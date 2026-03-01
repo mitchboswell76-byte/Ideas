@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-canvas text-ink antialiased;
+  background-image: radial-gradient(circle at 20% 20%, rgba(120, 140, 255, 0.12), transparent 35%), radial-gradient(circle at 80% 0%, rgba(115, 220, 255, 0.08), transparent 30%);
+}
+
+.panel {
+  @apply rounded-2xl border border-white/10 bg-panel/80 p-5 shadow-panel backdrop-blur;
+}
+
+.section-title {
+  @apply text-sm uppercase tracking-[0.2em] text-muted;
+}

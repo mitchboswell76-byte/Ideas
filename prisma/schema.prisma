@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum NoteType {
+  QUICK
+  JOURNAL
+  LONGFORM
+  STRUCTURED
+}
+
+enum ItemKind {
+  NOTE
+  ARTICLE
+  SOURCE
+  TASK
+  DICTIONARY
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  notes     Note[]
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id          String     @id @default(cuid())
+  title       String
+  content      String
+  type        NoteType   @default(QUICK)
+  pinned      Boolean    @default(false)
+  folderId    String?
+  folder      Folder?    @relation(fields: [folderId], references: [id])
+  tags        String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  linksFrom   Link[]     @relation("from")
+  linksTo     Link[]     @relation("to")
+
+  @@index([title])
+  @@index([updatedAt])
+}
+
+model Source {
+  id              String   @id @default(cuid())
+  name            String
+  homepage        String?
+  reliability     Int      @default(3)
+  reliabilityNote String
+  biasNote        String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  articles        Article[]
+
+  @@index([name])
+}
+
+model Article {
+  id              String   @id @default(cuid())
+  title           String
+  url             String?
+  summary         String
+  outlet          String
+  publishedAt     DateTime?
+  confidence      Int      @default(3)
+  evaluation      String?
+  sourceId        String?
+  source          Source?  @relation(fields: [sourceId], references: [id])
+  createdAt       DateTime @default(now())
+
+  @@index([title])
+  @@index([outlet])
+}
+
+model DictionaryEntry {
+  id                 String   @id @default(cuid())
+  term               String
+  partOfSpeech       String?
+  conciseDefinition  String
+  extendedDefinition String?
+  etymology          String?
+  usageHistory       String?
+  examples           String
+  status             String   @default("draft")
+  pinned             Boolean  @default(false)
+  notes              String?
+  createdAt          DateTime @default(now())
+
+  @@index([term])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  status      String   @default("next")
+  dueDate     DateTime?
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([status])
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  fromKind  ItemKind
+  fromId    String
+  toKind    ItemKind
+  toId      String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([fromKind, fromId])
+  @@index([toKind, toId])
+}
