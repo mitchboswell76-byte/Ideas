@@ -10,7 +10,7 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 
 ## M0 — Foundations
 - [x] T0 Handoff files: `CLAUDE.md`, `PROGRESS.md`, `docs/DESIGN.md`
-- [x] T1 Scaffold `mandate/` (Vite, React 19, TS strict, ESLint, Prettier, Vitest, npm scripts); gates pass
+- [x] T1 Scaffold `mandate/` (Vite 8, React 19, TS 6 strict, oxlint, Prettier, Vitest 5, npm scripts); gates pass
 - [ ] T2 Engine core: sfc32 RNG, clock (1 tick = 1 day), scheduler (daily/weekly/monthly/yearly), event bus,
       normalised state + types, save/load (versioned + migrations), `npm run soak`; tests
 - [ ] T3 Worker bridge (commands in, summary out, detail queries) + main-thread fallback; Zustand store;
@@ -52,6 +52,9 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-28 Dark "situation room" look (user referenced Stellaris) + light theme; 3D globe, hex map, Commons.
 - 2026-09-28 Life mode = playable backstory: born (startDate − startAge), childhood years as cards, real-time politics begins at game start date (keeps real politicians current).
 - 2026-09-28 React 19 (not 18) because @react-three/fiber v9 requires it.
+- 2026-09-28 oxlint (Vite template default, much faster) instead of ESLint; `lint` = oxlint --deny-warnings + prettier --check.
+- 2026-09-28 Vite `base: './'` so the build runs from any path (Artifact hosting).
+- 2026-09-28 Tests live in `mandate/tests/`, type-checked via `tsconfig.tools.json` (with `scripts/`).
 
 ## Known issues / open questions
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
