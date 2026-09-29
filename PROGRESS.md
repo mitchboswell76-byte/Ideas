@@ -2,8 +2,9 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T4**
+**Next session:** start at **T4b**
 **Last playable link:** none yet
+**Style preview (T4):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; rebuild with `npm run build:kit`)
 
 ## Workflow for the user
 Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Then `/clear`.
@@ -16,7 +17,7 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [x] T3 Worker bridge (commands in, summary out, detail queries) + main-thread fallback; Zustand store;
       speed controls (space, 1–5), auto-pause hooks; IndexedDB save slots + `.mandate` export/import
       (wraps `encodeSave`/`decodeSave` from `src/sim/save.ts`)
-- [ ] T4 "Ballot & Block" UI kit + app shell (DESIGN §17): tokens Night/Paper (`data-theme`), fonts (vendor
+- [x] T4 "Ballot & Block" UI kit + app shell (DESIGN §17): tokens Night/Paper (`data-theme`), fonts (vendor
       Departure Mono woff2 + OFL.txt from GitHub raw; `@fontsource/newsreader`), bitmap font `src/ui/pixel/font.ts`,
       components (Panel, BallotOption, Rosette, Stamp, Ticker, FrontPage, PixelIcon, Meter), top-left brand block,
       top bar clock/speed, save/load menu (slots, export/import), settings (auto-pause, theme), autosave to the
@@ -111,6 +112,25 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-29 Characters are customisable 3D voxel avatars (user request), superseding 2D pixel portraits. UI portraits
   are cached renders of the avatar bust (no live canvas per panel); 2D mode uses a front projection of the voxels.
 
+- 2026-09-29 T4 UI map: `ui/styles/base.css` (fonts, tokens, base), `ui/kit/` (components + `kit.css`, barrel
+  `index.ts`), `ui/pixel/font.ts` (5×7 glyphs, 7×7 icons, `textBitmap`/`inkRuns`/`bitmapPath` — pure, reuse for
+  canvas/voxels), `ui/shell/` (TopBar, Stage, StatusBar, Sheet, SavesMenu, SettingsMenu), `ui/format.ts` (UK dates
+  from the sim calendar, no Intl), `ui/store/theme.ts`. Stage shows a placeholder front page until T4b/T6.
+- 2026-09-29 Tokens apply to any subtree via `[data-theme=night|paper]` (a paper document can sit on a night screen);
+  derived tokens like `--lift` are redeclared on every theme root because `var()` resolves where declared.
+- 2026-09-29 Type: Departure Mono 11/22/33 px for UI; Newsreader latin 400/400i/700 only, 17 px body.
+- 2026-09-29 Autosave lives in the game store: on entering a new month/year of game time (setting Off / Every month
+  (default) / Every year), at most once per 60 s real time. Ticks during a load/new game are ignored and the period
+  re-baselined from the loaded date, so loading an old save never overwrites the autosave.
+- 2026-09-29 Menus are native `<dialog>` side sheets (focus trap, Escape). Slot delete is two-step in-page (no
+  `confirm()`); the `auto` slot can't be overwritten by hand.
+- 2026-09-29 Style guide: `kit.html` (dev server only, not in the game build) + `npm run build:kit` → one self-contained
+  `dist-kit/ballot-and-block.html` (fonts as data URIs, no doctype — the Artifact host wraps it). Reuse this approach
+  for later previews; the game build itself needs a different route at T8 (worker file).
+- 2026-09-29 Favicon replaced with the pixel monogram.
+
 ## Known issues / open questions
+- Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
+  at T22 accessibility pass.
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).

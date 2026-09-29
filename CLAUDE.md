@@ -19,7 +19,8 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
 - `docs/DESIGN.md` full design of every system; `docs/DATA_SOURCES.md` licences + `asOf` dates
 
 ## Commands (run inside `mandate/`)
-`npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak`
+`npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak` ·
+`npm run build:kit` (UI-kit style guide → one HTML file for an Artifact; dev: `/kit.html`)
 Quality gate before every commit: `npm run typecheck && npm run lint && npm test && npm run build`
 
 ## Rules

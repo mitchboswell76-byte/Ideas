@@ -6,34 +6,51 @@ import {
   type AutoPauseSettings,
   type FromRunner,
 } from '../src/runtime/protocol.ts'
-import { indexedDbSlots } from '../src/ui/saves/slots.ts'
-import { LOG_LIMIT, createGameStore } from '../src/ui/store/game.ts'
-import { parseAutoPause, type SettingsStorage } from '../src/ui/store/settings.ts'
+import { AUTOSAVE_SLOT, indexedDbSlots } from '../src/ui/saves/slots.ts'
+import { AUTOSAVE_MIN_GAP_MS, LOG_LIMIT, createGameStore } from '../src/ui/store/game.ts'
+import {
+  parseAutoPause,
+  parseAutosave,
+  type AutosaveCadence,
+  type SettingsStorage,
+} from '../src/ui/store/settings.ts'
 
 let dbCount = 0
 
-function memorySettings(initial: AutoPauseSettings = { ...DEFAULT_AUTO_PAUSE }) {
+function memorySettings(
+  initial: AutoPauseSettings = { ...DEFAULT_AUTO_PAUSE },
+  autosave: AutosaveCadence = 'off',
+) {
   const saved: AutoPauseSettings[] = []
+  const savedAutosave: AutosaveCadence[] = []
   const settings: SettingsStorage = {
     loadAutoPause: () => ({ ...initial }),
     saveAutoPause: (s) => void saved.push(s),
+    loadAutosave: () => autosave,
+    saveAutosave: (c) => void savedAutosave.push(c),
   }
-  return { settings, saved }
+  return { settings, saved, savedAutosave }
 }
 
-/** A real main-thread runner behind the store, with fresh IndexedDB slots. */
-async function bootedStore() {
+/**
+ * A real main-thread runner behind the store, with fresh IndexedDB slots. Real time starts at
+ * noon on 1 Oct 2026 and moves one second per `now()` call unless the test moves `clock.ms`.
+ */
+async function bootedStore(autosave: AutosaveCadence = 'off') {
   const bridge = createSimBridge({ createWorker: null })
-  let clock = 0
+  const clock = { ms: Date.UTC(2026, 9, 1, 12) }
   const store = createGameStore({
     bridge,
     slots: indexedDbSlots(`store-${++dbCount}`),
-    settings: memorySettings().settings,
-    now: () => new Date(Date.UTC(2026, 9, 1, 12, 0, clock++)).toISOString(),
+    settings: memorySettings(undefined, autosave).settings,
+    now: () => new Date((clock.ms += 1000)).toISOString(),
   })
   await store.getState().boot('store-seed')
-  return { store, bridge }
+  return { store, bridge, clock }
 }
+
+const autosaveSlot = (store: Awaited<ReturnType<typeof bootedStore>>['store']) =>
+  store.getState().slots.find((s) => s.id === AUTOSAVE_SLOT)
 
 /** Bridge stub: records what the store sends and lets the test play runner messages. */
 function stubBridge() {
@@ -148,7 +165,72 @@ describe('game store', () => {
     expect(sent).toEqual([{ type: 'autoPause', settings: expected }])
   })
 
-  it('parses stored auto-pause settings defensively', () => {
+  it('autosaves when game time enters a new month, at most once a minute of real time', async () => {
+    const { store, bridge, clock } = await bootedStore('monthly')
+    store.getState().step(20)
+    await vi.waitFor(() => expect(store.getState().date).toBe('2026-10-21'))
+    expect(autosaveSlot(store)).toBeUndefined()
+
+    store.getState().step(20)
+    await vi.waitFor(() => expect(autosaveSlot(store)).toMatchObject({ name: 'Autosave' }))
+    const first = autosaveSlot(store)!.savedAt
+
+    // Another month boundary straight away is inside the real-time gap: no new autosave.
+    store.getState().step(31)
+    await vi.waitFor(() => expect(store.getState().date).toBe('2026-12-11'))
+    await store.getState().refreshSlots()
+    expect(autosaveSlot(store)!.savedAt).toBe(first)
+
+    clock.ms += AUTOSAVE_MIN_GAP_MS
+    store.getState().step(31)
+    await vi.waitFor(() => expect(autosaveSlot(store)!.savedAt).not.toBe(first))
+    expect(autosaveSlot(store)!.gameDate.slice(0, 7)).toBe('2027-01')
+    bridge.dispose()
+  })
+
+  it('does not autosave when a load moves the date, or when off', async () => {
+    const { store, bridge, clock } = await bootedStore('monthly')
+    await store.getState().saveTo('early', 'Early')
+    store.getState().step(40)
+    await vi.waitFor(() => expect(autosaveSlot(store)).toBeDefined())
+    const first = autosaveSlot(store)!.savedAt
+
+    // Loading a save from another month must not overwrite the autosave with the loaded game.
+    clock.ms += AUTOSAVE_MIN_GAP_MS
+    await store.getState().loadFrom('early')
+    await vi.waitFor(() => expect(store.getState().date).toBe('2026-10-01'))
+    store.getState().step(1)
+    await vi.waitFor(() => expect(store.getState().date).toBe('2026-10-02'))
+    await store.getState().refreshSlots()
+    expect(autosaveSlot(store)!.savedAt).toBe(first)
+
+    store.getState().setAutosave('off')
+    store.getState().step(100)
+    await vi.waitFor(() => expect(store.getState().date).toBe('2027-01-10'))
+    await store.getState().refreshSlots()
+    expect(autosaveSlot(store)!.savedAt).toBe(first)
+
+    store.getState().setAutosave('yearly')
+    store.getState().step(365)
+    await vi.waitFor(() => expect(autosaveSlot(store)!.savedAt).not.toBe(first))
+    expect(autosaveSlot(store)!.gameDate.slice(0, 4)).toBe('2028')
+    bridge.dispose()
+  })
+
+  it('persists the autosave cadence', () => {
+    const { bridge } = stubBridge()
+    const { settings, savedAutosave } = memorySettings(undefined, 'yearly')
+    const store = createGameStore({ bridge, slots: indexedDbSlots('unused'), settings })
+    expect(store.getState().autosave).toBe('yearly')
+    store.getState().setAutosave('off')
+    expect(store.getState().autosave).toBe('off')
+    expect(savedAutosave).toEqual(['off'])
+  })
+
+  it('parses stored settings defensively', () => {
+    expect(parseAutosave(null)).toBe('monthly')
+    expect(parseAutosave('weekly')).toBe('monthly')
+    expect(parseAutosave('yearly')).toBe('yearly')
     expect(parseAutoPause(null)).toEqual(DEFAULT_AUTO_PAUSE)
     expect(parseAutoPause('not json')).toEqual(DEFAULT_AUTO_PAUSE)
     expect(parseAutoPause('{"election":false,"choice":"no","bogus":true}')).toEqual({

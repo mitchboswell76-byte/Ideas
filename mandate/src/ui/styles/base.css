@@ -1,0 +1,165 @@
+/* "Ballot & Block" foundations (DESIGN §17): fonts, colour tokens, base elements. */
+@import '@fontsource/newsreader/latin-400.css';
+@import '@fontsource/newsreader/latin-400-italic.css';
+@import '@fontsource/newsreader/latin-700.css';
+
+@font-face {
+  font-family: 'Departure Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/departure-mono/DepartureMono-Regular.woff2') format('woff2');
+}
+
+/*
+ * Night (default). Components use these tokens only; party colours come from data.
+ * Themes apply to any subtree via `data-theme`, so a paper document can sit on a night screen.
+ */
+:root,
+[data-theme='night'] {
+  --ground: #0a0a0b;
+  --grid-dot: #26262b;
+  --panel: #121214;
+  --rule: #3a3a40;
+  --ink: #ece8df;
+  --ink-muted: #8d8980;
+  --voxel-neutral: #8a8a8a;
+  --stamp: #d8342a;
+  --you: #f2c230;
+  /* Behind open menus: the ground, mostly opaque (flat, no blur). */
+  --scrim: rgb(10 10 11 / 0.82);
+
+  --font-mono: 'Departure Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  /* Departure Mono is drawn on an 11 px grid. */
+  --fs-mono: 11px;
+  --fs-mono-l: 22px;
+  --fs-mono-xl: 33px;
+  --fs-body: 17px;
+
+  /* ~12 fps stepped motion for pixel elements. */
+  --step: 83ms;
+
+  color-scheme: dark;
+}
+
+[data-theme='paper'] {
+  --ground: #efe9dc;
+  --grid-dot: #d6cebd;
+  --panel: #f8f4ea;
+  --rule: #1a1816;
+  --ink: #161412;
+  --ink-muted: #6b655b;
+  --voxel-neutral: #c9c1b1;
+  --stamp: #b3261e;
+  --scrim: rgb(239 233 220 / 0.82);
+  color-scheme: light;
+}
+
+/* Derived tokens are computed where they are declared, so every theme root redeclares them. */
+:root,
+[data-theme] {
+  /* Hard offset shadow for raised ephemera: solid ink, no blur. */
+  --lift: 2px 2px 0 0 var(--ink);
+  color: var(--ink);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  line-height: 1.5;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  color: inherit;
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--you);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The ground: a faint square dot grid. */
+.dot-grid {
+  background-color: var(--ground);
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 0);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  -webkit-font-smoothing: auto;
+}
+
+.caps {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+  }
+}
