@@ -4,6 +4,8 @@
   --text: #e6ebf5;
   --text-muted: #8b96b0;
   --accent: #d4a941;
+  --border: #2a3656;
+  --danger: #e0625a;
   color-scheme: dark;
 }
 
@@ -13,6 +15,8 @@
   --text: #1a2033;
   --text-muted: #5b6478;
   --accent: #9a7420;
+  --border: #d5d0c4;
+  --danger: #b3261e;
   color-scheme: light;
 }
 
@@ -41,31 +45,124 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.title-screen {
+.dev-shell {
   display: grid;
-  place-content: center;
-  gap: 0.75rem;
-  height: 100%;
-  padding: 1rem;
-  text-align: center;
+  gap: 1rem;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
 }
 
-.title-screen h1 {
+.dev-shell h1 {
   margin: 0;
-  font-size: clamp(3rem, 10vw, 6rem);
+  font-size: 2rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.eyebrow,
-.build {
+.dev-shell h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.build,
+.note,
+.dev-shell small {
   color: var(--text-muted);
   font-size: 0.875rem;
-  letter-spacing: 0.2em;
+}
+
+.build {
+  margin: 0.25rem 0 0;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.tagline {
-  color: var(--accent);
-  font-size: 1.125rem;
+.panel {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.panel.error {
+  border-color: var(--danger);
+}
+
+.clock-row,
+.speed-row,
+.button-row,
+.slot-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.clock-row {
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.game-date {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge {
+  padding: 0.125rem 0.5rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+button {
+  min-width: 2.25rem;
+  padding: 0.375rem 0.625rem;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button[aria-pressed='true'] {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.check {
+  display: inline-flex;
+  gap: 0.375rem;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.slot-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot-list li {
+  justify-content: space-between;
+}
+
+.slot-list small {
+  display: block;
 }

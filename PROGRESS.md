@@ -2,7 +2,7 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T3**
+**Next session:** start at **T4**
 **Last playable link:** none yet
 
 ## Workflow for the user
@@ -13,11 +13,14 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [x] T1 Scaffold `mandate/` (Vite 8, React 19, TS 6 strict, oxlint, Prettier, Vitest 5, npm scripts); gates pass
 - [x] T2 Engine core: sfc32 RNG, clock (1 tick = 1 day), scheduler (daily/weekly/monthly/yearly), event bus,
       normalised state + types, save/load (versioned + migrations), `npm run soak`; tests
-- [ ] T3 Worker bridge (commands in, summary out, detail queries) + main-thread fallback; Zustand store;
+- [x] T3 Worker bridge (commands in, summary out, detail queries) + main-thread fallback; Zustand store;
       speed controls (space, 1–5), auto-pause hooks; IndexedDB save slots + `.mandate` export/import
       (wraps `encodeSave`/`decodeSave` from `src/sim/save.ts`)
 - [ ] T4 Visual theme + app shell: tokens (dark/light), fonts (@fontsource), glass panels, top bar,
-      map tabs, right panel tabs, news ticker, toasts, portrait frame component
+      map tabs, right panel tabs, news ticker, toasts, portrait frame component. Replace the T3 placeholder
+      controls in `App.tsx` (keep `data-testid`s `game-date`, `sim-mode`, `slot-list`, `import-input`):
+      top-bar clock/speed, save/load menu (slots, export/import), settings (auto-pause), autosave to the
+      reserved `auto` slot (e.g. monthly, via `gameStore.saveTo(AUTOSAVE_SLOT, …)`)
 - [ ] T5 Data pipeline `scripts/build-data.ts`: hexjson (650 seats), world-atlas 110m, GE2024 results
       (fallback chain in DESIGN §Data), `docs/DATA_SOURCES.md`
 - [ ] T6 3D globe (r3f): countries on sphere, hover/click, atmosphere, terminator, arcs; graphics presets
@@ -72,6 +75,23 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   for the configurable auto-pause.
 - 2026-09-29 Soak: 50 years = 18,263 ticks in ~20 ms with no systems; p99 budget 4 ms; checks NaN/Infinity and
   that save-at-halfway + reload ends in the same world hash as an uninterrupted run.
+
+- 2026-09-29 T3 runtime map: `src/runtime/` (not sim — may use timers) = `protocol.ts` (messages, `TICK_MS`,
+  auto-pause types), `queries.ts` (query registry), `runner.ts` (`SimRunner` + `RunnerHost` so tests use a manual
+  clock), `sim.worker.ts`, `bridge.ts` (`createSimBridge`). UI: `ui/store/game.ts` (`createGameStore`, vanilla
+  Zustand, deps injected), `ui/store/index.ts` (singleton `gameStore`, `useGame`), `ui/saves/slots.ts` (idb),
+  `ui/saves/file.ts`, `ui/keys.ts` + `ui/hooks/useSpeedKeys.ts`.
+- 2026-09-29 Runner is authoritative for speed/pause (auto-pause happens there); the store mirrors `status`.
+  Requests (`newGame`/`save`/`load`/`query`) share one `request {id}` → `result {id, ok}` envelope.
+  Runner holds no game until `newGame`/`load`; loading or a new game always leaves the clock paused.
+- 2026-09-29 Speed 5 = 16 ms/tick (one per frame), running back-to-back if ticks get slower; DESIGN §2 said both
+  "uncapped" and "next frame" — this satisfies both without letting decades fly past in a second.
+- 2026-09-29 Save bytes are encoded in the runner (worker) and transferred, so the World is never cloned to the UI.
+  `.mandate` import is validated by the runner's `decodeSave`; a bad file leaves the current game untouched.
+- 2026-09-29 Auto-pause settings in localStorage (try/catch; not Zustand `persist`, which warns without storage).
+- 2026-09-29 Placeholder control panel in `App.tsx` until T4; `main.tsx` boots a random-seed game until T10.
+- 2026-09-29 Browser-verified (scratchpad Playwright script, not committed) in worker and forced main-thread
+  modes: speeds, Space, save/reload/load, export/import, bad import error.
 
 ## Known issues / open questions
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.

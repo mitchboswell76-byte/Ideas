@@ -12,7 +12,9 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
 ## Layout
 - `mandate/` — the game (Vite + React 19 + TypeScript strict)
   - `src/sim/` pure TS engine: no DOM, deterministic (seeded RNG), runs in a Web Worker or Node
-  - `src/ui/` React UI, 3D via @react-three/fiber; `src/data/` bundled JSON data
+  - `src/runtime/` sim runner (speed, auto-pause, save/load), Web Worker entry, main-thread bridge; timers OK, no DOM
+  - `src/ui/` React UI, Zustand store (`ui/store`), IndexedDB saves (`ui/saves`), 3D via @react-three/fiber
+  - `src/data/` bundled JSON data
   - `scripts/` data build + soak test; `tests/` Vitest
 - `docs/DESIGN.md` full design of every system; `docs/DATA_SOURCES.md` licences + `asOf` dates
 

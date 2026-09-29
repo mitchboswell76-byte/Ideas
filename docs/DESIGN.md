@@ -16,8 +16,11 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 
 ## §2 Time and scheduler
 
-- 1 tick = 1 in-game day. Speeds: 0 pause, then 1–5. Speed 5 is uncapped (as fast as the tick budget allows).
-- Real-time interval per tick: speed 1 = 1000 ms, speed 2 = 500 ms, speed 3 = 200 ms, speed 4 = 80 ms, speed 5 = next frame.
+- 1 tick = 1 in-game day. Speeds: 0 pause, then 1–5. Keys: Space pauses/resumes (previous speed), 1–5 set speed.
+- Real-time interval per tick: speed 1 = 1000 ms, speed 2 = 500 ms, speed 3 = 200 ms, speed 4 = 80 ms, speed 5 = 16 ms
+  (one per frame; if ticks outgrow that it runs back-to-back, i.e. as fast as the tick budget allows).
+  `TICK_MS` in `src/runtime/protocol.ts`. A late timer (throttled tab) catches up at most one tick.
+- While paused the player can step +N days; steps run in time slices and stop early on an auto-pause.
 - The scheduler runs systems by cadence. The order within a tick is fixed (deterministic).
   - **Daily:** activities progress, energy, money flows, heat decay, event rolls (low probability).
   - **Weekly (Monday):** polls, media cycle, opinion drift, donor behaviour.
@@ -33,14 +36,20 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - IDs are prefixed strings (`chr_…`, `pty_lab`, `con_E14001074`, `cty_GBR`).
 - A system is `{ id, cadence, run(world, ctx) }`. `ctx` = `{ rng, bus, day, emit }`.
 - **Determinism:** only `ctx.rng` (sfc32, seeded). There is no wall-clock time inside the sim.
-- **Commands from the UI** (e.g. `startActivity`, `chooseEventOption`, `setSpeed`) are queued and applied at the start of the next tick.
+- **Commands from the UI** (e.g. `startActivity`, `chooseEventOption`) are queued and applied at the start of the next tick.
+  Speed, pause and stepping are runner controls, not sim commands.
 - **Save format:** `{ version, savedAt, world }`, JSON compressed with CompressionStream (gzip) and stored in IndexedDB.
   Export/import is a `.mandate` file. Migrations live in `save.ts` as `migrations[version]`.
-- **Worker protocol:**
-  - UI → worker: `{type:'cmd', cmd}`
-  - Worker → UI: `{type:'tick', summary}` (compact: date, money, fame, heat, energy, headline changes, notifications)
-  - Detail queries: `{type:'query', id, what, args}` → `{type:'result', id, data}`
-  - If creating a Worker fails, the same engine runs on the main thread in time-sliced chunks.
+- **Worker protocol** (`src/runtime/protocol.ts`; the runner is `SimRunner`, the UI side `createSimBridge`):
+  - UI → runner: `{type:'cmd', cmd}` · `{type:'speed', speed}` · `{type:'togglePause'}` · `{type:'step', days}` ·
+    `{type:'autoPause', settings}` · `{type:'request', id, req}` with `req` = `newGame` | `save` | `load` | `query {what, args}`
+  - Runner → UI: `{type:'ready'}` · `{type:'tick', summary}` (compact: date, money, fame, heat, energy, headline changes,
+    notifications) · `{type:'status', speed, resumeSpeed, pausedBy}` · `{type:'result', id, ok, data|error}` · `{type:'fatal', message}`
+  - Detail queries are a data-driven registry (`src/runtime/queries.ts`); add an entry, not a message type.
+  - Main-thread fallback if `Worker` is missing, its constructor throws, it errors before `ready`, or `ready` takes > 5 s.
+    Same runner and messages (structured-cloned); step batches yield every 8 ms (50 ms in the worker).
+- **Save slots:** IndexedDB `mandate` with stores `slots` (metadata) and `saveData` (gzip bytes), one transaction per write.
+  Reserved slot ids `auto`, `quick`. Settings (auto-pause) in localStorage.
 
 ## §4 Character
 
