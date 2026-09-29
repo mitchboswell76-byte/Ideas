@@ -28,5 +28,8 @@ Quality gate before every commit: `npm run typecheck && npm run lint && npm test
 - UK English in all player-facing text. Money in £.
 - Real politicians: no invented crimes/scandals; procedural scandals only hit the player or fictional NPCs.
 - Coup/insurgency stay abstract (numbers, risk, backlash) — no real-world tactics, no real extremist groups.
-- Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand, has Low preset + 2D fallback.
+- Look = "Ballot & Block" (DESIGN §17): voxel diorama, colour means allegiance, UI as political ephemera.
+  Never: glass/blur, gradients, glows, soft shadows, rounded cards, emoji icons, Inter, purple/blue tech palettes.
+- Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand at reduced internal resolution,
+  Low preset + first-class 2D mode.
 - Network is restricted in cloud sessions: npm + raw.githubusercontent.com work; gov.uk/parliament/ONS/Wikipedia don't.

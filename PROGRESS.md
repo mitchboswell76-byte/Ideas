@@ -16,34 +16,41 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [x] T3 Worker bridge (commands in, summary out, detail queries) + main-thread fallback; Zustand store;
       speed controls (space, 1–5), auto-pause hooks; IndexedDB save slots + `.mandate` export/import
       (wraps `encodeSave`/`decodeSave` from `src/sim/save.ts`)
-- [ ] T4 Visual theme + app shell: tokens (dark/light), fonts (@fontsource), glass panels, top bar,
-      map tabs, right panel tabs, news ticker, toasts, portrait frame component. Replace the T3 placeholder
-      controls in `App.tsx` (keep `data-testid`s `game-date`, `sim-mode`, `slot-list`, `import-input`):
-      top-bar clock/speed, save/load menu (slots, export/import), settings (auto-pause), autosave to the
-      reserved `auto` slot (e.g. monthly, via `gameStore.saveTo(AUTOSAVE_SLOT, …)`)
+- [ ] T4 "Ballot & Block" UI kit + app shell (DESIGN §17): tokens Night/Paper (`data-theme`), fonts (vendor
+      Departure Mono woff2 + OFL.txt from GitHub raw; `@fontsource/newsreader`), bitmap font `src/ui/pixel/font.ts`,
+      components (Panel, BallotOption, Rosette, Stamp, Ticker, FrontPage, PixelIcon, Meter), top-left brand block,
+      top bar clock/speed, save/load menu (slots, export/import), settings (auto-pause, theme), autosave to the
+      reserved `auto` slot (e.g. monthly, via `gameStore.saveTo(AUTOSAVE_SLOT, …)`). Replace the T3 placeholder
+      controls in `App.tsx` (keep `data-testid`s `game-date`, `sim-mode`, `slot-list`, `import-input`).
+      Playwright screenshots (Night, Paper); publish a style-preview Artifact.
+- [ ] T4b Title screen + voxel core: pixel wordmark (flicker, drifting squares), bitmap-font→voxel builder,
+      three.js/r3f lazy chunk, low-res nearest-upscale render pipeline, graphics presets + GPU detect,
+      View 3D ⇄ 2D toggle (2D default if no WebGL / reduced motion / < 900 px), fly-into-wordmark transition;
+      publish preview
 - [ ] T5 Data pipeline `scripts/build-data.ts`: hexjson (650 seats), world-atlas 110m, GE2024 results
       (fallback chain in DESIGN §Data), `docs/DATA_SOURCES.md`
-- [ ] T6 3D globe (r3f): countries on sphere, hover/click, atmosphere, terminator, arcs; graphics presets
-      + GPU auto-detect; 2D SVG fallback; country info card
-- [ ] T7 3D UK hex map: 650 instanced columns, orbit, click → constituency card; 2D fallback; globe→UK zoom
-- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low, WebGL-off fallback); publish M0 Artifact;
+- [ ] T6 Voxel world map: Natural Earth rasterised to a voxel grid (greedy-meshed), column height = metric,
+      hover/click → country card (ephemera), fixed iso camera pan/zoom; 2D SVG equivalent
+- [ ] T7 Voxel UK hex map: 650 hex columns of stacked party-coloured voxel layers (grey = undecided, flicker on
+      change), click → constituency card; 2D SVG hex map; world→UK camera move
+- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium, <150 draw calls, 2D mode); publish M0 Artifact;
       ask user about PR into `main`
 
 ## M1 — Nobody to Prime Minister (party route)
-- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; SVG portrait system (layers + ageing)
-- [ ] T10 Character creation UI: birthplace (globe / hex map), family background, portrait editor, traits, ideology quiz, start mode
-- [ ] T11 Event engine (data-driven) + life mode: yearly age-up backstory, ~60 childhood/youth cards
+- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; 40×40 pixel portrait generator (layers + ageing)
+- [ ] T10 Character creation UI (ballot-paper style): birthplace (world / UK map), family background, pixel portrait editor, personal colour, traits, ideology quiz, start mode
+- [ ] T11 Event engine (data-driven) + life mode as voxel "road movie" (chapter beams, birthplace scenes), ~60 childhood/youth cards; 2D document equivalent
 - [ ] T12 Seed data: parties, leaders & key figures (web-verify, `asOf`), outlets, polling baseline, donor archetypes
 - [ ] T13 Opinion model (blocs × nations, salience, utility deltas) + pollsters with house effects + poll charts
 - [ ] T14 Election engine: FPTP, D'Hondt, STV, AV, AMS + swing projection; test reproduces 2024 seat totals
 - [ ] T15 Activities system + energy; ladder stages: join party, branch work, May council elections, approved list
 - [ ] T16 Money: ledgers, jobs, small/major donors, fundraising, ads, spending limits, compliance, heat, investigations
 - [ ] T17 Media: fame/reputation, press releases, interviews, social posts, scandals, ticker stories
-- [ ] T18 Selection contests + GE campaign + election night screen (3D columns rise)
-- [ ] T19 MP life: whips, rebellions, promotions; 3D Commons chamber
+- [ ] T18 Selection contests + GE campaign + election night (diorama recolours seat by seat, FrontPage results)
+- [ ] T19 MP life: whips, rebellions, promotions; voxel Commons chamber (650 voxel MPs, animated divisions)
 - [ ] T20 Leadership contests (per-party rules), becoming PM, hung parliament talks, placeholder governance
 - [ ] T21 NPC AI (rivals, leaders, donors) + ~40 political events
-- [ ] T22 Balance pass, soak, Playwright end-to-end, publish M1 Artifact
+- [ ] T22 Balance pass, soak, Playwright end-to-end, optional procedural audio (Web Audio), publish M1 Artifact
 
 ## Later milestones (plan each in detail when reached — see DESIGN §Roadmap)
 M2 activism/movement, espionage, courts, business route · M3 governing + full UK economy ·
@@ -53,7 +60,7 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-28 Browser (TS/React) over Godot: runs safely on user's Dell Latitude, no install, publishable link.
 - 2026-09-28 UK deep / world light first; real politicians in editable data with `asOf`.
 - 2026-09-28 Real-time with pause (1 tick = 1 day, systems on cadences) — user's choice.
-- 2026-09-28 Dark "situation room" look (user referenced Stellaris) + light theme; 3D globe, hex map, Commons.
+- 2026-09-28 ~~Dark "situation room" look~~ — superseded 2026-09-29, see below.
 - 2026-09-28 Life mode = playable backstory: born (startDate − startAge), childhood years as cards, real-time politics begins at game start date (keeps real politicians current).
 - 2026-09-28 React 19 (not 18) because @react-three/fiber v9 requires it.
 - 2026-09-28 oxlint (Vite template default, much faster) instead of ESLint; `lint` = oxlint --deny-warnings + prettier --check.
@@ -92,6 +99,12 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-29 Placeholder control panel in `App.tsx` until T4; `main.tsx` boots a random-seed game until T10.
 - 2026-09-29 Browser-verified (scratchpad Playwright script, not committed) in worker and forced main-thread
   modes: speeds, Space, save/reload/load, export/import, bad import error.
+
+- 2026-09-29 Art direction → "Ballot & Block" (DESIGN §17). User rejected generic-AI look and cited y-n10.com's voxel
+  "road movie". Adapted, not copied: voxel diorama + colour-means-allegiance + British political-ephemera UI;
+  Departure Mono + Newsreader + original bitmap font; flat voxel world map replaces globe (on-style, cheaper,
+  whole world visible); pixel portraits replace SVG; 1-bit dither only for intel screens; 2D mode first-class;
+  Framer Motion dropped (CSS steps). New task T4b (title screen + voxel core).
 
 ## Known issues / open questions
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
