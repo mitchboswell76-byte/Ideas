@@ -11,8 +11,8 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - **Many roads.** Party politics, activism/movements, business/media, coup, insurgency. They can be combined.
 - **Living simulation.** Opinion, economy, media and rivals move without you; you ride and shape them.
 - **Life, not just a career.** A BitLife-style layer: birth, family, relationships, health, ageing, death and heirs.
-- **Grand-strategy depth, authored look.** "Ballot & Block" (§17): a voxel diorama world where colour means allegiance,
-  with a UI made of British political ephemera. Readable first, never generic.
+- **Proven look, not an invented one.** Every layer of the interface copies a named, acclaimed game (§17):
+  Football Manager's shell and data screens, Crusader Kings III's characters, tooltips and events, and so on.
 - **Real but editable.** Real parties, politicians, outlets and countries, stored as data with `asOf` dates.
 
 ## §2 Time and scheduler
@@ -73,26 +73,23 @@ Figures marked **(verify)** must be checked by web search before being hard-code
   Favours owed and secrets known (kompromat, M2).
 - **Background:** birthplace (country + optional constituency), nationality/citizenship, class origin, parents (jobs, politics, wealth), religion, education.
 - **Eligibility:** standing for Parliament needs age ≥ 18 and British/Irish/qualifying Commonwealth citizenship. Some jobs (civil servants, police, military) must resign to stand.
-- **3D avatar (customisable voxel character):** every character is a 3D voxel figure (about 32 voxels tall,
-  semi-realistic proportions, not chibi) assembled from swappable voxel parts, each part a small greedy-meshed grid
-  cached per variant.
-  - Customise: height, build, skin tone, head/face shape, eyes, brows, nose, mouth, ears, facial hair, hair style
-    and colour, glasses, clothing (top, jacket/suit, tie, trousers/skirt, shoes), accessories (rosette, lanyard,
-    placard, hard hat, poppy), and personal colour.
-  - Expressions (neutral, smile, grim, worried, angry) swap face voxels. Idle poses: stand, arms folded, podium,
-    wave.
+- **3D avatar (stylised, customisable):** every character is a stylised 3D person in the vein of The Sims or Two
+  Point Hospital: soft, readable shapes, not realism. Built in code from parametric meshes, so there are no large
+  model downloads.
+  - Parts: head (shape morphs: width, jaw, cheeks, chin, brow), eyes, brows, nose, mouth, ears, hair (mesh
+    variants + colour), facial hair, glasses, body (height, build), clothing (top, jacket/suit, tie, trousers/skirt,
+    shoes), accessories (rosette, lanyard, placard, hard hat, poppy).
+  - Expressions (neutral, smile, grim, worried, angry) as morph targets. Idle poses: stand, arms folded, podium, wave.
   - Ageing: hair greys or recedes, lines appear, posture changes past set ages. Outfits change with role
     (student → councillor → MP suit).
-  - **Creator (T10):** live 3D turntable (drag to rotate, zoom to face), randomise button, saved presets.
-  - **Portraits:** the avatar bust is rendered once to a small offscreen target and cached as an image for the UI
-    (`Portrait` component), re-rendered only when appearance changes. There are no live 3D canvases per panel.
-    2D mode / no WebGL: a front orthographic projection of the same voxels, computed on a canvas without WebGL,
-    so the look matches.
-  - **In the world:** the player and key NPCs stand in the diorama. Crowds (rallies, the Commons) use a
-    low-detail variant via one `InstancedMesh` per part.
+  - **Creator (T10):** copies the CK3 ruler designer and The Sims' Create-a-Sim: categories on the left, turntable
+    avatar in the centre (drag to rotate, zoom to face), sliders and swatches on the right, randomise and presets.
+  - **Portraits:** CK3-style framed portraits. The bust is rendered once to a small offscreen target and cached as
+    an image (`Portrait` component); re-rendered only when appearance changes; no live 3D canvas per panel. The frame
+    shows party colour and office. Without WebGL: a flat illustrated silhouette in the same colours.
   - NPCs use the same generator. Real politicians get avatars generated from editable parameters (hair, glasses,
     build), with no photos and no photo-derived likenesses.
-- **Personal colour:** chosen at creation; used for the player's rosette, voxels and UI highlights (`--you`).
+- **Personal colour:** chosen at creation; used for the player's rosette, portrait frame and UI highlights (`--you`).
 - **Death and heirs:** health can fail with age or stress. The player may continue as a protégé or child who inherits part of the money, contacts and fame.
 
 ## §5 Life mode (playable backstory)
@@ -109,11 +106,9 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - Cards are keyed to real years for formative moments: 2008 crash, 2010 tuition fees protests, 2014 Scottish referendum, 2016 EU referendum, 2020 COVID, 2022 cost of living. A card fires only if the character was the right age.
 - Outcomes: attribute/skill growth, traits, ideology drift, contacts (friends who later become NPC allies), qualifications, starting money.
 - Quick start generates a backstory by sampling the same cards automatically.
-- **Presentation — the "road movie"** (from the y-n10 reference): the backstory is a road through a voxel diorama.
-  The camera follows a fixed path; raised beams by the road carry chapter signs (`01 BORN`, `02 SCHOOL`,
-  `03 FIRST VOTE`, `04 FIRST JOB`…). The opening scene depends on birthplace (terraced street, estate, village,
-  city centre, or abroad). Cards appear as `BallotOption` choices; year headings are voxel text on the ground.
-  In 2D mode the same content is a scrolling document.
+- **Presentation** copies BitLife: a year-by-year age log ("Age 7: You won the school spelling bee."), an
+  **Age +** button, and each choice shown in a CK3-style event window (§17). In real time the same log continues as
+  the career timeline on the Profile screen.
 
 ## §6 Opinion model
 
@@ -298,97 +293,64 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - **Authoritarian governance (M5):** emergency powers, press control, packing institutions, rigging elections, with legitimacy, unrest and international response.
 - **Other countries (M6):** US first (primaries, conventions, Electoral College, Congress, filibuster, SCOTUS), then others via generic election engines and institution templates.
 
-## §17 Visual design — "Ballot & Block"
+## §17 Visual design — the reference stack
 
-Reference the user liked: y-n10.com (isometric voxel "road movie", 80s-game-meets-modern, pixel type, 2D document
-mode). We **adapt** it, we don't copy it: all assets are original, and the style carries the game's meaning.
+The user rejected two invented looks ("situation room"; "Ballot & Block" voxels) as generic or unwanted and asked for
+a design that **copies proven games at every level**. Each layer below names its source. We copy layouts,
+interaction patterns and conventions only: never artwork, logos, trademarks or paid fonts. No real organisation's
+branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport font is licence-restricted).
 
-### Principles
-1. **Colour means allegiance.** Neutral things are grey. Colour appears only where there is political loyalty
-   (party colours from data) plus the player's own **personal colour** (picked at creation). Opinion shifts show
-   as grey voxels flipping to party colours; election night recolours the diorama seat by seat.
-2. **The world is a voxel diorama**: ground plane + faint dot grid, fixed isometric camera, flat shading.
-3. **The UI is British political ephemera**, never glass: ballot paper, polling card, rosette, rubber stamp,
-   leaflet, newspaper front page, Order Paper/Hansard (M1+), red dispatch box (M3).
-4. **Authored, not generated.** Banned: glassmorphism/blur, gradients, glows, soft drop shadows, rounded cards,
-   emoji icons, Inter/system-UI look, purple/blue "tech" palettes. Allowed: 1px rules, square corners, hard
-   offset shadows (2px, solid ink) for raised ephemera, halftone/dot textures, pixel icons.
-
-### Tokens (CSS variables on `:root`; `[data-theme=paper]` redefines; no hard-coded colours in components)
-| Token | Night (default) | Paper |
+### What each layer copies
+| Layer | Copy from | What exactly |
 |---|---|---|
-| `--ground` | `#0a0a0b` | `#efe9dc` (ballot cream) |
-| `--grid-dot` | `#26262b` | `#d6cebd` |
-| `--panel` | `#121214` | `#f8f4ea` |
-| `--rule` | `#3a3a40` | `#1a1816` |
-| `--ink` | `#ece8df` | `#161412` |
-| `--ink-muted` | `#8d8980` | `#6b655b` |
-| `--voxel-neutral` | `#8a8a8a` | `#c9c1b1` |
-| `--stamp` (danger only) | `#d8342a` | `#b3261e` |
-| `--you` | player's personal colour (runtime), default `#f2c230` | same |
-Party colours live in party data, not tokens. UI never uses a party colour for a non-political meaning.
+| App shell + navigation | Football Manager (FM24-era sidebar; FM26 tile → card) | Left sidebar with unread badges: Home, Inbox, Calendar, Profile, Party, Money, Media, Polls, Map, World. Header strip tinted in **your party's colours** (FM tints it with club colours). Home = tile dashboard; a tile opens a detail card |
+| Time controls | Paradox (CK3, Victoria 3) | Date, pause and five speed pips top-right; Space pauses; a banner says why the game paused |
+| Inbox + calendar | Football Manager | Inbox list (sender portrait, subject, date, unread dot) + reading pane with reply/action buttons. Calendar month grid: elections, conferences, council meetings, PMQs |
+| Character sheet | FM player profile + CK3 character window | Attribute grid with FM's colour-coded 1–20 values; traits as icon chips; relations with opinion numbers; big framed portrait |
+| Portraits | CK3 framing, stylised art (§4) | Cached 3D bust in a frame showing party colour and office |
+| Tooltips | CK3 nested tooltips | Highlighted terms inside a tooltip open their own tooltip; hold to lock; effect breakdowns list every modifier |
+| Events / decisions | CK3 event window | Title, scene image (3D render), body text, 2–4 options; each option's effects in its tooltip |
+| Conversations | Suzerain | Portrait left, dialogue in the serif, numbered choices, scrollable log |
+| Policy (M3) | Democracy 4 | Policy web: category clusters of round nodes, lines to affected voter groups and stats, green/red effect lines |
+| Votes (T19–T20) | Frostpunk 2 council | Horizontal For / Against / Undecided bar with the majority line; hemicycle seat chart |
+| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher (Party, Swing, Turnout, Demographics); news ticker along the bottom |
+| Election night (T18) | Broadcast convention, unbranded | Seat totals bar with the majority line, swing gauge, declared-seats feed, the map filling in |
+| Tables + charts | Football Manager | Dense sortable tables, zebra rows, 13 px, tabular numbers; thin line charts with endpoint dots |
+| Main menu | Paradox / FM main menus | Left-column menu (New career, Continue, Load, Settings) over a full-bleed backdrop: plain until T7, then a slowly panning political map of Britain |
+| Character creator (T10) | CK3 ruler designer + Sims Create-a-Sim | See §4 |
+| Life mode (T11) | BitLife | See §5 |
 
-### Type (all bundled, offline)
-- **Departure Mono** (SIL OFL; vendor woff2 + `OFL.txt` from its GitHub repo): UI labels, numbers, top bar, data.
-  Sizes in multiples of 11 px where possible (its crisp grid).
-- **Newsreader** (OFL, `@fontsource/newsreader`): newspaper headlines, event and card body text.
-- **Bitmap font** (original, 5×7 glyphs defined in `src/ui/pixel/font.ts`): wordmark, voxel headings, pixel icons.
-  One glyph table feeds canvas text, DOM pixel art and voxel builders.
+Avoid FM26's criticised habit of stacking pop-ups: cards open in place (a side panel or the main area), one at a time.
 
-### Components (UI kit)
-`Panel` (flat, 1px rule, optional hard shadow) · `BallotOption` (box you mark with an X; used for every choice) ·
-`Rosette` (party/you badge) · `Stamp` (alerts: APPROVED / REJECTED / URGENT; rotated, ink-red for danger only) ·
-`Ticker` (newspaper strapline) · `FrontPage` (event news) · `PollingCard` (election reminders) ·
-`PixelIcon` (from bitmap font) · `Portrait` (cached avatar render, §4) · `Meter` (pixel bar). Top-left brand block like the
-reference: pixel monogram in an outline box + stacked name. View toggle `3D ⇄ 2D`.
+### Visual system
+- **Fonts** (open licence, bundled offline): **Barlow** for UI text, **Barlow Condensed** for headers, tabs and
+  tables, **Newsreader** for narrative text (events, dialogue, news). Tabular numerals wherever numbers line up.
+- **Icons:** Phosphor Icons (MIT), regular weight for UI and fill weight for active states. No emoji.
+- **Colour:** dark graphite UI (default) and a light theme, as CSS tokens on `:root` with `[data-theme]` overrides.
+  The header strip takes your party's colours. Attribute values use FM's scale: low red → orange → yellow → green →
+  high blue-green. Semantic good / warning / bad colours are separate from party colours, and party colours only ever
+  mean parties.
+- **Still banned:** glassmorphism and blur, decorative gradients and glows, emoji icons, Inter.
+- **Motion:** quick, functional transitions (panel slides, tooltip fades ≤ 150 ms); respect `prefers-reduced-motion`.
 
-### Motion
-- Pixel elements animate in **steps** (~12 fps, CSS `steps()`), like the reference's frame-by-frame parts.
-- Camera moves ease (slow-in at the end). No Framer Motion.
-- `prefers-reduced-motion`: no flicker, no fly-throughs, instant camera cuts.
-
-### Title screen
-Pixel "MANDATE" wordmark inside a thin outline box; random pixels flicker in party colours (2–4 changes/s);
-small coloured squares drift across a dot-grid background. Bottom-left: stacked title + "Est. 2026".
-Bottom-right bordered buttons (label left, arrow right): `New life →`, `Continue →`, `Load →`.
-Choosing one flies the camera into the voxel wordmark, through the blocks, and out to the Britain diorama (2–3 s).
-Built (T4b): the 2D canvas wordmark paints instantly; once three.js has loaded, the voxel wordmark takes its place,
-shot through a 10° lens so it reads as flat pixels. The fly-in widens the lens to 30° as it passes through the gap
-between N and D, rises round the back and settles on the isometric view. Until the world map (T6) the settled view
-shows "the opening monument" (wordmark on a plinth, "EST. 2026" ground lettering, floating cubes).
-
-### 3D scenes (three.js + @react-three/fiber; lazy-loaded chunk)
-- **Camera:** perspective, FOV 25–35°, pitch 35–45°, yaw ~40° (named constants). Pan + zoom only, no free orbit
-  (optional 90° rotate steps). Life-mode road uses a `CatmullRomCurve3` path scrubbed by progress.
-- **World map (T6):** flat isometric voxel world — countries rasterised from Natural Earth into a voxel grid,
-  column height = chosen metric (population, GDP, military, relations). Oceans are dot-grid ground.
-- **UK map (T7):** 650 hex columns (hexjson layout); each column is stacked party-coloured voxel layers
-  (layer height ∝ vote share), neutral grey for undecided; flicker as opinion moves; click → constituency card.
-- **Character creator (T10):** avatar on a plinth, turntable, one directional + ambient light (§4).
-- **Commons (T19):** voxel chamber, green benches, 650 voxel MPs in party colours; divisions animate.
-- **Life road (T11):** §5. **Later (M3+):** voxel backdrops (Downing Street, rally stage, TV studio).
-- **Tone shifts:** war/coup/authoritarian states desaturate the palette, add smoke voxels, or switch to a
-  red/black regime palette. **1-bit dither** (Obra Dinn-style Bayer post-pass) only for intelligence dossiers,
-  flashbacks and "classified" screens.
+### 3D (three.js + @react-three/fiber; lazy-loaded)
+- Used for characters (portrait renders, the creator's turntable, event scene images) and, from T6/T7, an optional
+  map tilt and election-night seat columns. No voxel diorama.
+- Kept from T4b: the persistent canvas layer, graphics presets with GPU detection and adaptive downgrade, on-demand
+  rendering (`useStepper`), and the 3D/2D view setting.
 
 ### 2D mode (first-class)
-The whole game as an accessible, low-power document: same ephemera UI, SVG hex/world maps, no WebGL.
-Default when WebGL is unavailable, `prefers-reduced-motion`, or viewport < 900 px; the toggle is always offered.
+The whole game without WebGL: same UI, flat maps, illustrated portrait silhouettes. Default when WebGL is unavailable,
+`prefers-reduced-motion`, or viewport < 900 px; the setting is always offered.
 
 ### Performance (Dell Latitude, Intel UHD 620-class GPU)
-- Static scenery: **greedy-meshed** merged chunks (hidden faces culled). Changing voxels (flicker, hex layers,
-  figures, seats): one `InstancedMesh` per type. < 150 draw calls per scene.
-- `MeshLambertMaterial` + vertex colours; max two lights (directional + ambient); no shadows on Low/Medium.
-- **Internal resolution** scale Low 0.5 / Medium 0.75 / High 1.0, upscaled nearest-neighbour (`image-rendering:
-  pixelated`) — the pixel look and the performance win are the same thing. Preset auto-picked at first launch
-  (renderer string + short benchmark).
-- `frameloop="demand"`; idle scenes redraw in 12 fps steps (`useStepper`), a full-rate loop only while the camera
-  flies; pause when tab hidden; chunks out of range unloaded and disposed.
-- **Budgets:** sim tick median < 2 ms; 60 fps on Medium, ≥ 30 fps on Low; initial JS < 1.5 MB gzip.
+- Render on demand; full-rate loops only while animating; pause when the tab is hidden.
+- Portraits are cached images, never one live canvas per panel. Reduced internal resolution on Low.
+- **Budgets:** sim tick median < 2 ms; 60 fps on Medium, ≥ 30 fps on Low in 3D views; initial JS < 1.5 MB gzip.
 
 ### Audio (optional, T22)
-Procedural chiptune-meets-brass-band loop and UI blips via Web Audio (no audio files). Starts only after a user
-gesture; mute changes gain only; preference in `sessionStorage`.
+Procedural UI sounds and an ambient loop via Web Audio (no audio files). Starts only after a user gesture; mute
+changes gain only.
 
 ## §18 Data sources
 
@@ -401,10 +363,17 @@ gesture; mute changes gain only; preference in `sessionStorage`.
   3. User uploads `HoC-GE2024-results-by-constituency.csv` into `mandate/data-raw/`
   4. Regional results + seeded seat variation calibrated to the real seat totals (Lab 411, Con 121, LD 72, SNP 9, SF 7, Ind 6, Reform 5, DUP 5, Green 4, PC 4, SDLP 2, Alliance 1, UUP 1, TUV 1, Speaker 1)
 - **Politicians, polls, pay and limits:** web-verified at build time. Each file records `asOf` and its source in `docs/DATA_SOURCES.md`.
-- **Fonts:** Departure Mono (SIL OFL, github.com/rektdeckard/departure-mono), Newsreader (OFL, @fontsource).
+- **Fonts and icons:** Barlow and Barlow Condensed (OFL, @fontsource), Newsreader (OFL, @fontsource), Phosphor
+  Icons (MIT). Departure Mono was used by the superseded "Ballot & Block" kit.
 - **Art-direction research (2026-09-29):** y-n10.com (Cannes Lions / D&AD 2021 entries: "road movie", "80s game
   with a modern look"); 2026 brutalism/anti-AI trend pieces; Obra Dinn 1-bit dithering; Mini Metro/Vignelli
-  minimalism; Dorfromantik diorama readability; three.js low-res upscaling and voxel meshing notes.
+  minimalism; Dorfromantik diorama readability; three.js low-res upscaling and voxel meshing notes. Superseded.
+- **Reference-stack research (2026-09-29):** CK3 cited as the best Paradox UI, nested tooltips singled out
+  (forum.rpg.net best-UI thread); FM26 UI feature (tiles → cards; Efficiency, Familiarity, Predictability) and its
+  mixed reception (gosugamers review); Suzerain's map → notification → dialogue loop (Wikipedia); Frostpunk 2 council
+  vote bar (pcgamesn); Democracy 4's vector UI (techraptor); Atlus on the cost of Persona-style menus (pushsquare);
+  govuk-frontend is MIT but its Transport font is restricted (npm); MakeHuman exports are CC0 (considered for
+  realistic busts, not chosen); Game UI Database (gameuidatabase.com) as a reference library.
 
 ## §19 Content rules
 
@@ -416,7 +385,7 @@ gesture; mute changes gain only; preference in `sessionStorage`.
 
 | Milestone | Content |
 |---|---|
-| M0 | Foundations: engine, shell, "Ballot & Block" UI kit, title screen, data pipeline, voxel world + UK maps |
+| M0 | Foundations: engine, runtime, reference-stack UI kit + shell, main menu, data pipeline, world + UK maps |
 | M1 | Life layer + party route to PM: character, life mode, opinion, elections, money, media, events, AI |
 | M2 | Activism/movements, business/media route, espionage/kompromat, courts/prison |
 | M3 | Governing, full UK economy, devolved elections, Commons/Lords legislation, 3D backdrops |

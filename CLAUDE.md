@@ -13,8 +13,8 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
 - `mandate/` — the game (Vite + React 19 + TypeScript strict)
   - `src/sim/` pure TS engine: no DOM, deterministic (seeded RNG), runs in a Web Worker or Node
   - `src/runtime/` sim runner (speed, auto-pause, save/load), Web Worker entry, main-thread bridge; timers OK, no DOM
-  - `src/ui/` React UI, Zustand stores (`ui/store`), saves (`ui/saves`), `ui/voxel` (pure voxel data/meshing),
-    `ui/three` (lazy r3f scenes), `ui/title`, `ui/graphics` (GPU presets, 3D/2D default)
+  - `src/ui/` React UI, Zustand stores (`ui/store`), saves (`ui/saves`), `ui/kit` (components), `ui/shell`,
+    `ui/three` (lazy r3f scenes), `ui/graphics` (GPU presets, 3D/2D default)
   - `src/data/` bundled JSON data
   - `scripts/` data build + soak test; `tests/` Vitest
 - `docs/DESIGN.md` full design of every system; `docs/DATA_SOURCES.md` licences + `asOf` dates
@@ -30,8 +30,7 @@ Quality gate before every commit: `npm run typecheck && npm run lint && npm test
 - UK English in all player-facing text. Money in £.
 - Real politicians: no invented crimes/scandals; procedural scandals only hit the player or fictional NPCs.
 - Coup/insurgency stay abstract (numbers, risk, backlash) — no real-world tactics, no real extremist groups.
-- Look = "Ballot & Block" (DESIGN §17): voxel diorama, colour means allegiance, UI as political ephemera.
-  Never: glass/blur, gradients, glows, soft shadows, rounded cards, emoji icons, Inter, purple/blue tech palettes.
-- Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand at reduced internal resolution,
-  Low preset + first-class 2D mode.
+- Look = copied reference stack (DESIGN §17 table): FM shell/inbox/tables, CK3 characters/tooltips/events, Suzerain
+  dialogue, D4 policy, FP2 votes, Paradox map modes. Copy patterns, never assets, logos, paid fonts or real-org branding.
+- Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand, cached portraits, Low preset + 2D mode.
 - Network is restricted in cloud sessions: npm + raw.githubusercontent.com work; gov.uk/parliament/ONS/Wikipedia don't.

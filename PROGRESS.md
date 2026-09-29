@@ -2,9 +2,10 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T5**
-**Last playable link (T4b preview):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with `npm run build:preview`, republish from a session that has the link)
-**Style preview (T4):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; rebuild with `npm run build:kit`)
+**Next session:** start at **T4c**
+**Last playable link (T4b preview, old look):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; T4c republishes it
+  in the new look — rebuild with `npm run build:preview`, publish with `url` set to this link)
+**Style preview (T4, old look):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; T4c republishes the new kit here)
 
 ## Workflow for the user
 Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Then `/clear`.
@@ -28,29 +29,43 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       three.js/r3f lazy chunk, low-res nearest-upscale render pipeline, graphics presets + GPU detect,
       View 3D ⇄ 2D toggle (2D default if no WebGL / reduced motion / < 900 px), fly-into-wordmark transition;
       publish preview
+- [ ] T4c Reference-stack UI kit + shell + main menu (DESIGN §17 table): Barlow / Barlow Condensed (@fontsource) +
+      Newsreader; Phosphor icons (MIT); dark/light tokens; header tinted with party colour (placeholder until T12).
+      Components: Sidebar (FM, badges), TopBar with Paradox date/speed pips + pause banner, Tile→Card (FM26, opens in
+      place), Table (FM), AttributeGrid (FM 1–20 colours), Chip, Tabs, nested Tooltip (CK3), EventWindow (CK3),
+      Dialogue (Suzerain), VoteBar (Frostpunk 2), PortraitFrame (placeholder silhouette until T9), Button set.
+      Screens: Home tiles, Inbox (fed by sim notifications), Calendar (month grid), Saves, Settings. Main menu =
+      Paradox/FM left-column menu (New career / Continue / Load / Settings). Remove `ui/voxel`, Monument, voxel title,
+      Squares, pixel font + Departure Mono and their tests; keep `ui/three` infra, `ui/graphics`, view store (hide the
+      3D/2D toggle until a 3D view exists). Keep `data-testid`s used by tests. Rebuild kit gallery; Playwright
+      screenshots (dark, light, narrow); republish both preview links.
 - [ ] T5 Data pipeline `scripts/build-data.ts`: hexjson (650 seats), world-atlas 110m, GE2024 results
       (fallback chain in DESIGN §Data), `docs/DATA_SOURCES.md`
-- [ ] T6 Voxel world map: Natural Earth rasterised to a voxel grid (greedy-meshed), column height = metric,
-      hover/click → country card (ephemera), fixed iso camera pan/zoom; 2D SVG equivalent
-- [ ] T7 Voxel UK hex map: 650 hex columns of stacked party-coloured voxel layers (grey = undecided, flicker on
-      change), click → constituency card; 2D SVG hex map; world→UK camera move
-- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium, <150 draw calls, 2D mode); publish M0 Artifact;
+- [ ] T6 World map (Paradox map modes + Plague Inc ticker): flat clean map of Natural Earth countries, map-mode switcher,
+      hover/click → country card, pan/zoom; canvas/SVG, optional subtle 3D tilt
+- [ ] T7 UK constituency map: 650-seat hex map with map modes (Party, Swing, Turnout, Demographics), click →
+      constituency card; optional 3D seat columns; slowly panning map becomes the main-menu backdrop
+- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact;
       ask user about PR into `main`
 
 ## M1 — Nobody to Prime Minister (party route)
-- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; 3D voxel avatar
-      generator (swappable parts, expressions, ageing, role outfits) + cached `Portrait` renders + 2D projection fallback
-- [ ] T10 Character creation UI (ballot-paper style): birthplace (world / UK map), family background, 3D avatar creator
-      (turntable, all parts, randomise, presets), personal colour, traits, ideology quiz, start mode
-- [ ] T11 Event engine (data-driven) + life mode as voxel "road movie" (chapter beams, birthplace scenes), ~60 childhood/youth cards; 2D document equivalent
+- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
+      generator (Sims / Two Point style: parametric head + body, hair/clothes parts, expression morphs, ageing, role
+      outfits) + cached CK3-framed `Portrait` renders + illustrated 2D fallback
+- [ ] T10 Character creation (CK3 ruler designer + Sims Create-a-Sim layout): birthplace (world / UK map), family
+      background, avatar creator (turntable, all parts, randomise, presets), personal colour, traits, ideology quiz,
+      start mode
+- [ ] T11 Event engine (data-driven) + life mode as a BitLife age log (Age + button) with CK3 event windows,
+      ~60 childhood/youth cards
 - [ ] T12 Seed data: parties, leaders & key figures (web-verify, `asOf`), outlets, polling baseline, donor archetypes
 - [ ] T13 Opinion model (blocs × nations, salience, utility deltas) + pollsters with house effects + poll charts
 - [ ] T14 Election engine: FPTP, D'Hondt, STV, AV, AMS + swing projection; test reproduces 2024 seat totals
 - [ ] T15 Activities system + energy; ladder stages: join party, branch work, May council elections, approved list
 - [ ] T16 Money: ledgers, jobs, small/major donors, fundraising, ads, spending limits, compliance, heat, investigations
 - [ ] T17 Media: fame/reputation, press releases, interviews, social posts, scandals, ticker stories
-- [ ] T18 Selection contests + GE campaign + election night (diorama recolours seat by seat, FrontPage results)
-- [ ] T19 MP life: whips, rebellions, promotions; voxel Commons chamber (650 voxel MPs, animated divisions)
+- [ ] T18 Selection contests + GE campaign + election night (broadcast-style: seat bar with majority line, swing
+      gauge, declarations feed, map filling in)
+- [ ] T19 MP life: whips, rebellions, promotions; Commons divisions with the Frostpunk 2-style vote bar + hemicycle
 - [ ] T20 Leadership contests (per-party rules), becoming PM, hung parliament talks, placeholder governance
 - [ ] T21 NPC AI (rivals, leaders, donors) + ~40 political events
 - [ ] T22 Balance pass, soak, Playwright end-to-end, optional procedural audio (Web Audio), publish M1 Artifact
@@ -103,13 +118,15 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-29 Browser-verified (scratchpad Playwright script, not committed) in worker and forced main-thread
   modes: speeds, Space, save/reload/load, export/import, bad import error.
 
-- 2026-09-29 Art direction → "Ballot & Block" (DESIGN §17). User rejected generic-AI look and cited y-n10.com's voxel
+- 2026-09-29 ~~Art direction → "Ballot & Block"~~ — superseded later on 2026-09-29, see "reference stack" below.
+  Original entry: Art direction → "Ballot & Block" (DESIGN §17). User rejected generic-AI look and cited y-n10.com's voxel
   "road movie". Adapted, not copied: voxel diorama + colour-means-allegiance + British political-ephemera UI;
   Departure Mono + Newsreader + original bitmap font; flat voxel world map replaces globe (on-style, cheaper,
   whole world visible); pixel portraits replace SVG; 1-bit dither only for intel screens; 2D mode first-class;
   Framer Motion dropped (CSS steps). New task T4b (title screen + voxel core).
 
-- 2026-09-29 Characters are customisable 3D voxel avatars (user request), superseding 2D pixel portraits. UI portraits
+- 2026-09-29 ~~Characters are customisable 3D voxel avatars~~ (voxel part superseded by stylised 3D; see below)
+  (user request), superseding 2D pixel portraits. UI portraits
   are cached renders of the avatar bust (no live canvas per panel); 2D mode uses a front projection of the voxels.
 
 - 2026-09-29 T4 UI map: `ui/styles/base.css` (fonts, tokens, base), `ui/kit/` (components + `kit.css`, barrel
@@ -148,6 +165,15 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   `VITE_SINGLE_FILE` makes the bridge skip the worker (main-thread runner), dynamic imports folded in.
 - 2026-09-29 Voxel wordmark cubes are solid (1.0) with ±5% shade jitter per voxel instead of gaps (gaps shimmer at
   low resolution). "EST. 2026" ground lettering is hidden in the head-on title shot.
+
+- 2026-09-29 **Art direction → copied reference stack** (DESIGN §17). User disliked "Ballot & Block" and asked for
+  research + copying proven games at every level. Chose the hybrid: FM shell/inbox/calendar/tables (+ FM26 tile→card,
+  minus its pop-up stacking), CK3 characters/nested tooltips/event windows, Suzerain dialogue, Democracy 4 policy web,
+  Frostpunk 2 vote bar, Paradox map modes + Plague Inc ticker, BitLife age log, broadcast-style election night.
+  Characters: stylised 3D (Sims / Two Point), chosen over CK3-style realism (MakeHuman CC0) and voxels. Fonts Barlow /
+  Barlow Condensed / Newsreader; Phosphor icons. Copy patterns only: no artwork, logos, paid fonts or real-org
+  branding (no GOV.UK/BBC look). T4/T4b look is replaced by T4c; engine, runtime, saves, graphics presets and the
+  three.js layer carry over.
 
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
