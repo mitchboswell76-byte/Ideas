@@ -2,7 +2,7 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T2**
+**Next session:** start at **T3**
 **Last playable link:** none yet
 
 ## Workflow for the user
@@ -11,10 +11,11 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 ## M0 — Foundations
 - [x] T0 Handoff files: `CLAUDE.md`, `PROGRESS.md`, `docs/DESIGN.md`
 - [x] T1 Scaffold `mandate/` (Vite 8, React 19, TS 6 strict, oxlint, Prettier, Vitest 5, npm scripts); gates pass
-- [ ] T2 Engine core: sfc32 RNG, clock (1 tick = 1 day), scheduler (daily/weekly/monthly/yearly), event bus,
+- [x] T2 Engine core: sfc32 RNG, clock (1 tick = 1 day), scheduler (daily/weekly/monthly/yearly), event bus,
       normalised state + types, save/load (versioned + migrations), `npm run soak`; tests
 - [ ] T3 Worker bridge (commands in, summary out, detail queries) + main-thread fallback; Zustand store;
-      speed controls (space, 1–5), auto-pause hooks
+      speed controls (space, 1–5), auto-pause hooks; IndexedDB save slots + `.mandate` export/import
+      (wraps `encodeSave`/`decodeSave` from `src/sim/save.ts`)
 - [ ] T4 Visual theme + app shell: tokens (dark/light), fonts (@fontsource), glass panels, top bar,
       map tabs, right panel tabs, news ticker, toasts, portrait frame component
 - [ ] T5 Data pipeline `scripts/build-data.ts`: hexjson (650 seats), world-atlas 110m, GE2024 results
@@ -55,6 +56,22 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-28 oxlint (Vite template default, much faster) instead of ESLint; `lint` = oxlint --deny-warnings + prettier --check.
 - 2026-09-28 Vite `base: './'` so the build runs from any path (Artifact hosting).
 - 2026-09-28 Tests live in `mandate/tests/`, type-checked via `tsconfig.tools.json` (with `scripts/`).
+- 2026-09-29 T2 engine map (`src/sim/`): `rng.ts` sfc32 (state lives in `world.rngState`, mutated in place),
+  `clock.ts` integer day numbers since 1970-01-01 (no `Date`), `bus.ts` typed sync pub/sub (`SimEventMap`),
+  `world.ts` tables + placeholder entity types + `createWorld`/`newId`, `scheduler.ts` `System`/`Cadence`/
+  `Notification`, `command.ts`, `engine.ts`, `save.ts`, `systems/index.ts` (`defaultSystems`, run order).
+- 2026-09-29 A tick = advance to next day → apply queued commands → bus day/week/month/year events → due systems
+  in registration order. Summary date = the day just simulated.
+- 2026-09-29 Systems are `{id, cadence?, run?, on?, commands?}`: one object owns its schedule, bus listeners and
+  command handlers (`defineCommand<C>()` for typed payloads). Unknown command → `alert` notification.
+- 2026-09-29 Weekly = Monday, monthly = 1st, yearly = 1 Jan; date-specific yearly things (birthdays, May
+  elections) are daily systems with their own check (`isAnniversary`, `nthWeekdayOfMonth`). 29 Feb birthdays → 1 Mar.
+- 2026-09-29 `migrations[v]` upgrades v → v+1; `migrate()` sets `version`. Sim never reads the wall clock:
+  caller passes `savedAt`. IndexedDB + export/import moved to T3 (browser-side).
+- 2026-09-29 `setSpeed` is a runner concern (T3), not a sim command. Notifications carry `pause?: PauseReason`
+  for the configurable auto-pause.
+- 2026-09-29 Soak: 50 years = 18,263 ticks in ~20 ms with no systems; p99 budget 4 ms; checks NaN/Infinity and
+  that save-at-halfway + reload ends in the same world hash as an uninterrupted run.
 
 ## Known issues / open questions
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
