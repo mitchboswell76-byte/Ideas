@@ -3,6 +3,7 @@ import type { Speed } from '../../runtime/protocol.ts'
 import { formatShortDate } from '../format.ts'
 import { BrandBlock, Button, Stamp } from '../kit/index.ts'
 import { gameStore, useGame } from '../store/index.ts'
+import { ViewToggle } from './ViewToggle.tsx'
 
 const RUN_SPEEDS: readonly Speed[] = [1, 2, 3, 4, 5]
 
@@ -68,6 +69,7 @@ export function TopBar({ onOpen }: { onOpen: (menu: MenuName) => void }) {
         <SpeedControls />
       </div>
       <nav className="topbar__menu" aria-label="Game menu">
+        <ViewToggle />
         <Button icon="ballotBox" aria-haspopup="dialog" onClick={() => onOpen('saves')}>
           Saves
         </Button>

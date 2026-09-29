@@ -4,3 +4,4 @@ package-lock.json
 src/data/generated
 data-raw
 dist-kit
+dist-preview

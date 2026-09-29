@@ -1,0 +1,12 @@
+/* The 3D layer sits behind the whole UI; panels above it keep their own backgrounds. */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--ground);
+}
+
+/* Reduced internal resolution, upscaled with hard pixel edges (DESIGN §17). */
+.world canvas {
+  image-rendering: pixelated;
+}

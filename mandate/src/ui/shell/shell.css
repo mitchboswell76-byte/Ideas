@@ -1,6 +1,8 @@
 /* App shell: top bar, stage, status bar, side sheets. */
 
 .shell {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100%;
@@ -28,6 +30,25 @@
 .topbar__menu {
   display: flex;
   gap: 4px;
+  align-items: center;
+}
+
+/* View: [3D] [2D] */
+.view-toggle {
+  display: flex;
+  align-items: center;
+  margin-right: 11px;
+}
+
+.view-toggle__label {
+  margin-right: 8px;
+  color: var(--ink-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.view-toggle .btn + .btn {
+  margin-left: -1px;
 }
 
 .clock {

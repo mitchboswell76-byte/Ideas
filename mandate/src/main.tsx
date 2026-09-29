@@ -16,6 +16,5 @@ createRoot(root).render(
   </StrictMode>,
 )
 
-// A random seed per new game until character creation (T10) supplies one.
-const seed = Array.from(crypto.getRandomValues(new Uint32Array(2)), (n) => n.toString(36)).join('')
-void gameStore.getState().boot(seed)
+// Connect the simulation and list saves; the title screen starts or loads a game.
+void gameStore.getState().boot()

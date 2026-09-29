@@ -2,8 +2,8 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T4b**
-**Last playable link:** none yet
+**Next session:** start at **T5**
+**Last playable link (T4b preview):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with `npm run build:preview`, republish from a session that has the link)
 **Style preview (T4):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; rebuild with `npm run build:kit`)
 
 ## Workflow for the user
@@ -24,7 +24,7 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       reserved `auto` slot (e.g. monthly, via `gameStore.saveTo(AUTOSAVE_SLOT, …)`). Replace the T3 placeholder
       controls in `App.tsx` (keep `data-testid`s `game-date`, `sim-mode`, `slot-list`, `import-input`).
       Playwright screenshots (Night, Paper); publish a style-preview Artifact.
-- [ ] T4b Title screen + voxel core: pixel wordmark (flicker, drifting squares), bitmap-font→voxel builder,
+- [x] T4b Title screen + voxel core: pixel wordmark (flicker, drifting squares), bitmap-font→voxel builder,
       three.js/r3f lazy chunk, low-res nearest-upscale render pipeline, graphics presets + GPU detect,
       View 3D ⇄ 2D toggle (2D default if no WebGL / reduced motion / < 900 px), fly-into-wordmark transition;
       publish preview
@@ -129,8 +129,33 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   for later previews; the game build itself needs a different route at T8 (worker file).
 - 2026-09-29 Favicon replaced with the pixel monogram.
 
+- 2026-09-29 T4b map: `ui/voxel/` (pure: `grid.ts` VoxelGrid + `fromBitmap`, `greedy.ts` `greedyMesh`, `instances.ts`
+  `voxelCells`), `ui/graphics/` (`detect.ts` `probeGpu`/`presetForRenderer`/`defaultView`, `presets.ts`),
+  `ui/store/view.ts` (view 3d/2d + quality, localStorage), `ui/three/` (lazy chunk: `WorldCanvas.tsx`, `Monument.tsx`,
+  `camera.ts` constants + fly path, `geometry.ts`, `tokens.ts` CSS→scene colours, `useStepper.ts`), `ui/title/`
+  (`TitleScreen`, 2D `Wordmark` canvas, `Squares`, `accents.ts`), `ui/shell/` (`Shell`, `WorldLayer` lazy + error
+  boundary → 2D, `ViewToggle`), `ui/random.ts`, `hooks/useReducedMotion.ts`.
+- 2026-09-29 App phases title → entering (fly) → game; leaving the title is triggered by a game appearing in the store
+  (`date` null → set), so New life / Continue / Load all share one path. `gameStore.boot()` no longer starts a game.
+- 2026-09-29 One persistent WebGL canvas behind the whole UI (`.world`, fixed, z 0; `.shell`/`.title` z 1); stage is
+  transparent in 3D, dot-grid in 2D. Idle 3D redraws at 12 fps steps (`useStepper`), 60 fps only while flying.
+- 2026-09-29 Title shot through a 10° lens so the voxel wordmark reads as flat pixels matching the 2D canvas (60vw);
+  the lens widens to 30° during the 3.2 s fly (through the N–D gap, up round the back, down to iso). Fog is measured
+  from the monument. Settled iso target is offset (-22, 3, 5) so the monument sits clear of the stage panels.
+- 2026-09-29 Presets: Intel HD/UHD → Low, Iris/Xe → Medium, discrete/Apple M → High, software → Low; Auto drops a level
+  (persisted) if a fly-in averages > 40 ms/frame. three.js needs WebGL 2 — without it 3D is disabled.
+- 2026-09-29 `scripts/build-single.ts` (was build-kit) makes one-file Artifact builds: `build:kit` and `build:preview`;
+  `VITE_SINGLE_FILE` makes the bridge skip the worker (main-thread runner), dynamic imports folded in.
+- 2026-09-29 Voxel wordmark cubes are solid (1.0) with ±5% shade jitter per voxel instead of gaps (gaps shimmer at
+  low resolution). "EST. 2026" ground lettering is hidden in the head-on title shot.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).
+- `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);
+  revisit when r3f updates.
+- Artifact viewers block downloads, so "Export .mandate" does nothing in published previews (works in a normal browser
+  tab). T8: use the `downloads` capability for the published build, or hide Export there.
+- WorldCanvas chunk is ~245 KB gzip (r3f pulls in all of three); it is lazy, initial JS is ~83 KB gzip.

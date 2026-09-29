@@ -13,14 +13,15 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
 - `mandate/` — the game (Vite + React 19 + TypeScript strict)
   - `src/sim/` pure TS engine: no DOM, deterministic (seeded RNG), runs in a Web Worker or Node
   - `src/runtime/` sim runner (speed, auto-pause, save/load), Web Worker entry, main-thread bridge; timers OK, no DOM
-  - `src/ui/` React UI, Zustand store (`ui/store`), IndexedDB saves (`ui/saves`), 3D via @react-three/fiber
+  - `src/ui/` React UI, Zustand stores (`ui/store`), saves (`ui/saves`), `ui/voxel` (pure voxel data/meshing),
+    `ui/three` (lazy r3f scenes), `ui/title`, `ui/graphics` (GPU presets, 3D/2D default)
   - `src/data/` bundled JSON data
   - `scripts/` data build + soak test; `tests/` Vitest
 - `docs/DESIGN.md` full design of every system; `docs/DATA_SOURCES.md` licences + `asOf` dates
 
 ## Commands (run inside `mandate/`)
 `npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak` ·
-`npm run build:kit` (UI-kit style guide → one HTML file for an Artifact; dev: `/kit.html`)
+`npm run build:kit` / `build:preview` (kit.html / the game → one HTML file for an Artifact)
 Quality gate before every commit: `npm run typecheck && npm run lint && npm test && npm run build`
 
 ## Rules

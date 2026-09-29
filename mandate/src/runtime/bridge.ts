@@ -43,7 +43,8 @@ const MAIN_SLICE_BUDGET_MS = 8
 const READY_TIMEOUT_MS = 5000
 
 function defaultWorkerFactory(): (() => WorkerLike) | null {
-  if (typeof Worker === 'undefined') return null
+  // One-file preview builds (`npm run build:preview`) have no separate worker file to load.
+  if (typeof Worker === 'undefined' || import.meta.env.VITE_SINGLE_FILE) return null
   return () => new Worker(new URL('./sim.worker.ts', import.meta.url), { type: 'module' })
 }
 

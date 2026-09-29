@@ -9,6 +9,7 @@ const RESERVED = new Set([AUTOSAVE_SLOT, QUICKSAVE_SLOT])
 
 function SlotRow({ slot }: { slot: SlotMeta }) {
   const [confirming, setConfirming] = useState(false)
+  const hasGame = useGame((s) => s.date !== null)
   const game = gameStore.getState()
   return (
     <li className="slot">
@@ -27,7 +28,9 @@ function SlotRow({ slot }: { slot: SlotMeta }) {
           Load
         </Button>
         {slot.id !== AUTOSAVE_SLOT && (
-          <Button onClick={() => void game.saveTo(slot.id, slot.name)}>Overwrite</Button>
+          <Button disabled={!hasGame} onClick={() => void game.saveTo(slot.id, slot.name)}>
+            Overwrite
+          </Button>
         )}
         {confirming ? (
           <>
@@ -52,6 +55,8 @@ function SlotRow({ slot }: { slot: SlotMeta }) {
 
 export function SavesMenu() {
   const slots = useGame((s) => s.slots)
+  /** On the title screen there is nothing to save yet, only saves to load. */
+  const hasGame = useGame((s) => s.date !== null)
   const fileInput = useRef<HTMLInputElement>(null)
   const game = gameStore.getState()
   const manualCount = slots.filter((s) => !RESERVED.has(s.id)).length
@@ -70,12 +75,15 @@ export function SavesMenu() {
       <div className="saves__actions">
         <Button
           icon="ballotBox"
+          disabled={!hasGame}
           onClick={() => void game.saveTo(newSlotId(), `Save ${manualCount + 1}`)}
         >
           New save
         </Button>
-        <Button onClick={() => void game.quickSave()}>Quicksave</Button>
-        <Button icon="exportFile" onClick={() => void exportSave()}>
+        <Button disabled={!hasGame} onClick={() => void game.quickSave()}>
+          Quicksave
+        </Button>
+        <Button icon="exportFile" disabled={!hasGame} onClick={() => void exportSave()}>
           Export {SAVE_FILE_EXTENSION}
         </Button>
         <Button icon="importFile" onClick={() => fileInput.current?.click()}>

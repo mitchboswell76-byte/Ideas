@@ -47,8 +47,8 @@ export interface GameState extends RunnerStatus {
   lastError: string | null
   slots: SlotMeta[]
 
-  /** Wait for the runner, apply settings, list saves and start a new game. */
-  boot(seed: string): Promise<void>
+  /** Wait for the runner, apply settings and list saves. The title screen starts or loads a game. */
+  boot(): Promise<void>
   newGame(seed: string): Promise<void>
   setSpeed(speed: Speed): void
   togglePause(): void
@@ -129,11 +129,11 @@ export function createGameStore({
       lastError: null,
       slots: [],
 
-      async boot(seed) {
+      async boot() {
         const mode = await bridge.ready
         set({ mode })
         bridge.send({ type: 'autoPause', settings: get().autoPause })
-        await Promise.all([get().refreshSlots(), get().newGame(seed)])
+        await get().refreshSlots()
       },
       newGame: (seed) => replaceGame(() => bridge.request({ type: 'newGame', options: { seed } })),
       setSpeed: (speed) => bridge.send({ type: 'speed', speed }),

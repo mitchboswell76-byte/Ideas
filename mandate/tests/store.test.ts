@@ -45,7 +45,8 @@ async function bootedStore(autosave: AutosaveCadence = 'off') {
     settings: memorySettings(undefined, autosave).settings,
     now: () => new Date((clock.ms += 1000)).toISOString(),
   })
-  await store.getState().boot('store-seed')
+  await store.getState().boot()
+  await store.getState().newGame('store-seed')
   return { store, bridge, clock }
 }
 
@@ -70,6 +71,16 @@ function stubBridge() {
 }
 
 describe('game store', () => {
+  it('boots without starting a game, so the title screen decides', async () => {
+    const store = createGameStore({
+      bridge: createSimBridge({ createWorker: null }),
+      slots: indexedDbSlots(`store-${++dbCount}`),
+      settings: memorySettings().settings,
+    })
+    await store.getState().boot()
+    expect(store.getState()).toMatchObject({ mode: 'main', date: null, slots: [] })
+  })
+
   it('boots a new game and mirrors the runner clock and speed', async () => {
     const { store, bridge } = await bootedStore()
     expect(store.getState()).toMatchObject({ mode: 'main', date: '2026-10-01', speed: 0 })

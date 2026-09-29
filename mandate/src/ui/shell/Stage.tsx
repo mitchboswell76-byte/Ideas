@@ -1,6 +1,7 @@
 import { formatShortDate } from '../format.ts'
-import { Button, FrontPage, Panel, Stamp } from '../kit/index.ts'
+import { Button, cx, FrontPage, Panel, Stamp } from '../kit/index.ts'
 import { gameStore, useGame } from '../store/index.ts'
+import { useView } from '../store/view.ts'
 
 function Problems() {
   const fatal = useGame((s) => s.fatal)
@@ -49,11 +50,15 @@ function Notices() {
   )
 }
 
-/** The centre of the screen. The voxel diorama replaces the front page from T4b/T6. */
+/**
+ * The centre of the screen. In 3D it is a window onto the diorama behind the UI (the opening
+ * monument until the world map lands at T6); in 2D it is the dot-grid document.
+ */
 export function Stage() {
   const date = useGame((s) => s.date)
+  const in2d = useView((s) => s.view === '2d')
   return (
-    <main className="stage dot-grid">
+    <main className={cx('stage', in2d && 'dot-grid')}>
       <Problems />
       <div className="stage__layout">
         <FrontPage

@@ -1,0 +1,156 @@
+/* Title screen (DESIGN §17). The wordmark is 41 × 7 pixels at 60vw — in step with
+   WORDMARK_VIEW_FRACTION in ui/three/camera.ts, so the 3D wordmark lands in the same place. */
+
+.title {
+  --wordmark-width: 60vw;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  color: var(--ink);
+}
+
+.title__centre {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.title__frame {
+  padding: 3vw;
+  border: 1px solid var(--ink-muted);
+}
+
+.wordmark {
+  display: block;
+  width: var(--wordmark-width);
+  height: calc(var(--wordmark-width) * 7 / 41);
+  image-rendering: pixelated;
+}
+
+.title__top {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 3;
+}
+
+.title__foot {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  left: 22px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.title__name {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono-l);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title__since {
+  margin-left: 11px;
+  color: var(--ink-muted);
+  font-size: var(--fs-mono);
+  vertical-align: middle;
+}
+
+.title__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(300px, 100%);
+}
+
+.title__actions .btn {
+  width: 100%;
+  background: var(--panel);
+}
+
+.title__note {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+}
+
+/* Hand over to the fly-in: the overlay steps out of the way. */
+.title--leaving .title__frame,
+.title--leaving .title__top,
+.title--leaving .title__foot {
+  opacity: 0;
+  transition: opacity calc(var(--step) * 4) steps(4, jump-end);
+  pointer-events: none;
+}
+
+/* Drifting squares */
+.squares {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.squares--back {
+  z-index: 0;
+}
+
+.squares--front {
+  z-index: 2;
+}
+
+.squares__square {
+  position: absolute;
+  left: var(--x);
+  background-color: var(--voxel-neutral);
+  animation-name: square-drift;
+  animation-iteration-count: infinite;
+}
+
+/* Each square rests at --x; the drift runs from just off the left edge to just off the right. */
+@keyframes square-drift {
+  from {
+    transform: translateX(calc(-1 * var(--x) - 24px));
+  }
+
+  to {
+    transform: translateX(calc(100vw - var(--x) + 24px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squares__square {
+    animation: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .title__top {
+    right: 16px;
+    top: 16px;
+  }
+
+  .title__foot {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+  }
+
+  .title__actions {
+    width: 100%;
+  }
+}

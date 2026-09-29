@@ -352,6 +352,10 @@ Pixel "MANDATE" wordmark inside a thin outline box; random pixels flicker in par
 small coloured squares drift across a dot-grid background. Bottom-left: stacked title + "Est. 2026".
 Bottom-right bordered buttons (label left, arrow right): `New life →`, `Continue →`, `Load →`.
 Choosing one flies the camera into the voxel wordmark, through the blocks, and out to the Britain diorama (2–3 s).
+Built (T4b): the 2D canvas wordmark paints instantly; once three.js has loaded, the voxel wordmark takes its place,
+shot through a 10° lens so it reads as flat pixels. The fly-in widens the lens to 30° as it passes through the gap
+between N and D, rises round the back and settles on the isometric view. Until the world map (T6) the settled view
+shows "the opening monument" (wordmark on a plinth, "EST. 2026" ground lettering, floating cubes).
 
 ### 3D scenes (three.js + @react-three/fiber; lazy-loaded chunk)
 - **Camera:** perspective, FOV 25–35°, pitch 35–45°, yaw ~40° (named constants). Pan + zoom only, no free orbit
@@ -378,8 +382,8 @@ Default when WebGL is unavailable, `prefers-reduced-motion`, or viewport < 900 p
 - **Internal resolution** scale Low 0.5 / Medium 0.75 / High 1.0, upscaled nearest-neighbour (`image-rendering:
   pixelated`) — the pixel look and the performance win are the same thing. Preset auto-picked at first launch
   (renderer string + short benchmark).
-- `frameloop="demand"`; short render loop only while animating; pause when tab hidden; chunks out of range unloaded
-  and disposed.
+- `frameloop="demand"`; idle scenes redraw in 12 fps steps (`useStepper`), a full-rate loop only while the camera
+  flies; pause when tab hidden; chunks out of range unloaded and disposed.
 - **Budgets:** sim tick median < 2 ms; 60 fps on Medium, ≥ 30 fps on Low; initial JS < 1.5 MB gzip.
 
 ### Audio (optional, T22)
