@@ -73,12 +73,25 @@ Figures marked **(verify)** must be checked by web search before being hard-code
   Favours owed and secrets known (kompromat, M2).
 - **Background:** birthplace (country + optional constituency), nationality/citizenship, class origin, parents (jobs, politics, wealth), religion, education.
 - **Eligibility:** standing for Parliament needs age ≥ 18 and British/Irish/qualifying Commonwealth citizenship. Some jobs (civil servants, police, military) must resign to stand.
-- **Portrait:** procedural **40×40 pixel portrait** built from layered pixel parts: faceShape, skinTone,
-  hair{style,colour}, eyes, brows, nose, mouth, facialHair, glasses, clothing, rosette (party or personal colour).
-  Drawn to canvas, scaled nearest-neighbour inside a framed `PixelPortrait`.
-  - Ageing: greying hair and lines added past set ages.
-  - The same generator makes NPC portraits. Real politicians get generated portraits (no photos or likenesses).
-  - In 3D the player is also a small voxel figure in their personal colour.
+- **3D avatar (customisable voxel character):** every character is a 3D voxel figure (about 32 voxels tall,
+  semi-realistic proportions, not chibi) assembled from swappable voxel parts, each part a small greedy-meshed grid
+  cached per variant.
+  - Customise: height, build, skin tone, head/face shape, eyes, brows, nose, mouth, ears, facial hair, hair style
+    and colour, glasses, clothing (top, jacket/suit, tie, trousers/skirt, shoes), accessories (rosette, lanyard,
+    placard, hard hat, poppy), and personal colour.
+  - Expressions (neutral, smile, grim, worried, angry) swap face voxels. Idle poses: stand, arms folded, podium,
+    wave.
+  - Ageing: hair greys or recedes, lines appear, posture changes past set ages. Outfits change with role
+    (student → councillor → MP suit).
+  - **Creator (T10):** live 3D turntable (drag to rotate, zoom to face), randomise button, saved presets.
+  - **Portraits:** the avatar bust is rendered once to a small offscreen target and cached as an image for the UI
+    (`Portrait` component), re-rendered only when appearance changes. There are no live 3D canvases per panel.
+    2D mode / no WebGL: a front orthographic projection of the same voxels, computed on a canvas without WebGL,
+    so the look matches.
+  - **In the world:** the player and key NPCs stand in the diorama. Crowds (rallies, the Commons) use a
+    low-detail variant via one `InstancedMesh` per part.
+  - NPCs use the same generator. Real politicians get avatars generated from editable parameters (hair, glasses,
+    build), with no photos and no photo-derived likenesses.
 - **Personal colour:** chosen at creation; used for the player's rosette, voxels and UI highlights (`--you`).
 - **Death and heirs:** health can fail with age or stress. The player may continue as a protégé or child who inherits part of the money, contacts and fame.
 
@@ -326,7 +339,7 @@ Party colours live in party data, not tokens. UI never uses a party colour for a
 `Panel` (flat, 1px rule, optional hard shadow) · `BallotOption` (box you mark with an X; used for every choice) ·
 `Rosette` (party/you badge) · `Stamp` (alerts: APPROVED / REJECTED / URGENT; rotated, ink-red for danger only) ·
 `Ticker` (newspaper strapline) · `FrontPage` (event news) · `PollingCard` (election reminders) ·
-`PixelIcon` (from bitmap font) · `PixelPortrait` (§4) · `Meter` (pixel bar). Top-left brand block like the
+`PixelIcon` (from bitmap font) · `Portrait` (cached avatar render, §4) · `Meter` (pixel bar). Top-left brand block like the
 reference: pixel monogram in an outline box + stacked name. View toggle `3D ⇄ 2D`.
 
 ### Motion
@@ -347,6 +360,7 @@ Choosing one flies the camera into the voxel wordmark, through the blocks, and o
   column height = chosen metric (population, GDP, military, relations). Oceans are dot-grid ground.
 - **UK map (T7):** 650 hex columns (hexjson layout); each column is stacked party-coloured voxel layers
   (layer height ∝ vote share), neutral grey for undecided; flicker as opinion moves; click → constituency card.
+- **Character creator (T10):** avatar on a plinth, turntable, one directional + ambient light (§4).
 - **Commons (T19):** voxel chamber, green benches, 650 voxel MPs in party colours; divisions animate.
 - **Life road (T11):** §5. **Later (M3+):** voxel backdrops (Downing Street, rally stage, TV studio).
 - **Tone shifts:** war/coup/authoritarian states desaturate the palette, add smoke voxels, or switch to a

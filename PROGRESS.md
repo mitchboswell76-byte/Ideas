@@ -37,8 +37,10 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       ask user about PR into `main`
 
 ## M1 — Nobody to Prime Minister (party route)
-- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; 40×40 pixel portrait generator (layers + ageing)
-- [ ] T10 Character creation UI (ballot-paper style): birthplace (world / UK map), family background, pixel portrait editor, personal colour, traits, ideology quiz, start mode
+- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; 3D voxel avatar
+      generator (swappable parts, expressions, ageing, role outfits) + cached `Portrait` renders + 2D projection fallback
+- [ ] T10 Character creation UI (ballot-paper style): birthplace (world / UK map), family background, 3D avatar creator
+      (turntable, all parts, randomise, presets), personal colour, traits, ideology quiz, start mode
 - [ ] T11 Event engine (data-driven) + life mode as voxel "road movie" (chapter beams, birthplace scenes), ~60 childhood/youth cards; 2D document equivalent
 - [ ] T12 Seed data: parties, leaders & key figures (web-verify, `asOf`), outlets, polling baseline, donor archetypes
 - [ ] T13 Opinion model (blocs × nations, salience, utility deltas) + pollsters with house effects + poll charts
@@ -105,6 +107,9 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   Departure Mono + Newsreader + original bitmap font; flat voxel world map replaces globe (on-style, cheaper,
   whole world visible); pixel portraits replace SVG; 1-bit dither only for intel screens; 2D mode first-class;
   Framer Motion dropped (CSS steps). New task T4b (title screen + voxel core).
+
+- 2026-09-29 Characters are customisable 3D voxel avatars (user request), superseding 2D pixel portraits. UI portraits
+  are cached renders of the avatar bust (no live canvas per panel); 2D mode uses a front projection of the voxels.
 
 ## Known issues / open questions
 - GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
