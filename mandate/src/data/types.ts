@@ -81,6 +81,8 @@ export interface Ge2024Result {
 export interface Ge2024File {
   asOf: string
   parties: Record<Ge2024Party, string>
+  /** Map colour per party (`#rrggbb`); only ever used to mean that party. */
+  colours: Record<Ge2024Party, string>
   results: Ge2024Result[]
 }
 

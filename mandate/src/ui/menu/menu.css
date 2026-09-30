@@ -1,12 +1,70 @@
-/* Main menu (DESIGN §17): left column over a plain full-bleed backdrop. */
+/* Main menu (DESIGN §17): left column over a full-bleed backdrop (the political map, T7). */
 .menu {
+  position: relative;
   display: flex;
   height: 100%;
   background: var(--bg);
   overflow: hidden;
 }
 
+/* Right of the column; the column and panes sit above it. */
+.menu__backdrop {
+  position: absolute;
+  inset: 0 0 0 380px;
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+
+.backdrop--shown {
+  opacity: 0.4;
+}
+
+[data-theme='light'] .backdrop--shown {
+  opacity: 0.55;
+}
+
+/* Taller than the screen, drifting north to south and back over two minutes. */
+.backdrop__map {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: auto;
+  height: 180%;
+  animation: backdrop-drift 120s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.backdrop__nations {
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: 0.25;
+}
+
+@keyframes backdrop-drift {
+  from {
+    transform: translate(-50%, 0);
+  }
+  to {
+    transform: translate(-46%, -44%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop__map {
+    animation: none;
+    transform: translate(-50%, -20%);
+  }
+}
+
 .menu__column {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex: none;
   flex-direction: column;
@@ -144,8 +202,11 @@
 }
 
 .menu__pane {
+  position: relative;
+  z-index: 1;
   display: grid;
   flex: 1;
+  background: var(--bg);
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   animation: pane-in var(--dur-fast) ease-out;

@@ -313,10 +313,10 @@ branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport fo
 | Conversations | Suzerain | Portrait left, dialogue in the serif, numbered choices, scrollable log |
 | Policy (M3) | Democracy 4 | Policy web: category clusters of round nodes, lines to affected voter groups and stats, green/red effect lines |
 | Votes (T19–T20) | Frostpunk 2 council | Horizontal For / Against / Undecided bar with the majority line; hemicycle seat chart |
-| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7): Party, Swing, Turnout, Demographics |
+| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7): 650-seat hex map with Party, Majority (marginal → safe), Turnout, Demographics (21 census measures); Swing disabled until polling (T13); 3D seat columns at election night (T18). Value modes use one party-neutral ramp (sand → umber), never party colours |
 | Election night (T18) | Broadcast convention, unbranded | Seat totals bar with the majority line, swing gauge, declared-seats feed, the map filling in |
 | Tables + charts | Football Manager | Dense sortable tables, zebra rows, 13 px, tabular numbers; thin line charts with endpoint dots |
-| Main menu | Paradox / FM main menus | Left-column menu (New career, Continue, Load, Settings) over a full-bleed backdrop: plain until T7, then a slowly panning political map of Britain |
+| Main menu | Paradox / FM main menus | Left-column menu (New career, Continue, Load, Settings) over a full-bleed backdrop: the 650 seats in their 2024 colours, drifting slowly (static with reduced motion; hidden on narrow screens) |
 | Character creator (T10) | CK3 ruler designer + Sims Create-a-Sim | See §4 |
 | Life mode (T11) | BitLife | See §5 |
 

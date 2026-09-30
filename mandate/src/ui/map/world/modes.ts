@@ -4,6 +4,7 @@
  */
 import type { Bloc, CountryInfo, WorldRegion, WorldShape } from '../../../data/types.ts'
 import { WORLD_REGIONS } from '../../../data/types.ts'
+import type { LegendRow } from '../legend.ts'
 
 export const WORLD_MODES = ['political', 'region', 'blocs'] as const
 export type WorldMode = (typeof WORLD_MODES)[number]
@@ -51,14 +52,6 @@ export function modeLine(country: CountryInfo, mode: WorldMode, bloc: Bloc | nul
       if (!bloc) return ''
       return `${bloc.name}: ${country.blocs.includes(bloc.id) ? 'member' : 'not a member'}`
   }
-}
-
-export interface LegendRow {
-  /** CSS colour for the swatch. */
-  swatch: string
-  label: string
-  /** Draw the swatch as an outline (the home country). */
-  outline?: boolean
 }
 
 export function legendFor(mode: WorldMode, bloc: Bloc | null): LegendRow[] {
@@ -114,9 +107,3 @@ export function labelsThatFit(
 }
 
 const area = (s: WorldShape) => (s.focus[2] - s.focus[0]) * (s.focus[3] - s.focus[1])
-
-/** Case- and accent-insensitive name search ("cote" finds Côte d'Ivoire). */
-export function matchesSearch(name: string, query: string): boolean {
-  const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-  return fold(name).includes(fold(query.trim()))
-}

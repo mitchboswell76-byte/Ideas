@@ -1,4 +1,3 @@
-import { useEffect, useState, type KeyboardEvent } from 'react'
 import type { CountryInfo } from '../../data/types.ts'
 import { BLOCS, COUNTRIES } from '../../data/world.ts'
 import {
@@ -7,24 +6,22 @@ import {
   FlagIcon,
   GlobeHemisphereWestIcon,
   HandshakeIcon,
-  MagnifyingGlassIcon,
   UsersIcon,
   type Icon,
 } from '../kit/icons.ts'
-import { Button, Card, Chip, Panel, Tabs, Tooltip, type TabItem } from '../kit/index.ts'
+import { Button, Card, Chip, Tabs, Tooltip, type TabItem } from '../kit/index.ts'
+import '../map/map-screen.css'
+import { PlaceList } from '../map/PlaceList.tsx'
+import { useEscapeDeselect } from '../map/useEscapeDeselect.ts'
+import { LATER_MODES, MODE_LABELS, WORLD_MODES, type WorldMode } from '../map/world/modes.ts'
 import { WorldMap } from '../map/world/WorldMap.tsx'
-import {
-  LATER_MODES,
-  matchesSearch,
-  MODE_LABELS,
-  WORLD_MODES,
-  type WorldMode,
-} from '../map/world/modes.ts'
-import { mapStore, useMap } from '../store/map.ts'
+import { useMapState, worldMapStore } from '../store/map.ts'
 import './screens.css'
 import './world.css'
 
 const BY_ID: ReadonlyMap<string, CountryInfo> = new Map(COUNTRIES.map((c) => [c.id, c]))
+const PLACES = COUNTRIES.map((c) => ({ id: c.id, name: c.name, meta: c.subregion }))
+const focusOn = (id: string) => worldMapStore.getState().focusOn(id)
 
 type ModeKey = WorldMode | (typeof LATER_MODES)[number]
 
@@ -57,28 +54,21 @@ const TABS: TabItem<ModeKey>[] = [...WORLD_MODES, ...LATER_MODES].map((key) => {
  * country list beside it. The world simulation (leaders, relations, economies) arrives in M4.
  */
 export function World() {
-  const mode = useMap((s) => s.mode)
-  const blocId = useMap((s) => s.bloc)
-  const selected = useMap((s) => s.country)
+  const mode = useMapState(worldMapStore, (s) => s.mode)
+  const blocId = useMapState(worldMapStore, (s) => s.option)
+  const selected = useMapState(worldMapStore, (s) => s.selected)
   const bloc = BLOCS.find((b) => b.id === blocId) ?? BLOCS[0]!
   const country = selected ? BY_ID.get(selected) : undefined
-
-  useEffect(() => {
-    if (!selected) return
-    const onKey = (e: globalThis.KeyboardEvent) =>
-      e.key === 'Escape' && mapStore.getState().select(null)
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [selected])
+  useEscapeDeselect(worldMapStore)
 
   return (
-    <div className="world-screen">
-      <div className="world-screen__bar">
+    <div className="map-screen">
+      <div className="map-screen__bar">
         <Tabs
           label="Map mode"
           tabs={TABS}
           value={mode}
-          onChange={(key) => mapStore.getState().setMode(key as WorldMode)}
+          onChange={(key) => worldMapStore.getState().setMode(key as WorldMode)}
         />
         {mode === 'blocs' && (
           <div className="world-screen__blocs" role="group" aria-label="Bloc">
@@ -89,7 +79,7 @@ export function World() {
                   variant="quiet"
                   className="world-screen__bloc"
                   aria-pressed={b.id === bloc.id}
-                  onClick={() => mapStore.getState().setBloc(b.id)}
+                  onClick={() => worldMapStore.getState().setOption(b.id)}
                 >
                   {b.name}
                 </Button>
@@ -99,8 +89,19 @@ export function World() {
         )}
       </div>
       <WorldMap countries={BY_ID} mode={mode} bloc={mode === 'blocs' ? bloc : null} />
-      <aside className="world-screen__side">
-        {country ? <CountryCard country={country} /> : <CountryList />}
+      <aside className="map-screen__side">
+        {country ? (
+          <CountryCard country={country} />
+        ) : (
+          <PlaceList
+            title="Countries"
+            icon={GlobeHemisphereWestIcon}
+            places={PLACES}
+            noun="countries and territories"
+            searchLabel="Find a country"
+            onPick={focusOn}
+          />
+        )}
       </aside>
     </div>
   )
@@ -110,7 +111,7 @@ function CountryLink({ id }: { id: string }) {
   const c = BY_ID.get(id)
   if (!c) return null
   return (
-    <button type="button" className="link-button" onClick={() => mapStore.getState().focusOn(c.id)}>
+    <button type="button" className="link-button" onClick={() => focusOn(c.id)}>
       {c.name}
     </button>
   )
@@ -126,18 +127,14 @@ function CountryCard({ country }: { country: CountryInfo }) {
       title={country.name}
       icon={FlagIcon}
       className="country-card"
-      onClose={() => mapStore.getState().select(null)}
+      onClose={() => worldMapStore.getState().select(null)}
       footer={
-        <Button
-          variant="primary"
-          icon={CrosshairIcon}
-          onClick={() => mapStore.getState().focusOn(country.id)}
-        >
+        <Button variant="primary" icon={CrosshairIcon} onClick={() => focusOn(country.id)}>
           Centre on map
         </Button>
       }
     >
-      {country.statusText && <p className="country-card__status">{country.statusText}</p>}
+      {country.statusText && <p className="place-card__status">{country.statusText}</p>}
       <dl className="facts" data-testid="country-facts">
         <dt>Capital</dt>
         <dd>{country.capital}</dd>
@@ -170,7 +167,7 @@ function CountryCard({ country }: { country: CountryInfo }) {
         <dt>Borders</dt>
         <dd>
           {neighbours.length ? (
-            <span className="country-card__links">
+            <span className="place-card__links">
               {neighbours.map((id) => (
                 <CountryLink key={id} id={id} />
               ))}
@@ -180,57 +177,9 @@ function CountryCard({ country }: { country: CountryInfo }) {
           )}
         </dd>
       </dl>
-      <p className="muted country-card__later">
+      <p className="muted place-card__later">
         Leaders, relations and the economy arrive with world diplomacy (M4).
       </p>
     </Card>
-  )
-}
-
-function CountryList() {
-  const [query, setQuery] = useState('')
-  const matches = COUNTRIES.filter((c) => matchesSearch(c.name, query))
-  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && matches[0]) mapStore.getState().focusOn(matches[0].id)
-  }
-  return (
-    <Panel title="Countries" icon={GlobeHemisphereWestIcon} flush className="country-list">
-      <label className="search-field">
-        <MagnifyingGlassIcon className="search-field__icon" aria-hidden />
-        <input
-          type="search"
-          value={query}
-          placeholder="Find a country"
-          aria-label="Find a country"
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-        />
-      </label>
-      <p className="country-list__count muted" aria-live="polite">
-        {matches.length === COUNTRIES.length
-          ? `${COUNTRIES.length} countries and territories`
-          : `${matches.length} of ${COUNTRIES.length}`}
-      </p>
-      {matches.length === 0 ? (
-        <p className="empty">No country matches “{query.trim()}”.</p>
-      ) : (
-        <ul className="mini-list country-list__items">
-          {matches.map((c) => (
-            <li key={c.id}>
-              <button
-                type="button"
-                className="mini-list__row"
-                onClick={() => mapStore.getState().focusOn(c.id)}
-              >
-                <span className="mini-list__main">
-                  <span className="mini-list__title">{c.name}</span>
-                  <span className="mini-list__meta">{c.subregion}</span>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Panel>
   )
 }

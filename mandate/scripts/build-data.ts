@@ -1,7 +1,7 @@
 /**
  * Builds the bundled data in `src/data/generated/` from pinned sources (see docs/DATA_SOURCES.md):
  *  - uk-seats.json     650 Westminster seats: name, nation, region, type, hex cell
- *  - ge2024.json       2024 general election results per seat
+ *  - ge2024.json       2024 general election results per seat, plus party map colours
  *  - census2021.json   Census measures per seat (England and Wales 2021, Scotland 2022)
  *  - world-110m.json   Natural Earth 1:110m countries (TopoJSON), Antarctica dropped
  *  - world-map.json    the same projected to SVG paths (Natural Earth I) for the World screen
@@ -57,6 +57,22 @@ function nationOf(id: string): Nation {
   const nation = NATIONS[id[0]]
   if (!nation) throw new Error(`${id}: unknown nation prefix`)
   return nation
+}
+
+/** One `#rrggbb` colour for every 2024 party, in `GE2024_PARTIES` order. */
+function partyColours(source: Record<string, string>): Record<Ge2024Party, string> {
+  const out = {} as Record<Ge2024Party, string>
+  for (const party of Object.keys(GE2024_PARTIES) as Ge2024Party[]) {
+    const colour = source[party]
+    if (!colour || !/^#[0-9a-f]{6}$/.test(colour)) {
+      throw new Error(`ge2024-party-colours.json: ${party} needs a #rrggbb colour`)
+    }
+    out[party] = colour
+  }
+  const extra = Object.keys(source).filter((k) => !(k in GE2024_PARTIES))
+  if (extra.length)
+    throw new Error(`ge2024-party-colours.json: unknown parties ${extra.join(', ')}`)
+  return out
 }
 
 /** Pretty enough to diff: top-level keys on their own lines, one array element per line. */
@@ -165,7 +181,16 @@ async function main() {
   const countriesFile: CountriesFile = { asOf: blocsSource.asOf, ...facts }
 
   const seatsFile: SeatsFile = { asOf: '2024-07-04', layout: hex.layout, regions, seats }
-  const ge2024File: Ge2024File = { asOf: '2024-07-04', parties: GE2024_PARTIES, results }
+  const colourFile = JSON.parse(
+    await readFile(`${RAW}manual/ge2024-party-colours.json`, 'utf8'),
+  ) as { colours: Record<string, string> }
+  const colours = partyColours(colourFile.colours)
+  const ge2024File: Ge2024File = {
+    asOf: '2024-07-04',
+    parties: GE2024_PARTIES,
+    colours,
+    results,
+  }
   const censusFile: CensusFile = {
     asOf: '2021-03-21',
     scotlandAsOf: '2022-03-20',

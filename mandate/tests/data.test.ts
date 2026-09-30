@@ -95,6 +95,15 @@ describe('GE2024 results', () => {
   })
 })
 
+describe('GE2024 party colours', () => {
+  it('gives every party a distinct #rrggbb colour', () => {
+    const parties = Object.keys(GE2024.parties)
+    expect(Object.keys(GE2024.colours)).toEqual(parties)
+    for (const c of Object.values(GE2024.colours)) expect(c).toMatch(/^#[0-9a-f]{6}$/)
+    expect(new Set(Object.values(GE2024.colours)).size).toBe(parties.length)
+  })
+})
+
 describe('Census', () => {
   it('has one row per seat with percentages in range', () => {
     expect(CENSUS.seats.map((s) => s.id)).toEqual(UK_SEATS.seats.map((s) => s.id))

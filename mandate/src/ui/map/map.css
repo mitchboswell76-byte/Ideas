@@ -25,6 +25,16 @@
   --map-hover: rgb(255 255 255 / 0.16);
   --map-label: #f1f3f5;
   --map-label-halo: rgb(12 16 20 / 0.8);
+  /* Value ramp (UK map): one party-neutral hue, low → high; lighter is more on a dark map. */
+  --map-seq-0: #705439;
+  --map-seq-1: #8e7155;
+  --map-seq-2: #ad8f72;
+  --map-seq-3: #cdae90;
+  --map-seq-4: #eeceaf;
+  --map-nodata: #3a424b;
+  --map-hex-line: rgb(14 19 24 / 0.55);
+  --map-region-line: rgb(233 235 238 / 0.5);
+  --map-nation-line: #e9ebee;
 }
 
 [data-theme='light'] {
@@ -49,6 +59,15 @@
   --map-hover: rgb(0 0 0 / 0.12);
   --map-label: #15181c;
   --map-label-halo: rgb(255 255 255 / 0.85);
+  --map-seq-0: #ba9b7e;
+  --map-seq-1: #9b7d60;
+  --map-seq-2: #7c6044;
+  --map-seq-3: #5f4429;
+  --map-seq-4: #432a0f;
+  --map-nodata: #b9c0c7;
+  --map-hex-line: rgb(255 255 255 / 0.7);
+  --map-region-line: rgb(21 24 28 / 0.45);
+  --map-nation-line: #15181c;
 }
 
 .mapview {
@@ -162,6 +181,28 @@
   font-size: var(--fs-xs);
 }
 
+.map-legend--column {
+  max-width: 168px;
+}
+
+.map-legend--column .map-legend__rows {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.map-legend__title {
+  cursor: pointer;
+  font-family: var(--font-cond);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.map-legend[open] .map-legend__title {
+  margin-bottom: 6px;
+}
+
 .map-legend__rows {
   display: flex;
   flex-wrap: wrap;
@@ -191,8 +232,68 @@
   color: var(--text-muted);
 }
 
+/* UK hex map (T7). */
+.ukmap__hexes path {
+  cursor: pointer;
+  stroke: var(--map-hex-line);
+  stroke-width: 0.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.ukmap__regions,
+.ukmap__nations,
+.ukmap__outline,
+.ukmap__hover,
+.ukmap__selected {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.ukmap__regions {
+  stroke: var(--map-region-line);
+  stroke-width: 1px;
+}
+
+.ukmap__nations {
+  stroke: var(--map-nation-line);
+  stroke-width: 2px;
+}
+
+.ukmap__outline {
+  stroke: var(--map-coast);
+  stroke-width: 1px;
+}
+
+.ukmap__hover {
+  fill: var(--map-hover);
+  stroke: var(--text-muted);
+  stroke-width: 1.5px;
+}
+
+.ukmap__selected {
+  stroke: var(--text);
+  stroke-width: 2.5px;
+}
+
+.ukmap__labels {
+  fill: var(--map-label);
+  stroke: var(--map-label-halo);
+  font-family: var(--font-cond);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  paint-order: stroke;
+  stroke-linejoin: round;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
 @media (max-width: 599px) {
-  /* The map is small on a phone: keep the key, drop the long notes. */
+  /* The map is small on a phone: the key starts folded and drops its long notes. */
   .map-legend__note {
     display: none;
   }

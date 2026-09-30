@@ -17,9 +17,9 @@ import {
   labelsThatFit,
   legendFor,
   legendNote,
-  matchesSearch,
   modeLine,
 } from '../src/ui/map/world/modes.ts'
+import { matchesSearch } from '../src/ui/map/search.ts'
 
 /** A 1000 × 500 map in an 800 × 600 frame: width-limited, 0.8 px per unit at k = 1. */
 const frame: Frame = { width: 800, height: 600, mapWidth: 1000, mapHeight: 500 }

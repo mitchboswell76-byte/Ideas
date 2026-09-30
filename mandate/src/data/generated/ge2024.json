@@ -1,6 +1,7 @@
 {
   "asOf": "2024-07-04",
   "parties": {"con":"Conservative","lab":"Labour","ld":"Liberal Democrats","reform":"Reform UK","green":"Green","snp":"SNP","pc":"Plaid Cymru","dup":"DUP","sf":"Sinn Féin","sdlp":"SDLP","uup":"UUP","alliance":"Alliance","tuv":"TUV","workers":"Workers Party","ind":"Independent","speaker":"Speaker","other":"Other"},
+  "colours": {"con":"#0087dc","lab":"#e4003b","ld":"#faa61a","reform":"#12b6cf","green":"#02a95b","snp":"#fdf38e","pc":"#005b54","dup":"#d46a4c","sf":"#326760","sdlp":"#2aa82c","uup":"#48a5ee","alliance":"#f6cb2f","tuv":"#0c3a6a","workers":"#8b1a1a","ind":"#b8b8b8","speaker":"#ffffff","other":"#8a8a8a"},
   "results": [
     {"id":"E14001063","winner":"lab","second":"con","electorate":78553,"valid":48544,"rejected":179,"majority":5683,"votes":{"con":14081,"lab":19764,"ld":4052,"reform":8210,"green":2155,"other":282},"mp":{"first":"Alex","last":"Baker","gender":"female"},"declared":null,"verified":true,"source":"hoc-mirror"},
     {"id":"E14001064","winner":"con","second":"lab","electorate":70268,"valid":40912,"rejected":156,"majority":4294,"votes":{"con":15901,"lab":11607,"ld":1755,"reform":9903,"green":1746},"mp":{"first":"Wendy","last":"Morton","gender":"female"},"declared":null,"verified":true,"source":"hoc-mirror"},

@@ -8,6 +8,7 @@ import type { SlotMeta } from '../saves/slots.ts'
 import { Saves } from '../screens/Saves.tsx'
 import { Settings } from '../screens/Settings.tsx'
 import { gameStore, useGame } from '../store/index.ts'
+import { Backdrop } from './Backdrop.tsx'
 import './menu.css'
 
 function latestSlot(slots: readonly SlotMeta[]): SlotMeta | null {
@@ -46,8 +47,8 @@ function MenuItem({ children, detail, active, disabled, onClick, testId, primary
 }
 
 /**
- * Main menu (DESIGN §17): Paradox / FM left-column menu over a plain backdrop (a panning map of
- * Britain from T7). Load and Settings open beside it. Starting or loading a game hands over to
+ * Main menu (DESIGN §17): Paradox / FM left-column menu over a slowly panning political map of
+ * Britain. Load and Settings open beside it. Starting or loading a game hands over to
  * the shell.
  */
 export function MainMenu() {
@@ -74,6 +75,7 @@ export function MainMenu() {
 
   return (
     <div className={cx('menu', pane && 'menu--pane')} data-testid="title-screen">
+      <Backdrop />
       <div className="menu__column">
         <h1 className="menu__wordmark">
           Mandate

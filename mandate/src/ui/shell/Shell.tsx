@@ -13,20 +13,24 @@ import './shell.css'
 import { StatusBar } from './StatusBar.tsx'
 import { TopBar } from './TopBar.tsx'
 
-// The map screens load on demand with their data (the world map is ~170 KB of JSON).
+// The map screens load on demand with their data (~170 KB of JSON for the world, ~500 KB for the UK).
 const World = lazy(() => import('../screens/World.tsx').then((m) => ({ default: m.World })))
+const UkMap = lazy(() =>
+  import('../screens/UkMapScreen.tsx').then((m) => ({ default: m.UkMapScreen })),
+)
 
 const SCREENS: Record<ScreenName, ComponentType> = {
   home: Home,
   inbox: Inbox,
   calendar: Calendar,
+  map: UkMap,
   world: World,
   saves: Saves,
   settings: Settings,
 }
 
 /** Screens that fill the stage edge to edge (maps). */
-const FLUSH = new Set<ScreenName>(['world'])
+const FLUSH = new Set<ScreenName>(['map', 'world'])
 
 /**
  * The game screen (DESIGN §17): FM sidebar, party-tinted header with Paradox time controls, the

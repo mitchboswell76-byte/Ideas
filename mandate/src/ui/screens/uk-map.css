@@ -1,0 +1,61 @@
+/* UK map screen (T7): constituency card. Layout is shared (`map/map-screen.css`). */
+.seat-card__mp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: center;
+}
+
+.seat-card__note {
+  margin-top: 10px;
+  color: var(--warn);
+  font-size: var(--fs-s);
+}
+
+.seat-card__votes {
+  margin-top: 14px;
+}
+
+.seat-card__heading {
+  margin: 16px 0 8px;
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.facts__pair {
+  display: contents;
+}
+
+.party-name {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Party colour marks the party it belongs to, nothing else. */
+.party-name__swatch {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 2px;
+  background: var(--party-colour);
+}
+
+.share {
+  position: relative;
+  display: inline-block;
+  min-width: 64px;
+  padding-bottom: 4px;
+}
+
+.share__bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--party-colour);
+}

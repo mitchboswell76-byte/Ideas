@@ -1,40 +1,55 @@
-/** World map state: mode, bloc, selected country and view (UI only; not saved). */
+/**
+ * Map screen state (UI only; not saved): mode, the mode's option (a bloc on the world map, a census
+ * field on the UK map), the selected place, the view and "frame this place" requests.
+ */
 import { useStore } from 'zustand'
-import { createStore } from 'zustand/vanilla'
-import type { WorldMode } from '../map/world/modes.ts'
+import { createStore, type StoreApi } from 'zustand/vanilla'
+import type { UkMode } from '../map/uk/modes.ts'
 import type { View } from '../map/viewport.ts'
+import type { WorldMode } from '../map/world/modes.ts'
 
-interface MapState {
-  mode: WorldMode
-  /** The bloc shown in Blocs mode. */
-  bloc: string
-  /** Selected country id: its card is open. */
-  country: string | null
+export interface MapState<M extends string> {
+  mode: M
+  option: string
+  /** Selected place id: its card is open. */
+  selected: string | null
   /** Null until the player pans or zooms: the whole map. */
   view: View | null
-  /** A request to frame a country; `n` changes each time, so asking twice moves twice. */
+  /** A request to frame a place; `n` changes each time, so asking twice moves twice. */
   focus: { id: string; n: number } | null
-  setMode(mode: WorldMode): void
-  setBloc(bloc: string): void
-  select(country: string | null): void
+  setMode(mode: M): void
+  setOption(option: string): void
+  select(id: string | null): void
   setView(view: View | null): void
-  /** Select a country and frame it on the map. */
-  focusOn(country: string): void
+  /** Select a place and frame it on the map. */
+  focusOn(id: string): void
 }
 
-export const mapStore = createStore<MapState>()((set) => ({
-  mode: 'political',
-  bloc: 'nato',
-  country: null,
-  view: null,
-  focus: null,
-  setMode: (mode) => set({ mode }),
-  setBloc: (bloc) => set({ bloc }),
-  select: (country) => set({ country }),
-  setView: (view) => set({ view }),
-  focusOn: (country) => set((s) => ({ country, focus: { id: country, n: (s.focus?.n ?? 0) + 1 } })),
-}))
+export type MapStore<M extends string = string> = StoreApi<MapState<M>>
 
-export function useMap<T>(selector: (state: MapState) => T): T {
-  return useStore(mapStore, selector)
+export function createMapStore<M extends string>(mode: M, option: string): MapStore<M> {
+  return createStore<MapState<M>>()((set) => ({
+    mode,
+    option,
+    selected: null,
+    view: null,
+    focus: null,
+    setMode: (next) => set({ mode: next }),
+    setOption: (next) => set({ option: next }),
+    select: (id) => set({ selected: id }),
+    setView: (view) => set({ view }),
+    focusOn: (id) => set((s) => ({ selected: id, focus: { id, n: (s.focus?.n ?? 0) + 1 } })),
+  }))
+}
+
+/** World map: option = the bloc shown in Blocs mode. */
+export const worldMapStore = createMapStore<WorldMode>('political', 'nato')
+/** UK map: option = the census field shown in Demographics mode. */
+export const ukMapStore = createMapStore<UkMode>('party', 'age65plus')
+
+export function useMapState<M extends string, T>(
+  store: MapStore<M>,
+  selector: (state: MapState<M>) => T,
+): T {
+  return useStore(store, selector)
 }

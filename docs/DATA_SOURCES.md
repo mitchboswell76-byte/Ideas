@@ -8,7 +8,7 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 | Output | Content | As of |
 |---|---|---|
 | `uk-seats.json` | 650 Westminster seats (2024 boundaries): ONS code, name, nation, region, county/borough/burgh, hex cell | 2024-07-04 |
-| `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected | 2024-07-04 |
+| `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected; map colour per party | 2024-07-04 |
 | `census2021.json` | 21 census measures per seat (GB only) | E&W 2021-03-21, Scotland 2022-03-20 |
 | `world-110m.json` | 176 countries and territories as TopoJSON (Antarctica dropped) | Natural Earth via world-atlas 2.0.2 |
 | `world-map.json` | The same projected to SVG paths (Natural Earth I, 1000 units wide): focus box, label point, political colour per country; border and coast meshes | derived |
@@ -95,6 +95,12 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
   18th BRICS summit; businesstoday.in 2026-09-10), Saudi status (swissinfo; theglobeandmail; arabnews.pk 2026),
   Commonwealth (Wikipedia member states; commonwealthsport.com), EU (appf.europa.eu 2026 lists), G20 (Wikipedia 2026
   G20 Miami summit; thestatesman), Equatorial Guinea (archdaily; allafrica 2026-01-05). Re-check at M4.
+
+### Party map colours
+- **File:** `data-raw/manual/ge2024-party-colours.json`, hand-entered at T7: approximations of the colours election
+  maps conventionally use for each party (colour only; no logos or other branding). Validated by the build (one
+  `#rrggbb` per party key) and written into `ge2024.json`. Used only to mean that party (Party map mode, results
+  table, main-menu backdrop). T12's party data replaces them.
 
 ## Known limits
 - MPs are as elected on 4 July 2024. By-elections, defections and suspensions since then are not applied

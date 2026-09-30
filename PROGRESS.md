@@ -2,8 +2,8 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T7**
-**Last playable link (T6):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Next session:** start at **T8**
+**Last playable link (T7):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link)
 **UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
@@ -43,8 +43,9 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       results + census (GB mirror; NI winners hand-entered), `docs/DATA_SOURCES.md`, Settings data credits
 - [x] T6 World map (Paradox map modes + Plague Inc ticker): flat clean map of Natural Earth countries, map-mode switcher,
       hover/click → country card, pan/zoom; canvas/SVG, optional subtle 3D tilt (skipped, see decisions)
-- [ ] T7 UK constituency map: 650-seat hex map with map modes (Party, Swing, Turnout, Demographics), click →
-      constituency card; optional 3D seat columns; slowly panning map becomes the main-menu backdrop
+- [x] T7 UK constituency map: 650-seat hex map with map modes (Party, Majority, Turnout, Demographics; Swing
+      disabled until T13), click → constituency card; slowly panning map as the main-menu backdrop (3D seat columns
+      moved to T18)
 - [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact;
       ask user about PR into `main`
 
@@ -63,7 +64,8 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [ ] T15 Activities system + energy; ladder stages: join party, branch work, May council elections, approved list
 - [ ] T16 Money: ledgers, jobs, small/major donors, fundraising, ads, spending limits, compliance, heat, investigations
 - [ ] T17 Media: fame/reputation, press releases, interviews, social posts, scandals, ticker stories
-- [ ] T18 Selection contests + GE campaign + election night (broadcast-style: seat bar with majority line, swing
+- [ ] T18 Selection contests + GE campaign + election night (3D seat columns on the hex map, from T7;
+      broadcast-style: seat bar with majority line, swing
       gauge, declarations feed, map filling in)
 - [ ] T19 MP life: whips, rebellions, promotions; Commons divisions with the Frostpunk 2-style vote bar + hemicycle
 - [ ] T20 Leadership contests (per-party rules), becoming PM, hung parliament talks, placeholder governance
@@ -255,14 +257,42 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   label, click → card, wheel/drag/keys, Esc, all modes and blocs, search → Qatar framed, neighbour link; single-file
   build loads the World screen with no console errors. Republished the playable link.
 
+- 2026-09-30 T7 map: `ui/map/uk/` (`hex.ts` pure odd-r geometry: `rawCentre`, `hexNeighbours`, `edgesBetween`
+  (coast, nation and region borders drawn once), `regionLabelCells`, `buildHexMap`; `modes.ts` pure modes, bins,
+  legends; `data.ts` joins seats + results + census once; `UkHexMap.tsx`; `Backdrop.tsx`), `ui/screens/UkMapScreen.tsx`
+  (lazy; sidebar **Map**). Shared from T6: `ui/map/StoreMapView.tsx` (MapView bound to a map store: view, select,
+  focus), `MapTip.tsx`, `Legend.tsx` (a `<details>`, folded on phones), `PlaceList.tsx`, `search.ts`,
+  `useEscapeDeselect.ts`, `map-screen.css`; `ui/store/map.ts` is now `createMapStore` → `worldMapStore`,
+  `ukMapStore` (`mode`, `option`, `selected`, `view`, `focus`). UK data split into `ukSeats.ts`, `ge2024.ts`,
+  `census.ts` (`uk.ts` re-exports) so the backdrop loads no census.
+- 2026-09-30 User chose Majority (new) over a fake Swing; Swing is a disabled tab ("Arrives with polling (T13)"). 3D
+  seat columns moved to T18, where height means something; `HAS_3D_VIEW` stays false.
+- 2026-09-30 Majority = majority / valid votes with fixed bins (< 5% marginal … 30%+ safe); Turnout = valid /
+  electorate (Commons Library convention) and Demographics use quintiles of the data. No-data seats (NI results,
+  census gaps) get their own grey and legend row. Value ramp: one party-neutral hue (sand → umber; blue would read as
+  Conservative), validated with the dataviz ordinal check in both themes; lighter = more on the dark theme.
+- 2026-09-30 Party colours are data (`data-raw/manual/ge2024-party-colours.json` → `ge2024.json` `colours`), used only
+  to mean parties. Seat card: MP as elected with party chip, majority over the runner-up, turnout, electorate, a
+  sortable results table with share bars, six census measures, NI "winner only" warning.
+- 2026-09-30 Region labels sit on each region's deepest cell (furthest from coast and other regions), so the South
+  East's label isn't on London's; shown below zoom 2.5. The UK key is a narrow column that fits the sea west of the
+  map. Returning to a map screen keeps its view (focus requests made earlier aren't replayed; this also fixed T6).
+- 2026-09-30 Main-menu backdrop: the 650 hexes in 2024 winner colours at 40% opacity (55% light), 180% of the screen
+  height, drifting north ↔ south over 120 s with a CSS transform on one cached layer; static under reduced motion;
+  not rendered below 900 px. Its chunk (seats + results, ~47 KB gzip) loads after first paint.
+- 2026-09-30 Browser-verified (scratchpad Playwright): backdrop drifts (static with reduced motion, absent at 390 px);
+  650 hexes; hover label; click → card with 6 result rows; Esc; all modes + census field; Swing disabled; search →
+  Ynys Môn; Foyle shows the winner-only note; World still works; dark, light, 390 px with no sideways scroll; no
+  console errors; menu drift and UK map pan hold 60 fps under a 4× CPU throttle (headless).
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
 - GE2024 Northern Ireland: winners only, hand-entered and unverified (no votes, turnout or MPs). User can add
   `mandate/data-raw/HoC-GE2024-results-by-constituency.csv` (Commons Library CBP-10009) and run `npm run data` to
   get official results for all 650 seats plus declaration times; `fromHocCsv` is fixture-tested only.
-- No 2019 notional results (dropped for licence reasons), so T7's "Swing" map mode has no baseline yet: use swing
-  from 2024 in the running game, or find a licensed notional source.
+- No 2019 notional results (dropped for licence reasons): the UK map's Swing mode is disabled until T13, where swing
+  will be measured from 2024 in the running game.
 - Census gaps: Scotland lacks ~10 measures in the source; Northern Ireland has none.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).
 - `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);
