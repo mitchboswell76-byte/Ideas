@@ -1,7 +1,7 @@
 # Progress — Mandate
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
-**Current milestone:** M1 — Nobody to Prime Minister (M0 done; PR of this branch → `main` open for review)
+**Current milestone:** M1 — Nobody to Prime Minister (M0 done; PR https://github.com/mitchboswell76-byte/Ideas/pull/1 of this branch → `main`)
 **Next session:** start at **T9**
 **Last playable link (T8, M0):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
