@@ -17,8 +17,8 @@ import type {
 import { AUTOSAVE_SLOT, QUICKSAVE_SLOT, type SaveSlots, type SlotMeta } from '../saves/slots.ts'
 import type { AutosaveCadence, SettingsStorage } from './settings.ts'
 
-/** Notifications kept for the log, newest first. */
-export const LOG_LIMIT = 50
+/** Notifications kept for the inbox and ticker, newest first. */
+export const LOG_LIMIT = 200
 
 /** Shortest real-time gap between autosaves, so fast speeds don't save every half second. */
 export const AUTOSAVE_MIN_GAP_MS = 60_000
@@ -30,9 +30,28 @@ function autosavePeriod(date: string | null, cadence: AutosaveCadence): string |
 }
 
 export interface LoggedNotification extends Notification {
+  /** Unique for this page session; stable while the item is in the log. */
+  id: number
   /** In-game date of the tick that produced it. */
   date: string
+  /** Opened in the inbox. */
+  read: boolean
 }
+
+/**
+ * FM-style first mail of a new career (UI copy, not a simulation event): how the clock works.
+ * Paragraphs are separated by blank lines.
+ */
+export const WELCOME_TEXT = [
+  'Every Prime Minister started out as someone no one had heard of. Most people who start out ' +
+    'that way stay there. The difference is made in branch meetings, on doorsteps and in the ' +
+    'small hours of election night.',
+  'The clock is running. Space pauses it and keys 1 to 5 set the speed; the bars by the date ' +
+    'show how fast time is passing. While paused you can step on a day or a week at a time.',
+  'Word from your party, your rivals and the press will arrive here. Keep a save before ' +
+    'anything you might regret: saves stay in this browser, and the Saves screen can export a ' +
+    'copy.',
+].join('\n\n')
 
 export interface GameState extends RunnerStatus {
   mode: 'starting' | BridgeMode
@@ -40,6 +59,7 @@ export interface GameState extends RunnerStatus {
   date: string | null
   autoPause: AutoPauseSettings
   autosave: AutosaveCadence
+  /** Inbox and ticker items, newest first. */
   log: LoggedNotification[]
   /** The simulation crashed; shown until a new game or load. */
   fatal: string | null
@@ -54,6 +74,9 @@ export interface GameState extends RunnerStatus {
   togglePause(): void
   step(days: number): void
   send(cmd: Command): void
+  /** Mark an inbox item read (or unread again). */
+  markRead(id: number, read?: boolean): void
+  markAllRead(): void
   setAutoPause(reason: PauseReason, on: boolean): void
   setAutosave(cadence: AutosaveCadence): void
   refreshSlots(): Promise<void>
@@ -92,6 +115,7 @@ export function createGameStore({
   let autosaving = false
   /** Loads/new games in flight; their ticks must not count as time passing in either game. */
   let replacing = 0
+  let nextLogId = 1
 
   const store = createStore<GameState>()((set, get) => {
     /** Run an action; failures land in `lastError` instead of rejecting. */
@@ -103,12 +127,30 @@ export function createGameStore({
         return null
       }
     }
-    /** Swap in another game (new or loaded) and reset the per-game UI state on success. */
-    const replaceGame = async (action: () => Promise<GameDate>): Promise<void> => {
+    /**
+     * Swap in another game (new or loaded) and reset the per-game UI state on success. A new
+     * career starts with the welcome mail in the inbox.
+     */
+    const replaceGame = async (action: () => Promise<GameDate>, welcome = false): Promise<void> => {
       replacing++
       try {
         const loaded = await attempt(action)
-        if (loaded) set({ log: [], fatal: null, lastError: null })
+        if (loaded) {
+          const log: LoggedNotification[] = welcome
+            ? [
+                {
+                  id: nextLogId++,
+                  kind: 'info',
+                  from: 'Mandate',
+                  subject: 'Welcome to your career',
+                  text: WELCOME_TEXT,
+                  date: loaded.date,
+                  read: false,
+                },
+              ]
+            : []
+          set({ log, fatal: null, lastError: null })
+        }
         lastPeriod = autosavePeriod(loaded?.date ?? get().date, get().autosave)
       } finally {
         replacing--
@@ -135,11 +177,20 @@ export function createGameStore({
         bridge.send({ type: 'autoPause', settings: get().autoPause })
         await get().refreshSlots()
       },
-      newGame: (seed) => replaceGame(() => bridge.request({ type: 'newGame', options: { seed } })),
+      newGame: (seed) =>
+        replaceGame(() => bridge.request({ type: 'newGame', options: { seed } }), true),
       setSpeed: (speed) => bridge.send({ type: 'speed', speed }),
       togglePause: () => bridge.send({ type: 'togglePause' }),
       step: (days) => bridge.send({ type: 'step', days }),
       send: (cmd) => bridge.send({ type: 'cmd', cmd }),
+      markRead(id, read = true) {
+        set((s) => ({
+          log: s.log.map((n) => (n.id === id && n.read !== read ? { ...n, read } : n)),
+        }))
+      },
+      markAllRead() {
+        set((s) => ({ log: s.log.map((n) => (n.read ? n : { ...n, read: true })) }))
+      },
       setAutoPause(reason, on) {
         const autoPause = { ...get().autoPause, [reason]: on }
         set({ autoPause })
@@ -203,7 +254,9 @@ export function createGameStore({
           store.setState({ day, date })
           break
         }
-        const fresh = notifications.map((n) => ({ ...n, date })).reverse()
+        const fresh = notifications
+          .map((n) => ({ ...n, id: nextLogId++, date, read: false }))
+          .reverse()
         store.setState((s) => ({ day, date, log: [...fresh, ...s.log].slice(0, LOG_LIMIT) }))
         break
       }

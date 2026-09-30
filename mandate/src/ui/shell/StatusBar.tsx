@@ -7,18 +7,19 @@ import { MODE_LABELS } from './labels.ts'
 const QUIET_DAY = [
   'No news yet: the country has not heard of you',
   'Space pauses the clock; keys 1 to 5 set the speed',
-  'Saves live in this browser; export a .mandate file to keep a copy',
+  'Saves stay in this browser; export a .mandate file to keep a copy',
 ]
 
 const TICKER_ITEMS = 6
 
+/** Bottom strip: news ticker, version and where the simulation runs. */
 export function StatusBar() {
   const log = useGame((s) => s.log)
   const mode = useGame((s) => s.mode)
-  const items = log.length ? log.slice(0, TICKER_ITEMS).map((n) => n.text) : QUIET_DAY
+  const news = log.filter((n) => n.kind === 'news').slice(0, TICKER_ITEMS)
   return (
     <footer className="statusbar">
-      <Ticker items={items} />
+      <Ticker items={news.length ? news.map((n) => n.text) : QUIET_DAY} />
       <p className="statusbar__meta">
         <span>v{GAME_VERSION}</span>
         <span data-testid="sim-mode">{MODE_LABELS[mode]}</span>

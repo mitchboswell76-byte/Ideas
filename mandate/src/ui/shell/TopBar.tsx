@@ -1,82 +1,54 @@
-import { PAUSE_LABELS } from './labels.ts'
-import type { Speed } from '../../runtime/protocol.ts'
+import type { CSSProperties } from 'react'
 import { formatShortDate } from '../format.ts'
-import { BrandBlock, Button, Stamp } from '../kit/index.ts'
+import { readableInk } from '../kit/colour.ts'
+import { DateSpeed, PauseBanner } from '../kit/index.ts'
 import { gameStore, useGame } from '../store/index.ts'
+import { useNav } from '../store/nav.ts'
+import { HAS_3D_VIEW } from '../store/view.ts'
+import { PAUSE_LABELS, SCREEN_TITLES } from './labels.ts'
+import { NO_PARTY } from './party.ts'
 import { ViewToggle } from './ViewToggle.tsx'
 
-const RUN_SPEEDS: readonly Speed[] = [1, 2, 3, 4, 5]
-
-export type MenuName = 'saves' | 'settings'
-
-function Clock() {
+/**
+ * The header strip, tinted in the player's party colours (FM), with the time controls and, while
+ * paused, the banner saying why (Paradox).
+ */
+export function TopBar() {
+  const screen = useNav((s) => s.screen)
   const date = useGame((s) => s.date)
-  const pausedBy = useGame((s) => s.pausedBy)
-  return (
-    <div className="clock">
-      <output className="clock__date" data-testid="game-date" data-iso={date ?? ''}>
-        {formatShortDate(date)}
-      </output>
-      {pausedBy && (
-        <Stamp className="stamp--small" key={pausedBy}>
-          Paused · {PAUSE_LABELS[pausedBy]}
-        </Stamp>
-      )}
-    </div>
-  )
-}
-
-function SpeedControls() {
   const speed = useGame((s) => s.speed)
-  const { setSpeed, step } = gameStore.getState()
-  const paused = speed === 0
+  const resumeSpeed = useGame((s) => s.resumeSpeed)
+  const pausedBy = useGame((s) => s.pausedBy)
+  const game = gameStore.getState()
+  const party = NO_PARTY
+  const style = {
+    '--party': party.colour,
+    '--party-ink': readableInk(party.colour),
+  } as CSSProperties
   return (
-    <div className="speed" role="group" aria-label="Speed">
-      <Button
-        icon={paused ? 'play' : 'pause'}
-        aria-label={paused ? 'Resume (Space)' : 'Pause (Space)'}
-        title={paused ? 'Resume (Space)' : 'Pause (Space)'}
-        onClick={() => gameStore.getState().togglePause()}
-      />
-      {RUN_SPEEDS.map((s) => (
-        <Button
-          key={s}
-          className="speed__level"
-          aria-pressed={speed === s}
-          aria-label={`Speed ${s}`}
-          title={`Speed ${s} (${s})`}
-          onClick={() => setSpeed(s)}
-        >
-          {s}
-        </Button>
-      ))}
-      <Button icon="step" disabled={!paused} onClick={() => step(1)} title="Advance one day">
-        Day
-      </Button>
-      <Button icon="step" disabled={!paused} onClick={() => step(7)} title="Advance one week">
-        Week
-      </Button>
-    </div>
-  )
-}
-
-export function TopBar({ onOpen }: { onOpen: (menu: MenuName) => void }) {
-  return (
-    <header className="topbar">
-      <BrandBlock />
-      <div className="topbar__time">
-        <Clock />
-        <SpeedControls />
+    <header className="topbar" style={style}>
+      <div className="topbar__title">
+        <span className="topbar__party">{party.name}</span>
+        <h1 className="topbar__screen">{SCREEN_TITLES[screen]}</h1>
       </div>
-      <nav className="topbar__menu" aria-label="Game menu">
-        <ViewToggle />
-        <Button icon="ballotBox" aria-haspopup="dialog" onClick={() => onOpen('saves')}>
-          Saves
-        </Button>
-        <Button icon="settings" aria-haspopup="dialog" onClick={() => onOpen('settings')}>
-          Settings
-        </Button>
-      </nav>
+      <div className="topbar__controls">
+        {HAS_3D_VIEW && <ViewToggle />}
+        {speed === 0 && (
+          <PauseBanner
+            reason={pausedBy && PAUSE_LABELS[pausedBy]}
+            onResume={() => game.togglePause()}
+          />
+        )}
+        <DateSpeed
+          label={formatShortDate(date)}
+          iso={date ?? ''}
+          speed={speed}
+          resumeSpeed={resumeSpeed}
+          onTogglePause={() => game.togglePause()}
+          onSpeed={(s) => game.setSpeed(s)}
+          onStep={(days) => game.step(days)}
+        />
+      </div>
     </header>
   )
 }

@@ -1,288 +1,761 @@
-import { useState, type ReactNode } from 'react'
-import { GLYPH_HEIGHT, ICON_NAMES } from '../../pixel/font.ts'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import type { RunSpeed, Speed } from '../../../runtime/protocol.ts'
 import type { Theme } from '../../store/theme.ts'
+import { attributeBand } from '../attributes.ts'
+import { readableInk } from '../colour.ts'
 import {
-  Ballot,
-  BallotOption,
-  BrandBlock,
+  CalendarBlankIcon,
+  ChartLineIcon,
+  CoinsIcon,
+  DownloadSimpleIcon,
+  FlagIcon,
+  FloppyDiskIcon,
+  GearSixIcon,
+  HouseIcon,
+  MegaphoneIcon,
+  PlusIcon,
+  ScrollIcon,
+  TrashIcon,
+  TrayIcon,
+  UserIcon,
+} from '../icons.ts'
+import {
+  AttributeGrid,
+  Badge,
   Button,
-  FrontPage,
-  Meter,
+  Card,
+  Chip,
+  DateSpeed,
+  Dialogue,
+  EventWindow,
+  IconButton,
+  ModifierList,
   Panel,
-  PixelIcon,
-  PixelText,
-  Rosette,
-  Stamp,
+  PauseBanner,
+  PortraitFrame,
+  Sidebar,
+  Table,
+  Tabs,
+  Term,
   Ticker,
+  Tile,
+  Tooltip,
+  VoteBar,
+  type Column,
+  type DialogueLine,
+  type PartyColours,
 } from '../index.ts'
 import './gallery.css'
 
 /** Fictional parties for the specimens; real parties arrive as data (T12). */
-const PARTIES = [
-  { id: 'civic', name: 'Civic Union', initial: 'C', colour: '#2e7d4f' },
-  { id: 'harbour', name: 'Harbour Party', initial: 'H', colour: '#d9642b' },
-]
-
-const CANDIDATES = [
-  { id: 'bramley', name: 'BRAMLEY, Joan', detail: 'Civic Union', colour: '#2e7d4f' },
-  { id: 'okafor', name: 'OKAFOR, Daniel', detail: 'Harbour Party', colour: '#d9642b' },
-  { id: 'pryce', name: 'PRYCE-WELLS, Tom', detail: 'Independent', colour: undefined },
+const PARTIES: readonly PartyColours[] = [
+  { name: 'Independent', colour: '#56606b' },
+  { name: 'Civic Union', colour: '#2e7d4f' },
+  { name: 'Harbour Party', colour: '#d9642b' },
+  { name: 'Moorland Alliance', colour: '#6d4bb0' },
 ]
 
 const TOKENS = [
-  'ground',
-  'grid-dot',
-  'panel',
-  'rule',
-  'ink',
-  'ink-muted',
-  'voxel-neutral',
-  'stamp',
-  'you',
-]
+  ['bg', 'Ground'],
+  ['surface-1', 'Surface 1'],
+  ['surface-2', 'Surface 2'],
+  ['surface-3', 'Surface 3'],
+  ['line', 'Line'],
+  ['line-strong', 'Strong line'],
+  ['text', 'Text'],
+  ['text-muted', 'Muted'],
+  ['text-faint', 'Faint'],
+  ['good', 'Good'],
+  ['warn', 'Warning'],
+  ['bad', 'Bad'],
+  ['you', 'You'],
+] as const
 
-const FONT_ROWS = ['ABCDEFGHIJKLM', 'NOPQRSTUVWXYZ', '0123456789 £%', '.,:;!?\'"-+=/()<>&#*_']
-
-function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+function Section({
+  title,
+  note,
+  children,
+}: {
+  title: string
+  note?: ReactNode
+  children: ReactNode
+}) {
   return (
     <section className="specimen">
-      <h3 className="specimen__title">{title}</h3>
-      {note && <p className="specimen__note">{note}</p>}
+      <header className="specimen__head">
+        <h2 className="specimen__title">{title}</h2>
+        {note && <p className="specimen__note">{note}</p>}
+      </header>
       <div className="specimen__body">{children}</div>
     </section>
   )
 }
 
-function Sheet({ theme }: { theme: Theme }) {
-  const [vote, setVote] = useState('okafor')
-  const [speed, setSpeed] = useState(2)
-  const [autoPause, setAutoPause] = useState({ elections: true, scandals: false })
-  const radioName = `candidate-${theme}`
+function Tokens() {
   return (
-    <div className="sheet-specimen dot-grid" data-theme={theme}>
-      <p className="sheet-specimen__label">{theme === 'night' ? 'Night (default)' : 'Paper'}</p>
-
-      <Section title="Top bar" note="Brand block, game clock, speed, menus.">
-        <div className="mock-bar">
-          <BrandBlock />
-          <span className="mock-bar__date">Thu 1 Oct 2026</span>
-          <span className="mock-bar__speed">
-            <Button icon="pause" aria-label="Pause" onClick={() => setSpeed(0)} />
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>
-                {s}
-              </Button>
-            ))}
+    <Section
+      title="Colour"
+      note="Tokens on :root, switched by data-theme. Party colours come from data and only mean parties."
+    >
+      <div className="swatches">
+        {TOKENS.map(([token, label]) => (
+          <div key={token} className="swatch">
+            <span className="swatch__chip" style={{ background: `var(--${token})` }} />
+            <span className="swatch__label">{label}</span>
+            <code className="swatch__token">--{token}</code>
+          </div>
+        ))}
+      </div>
+      <p className="specimen__label">Attribute scale (FM), 1–20</p>
+      <div className="attr-scale">
+        {Array.from({ length: 20 }, (_, i) => i + 1).map((v) => (
+          <span key={v} className={`attr-scale__cell attr--${attributeBand(v)}`}>
+            {v}
           </span>
-        </div>
-      </Section>
-
-      <Section
-        title="Buttons"
-        note="Square, 1 px ink rule; hover inverts. Arrow buttons as on the title screen."
-      >
-        <div className="row">
-          <Button arrow>New life</Button>
-          <Button arrow>Continue</Button>
-          <Button arrow disabled>
-            Load
-          </Button>
-        </div>
-        <div className="row">
-          <Button icon="ballotBox">Saves</Button>
-          <Button icon="settings">Settings</Button>
-          <Button variant="quiet" icon="close" aria-label="Close" />
-          <Button variant="danger" icon="trash">
-            Delete for good
-          </Button>
-        </div>
-      </Section>
-
-      <Section
-        title="Ballot paper"
-        note="Every choice is a ballot: text left, box right, marked with a pen cross."
-      >
-        <Ballot
-          legend="Election of a Member of Parliament"
-          instruction="Vote for one candidate only"
-        >
-          {CANDIDATES.map((c) => (
-            <BallotOption
-              key={c.id}
-              name={radioName}
-              value={c.id}
-              label={c.name}
-              detail={c.detail}
-              colour={c.colour}
-              checked={vote === c.id}
-              onChange={() => setVote(c.id)}
-            />
-          ))}
-        </Ballot>
-        <Ballot legend="Auto-pause on" instruction="Mark as many as you like">
-          <BallotOption
-            type="checkbox"
-            label="Elections"
-            checked={autoPause.elections}
-            onChange={(on) => setAutoPause((a) => ({ ...a, elections: on }))}
-          />
-          <BallotOption
-            type="checkbox"
-            label="Scandals"
-            detail="Press stories about you"
-            checked={autoPause.scandals}
-            onChange={(on) => setAutoPause((a) => ({ ...a, scandals: on }))}
-          />
-        </Ballot>
-      </Section>
-
-      <Section
-        title="Rosettes"
-        note="Colour means allegiance: party colours come from data; yellow is the player's own."
-      >
-        <div className="row">
-          {PARTIES.map((p) => (
-            <Rosette key={p.id} colour={p.colour} initial={p.initial} label={p.name} />
-          ))}
-          <Rosette colour="var(--you)" initial="Y" label="You" />
-          <Rosette colour="var(--voxel-neutral)" initial="?" label="Undecided" />
-        </div>
-      </Section>
-
-      <Section title="Stamps" note="Red ink is kept for danger.">
-        <div className="row row--stamps">
-          <Stamp>Approved</Stamp>
-          <Stamp tone="danger" rotate={3}>
-            Rejected
-          </Stamp>
-          <Stamp tone="danger" rotate={-7}>
-            Urgent
-          </Stamp>
-          <Stamp className="stamp--small" rotate={-2}>
-            Paused · Elections
-          </Stamp>
-        </div>
-      </Section>
-
-      <Section title="Meters" note="Pixel bars, ten cells.">
-        <div className="stack">
-          <Meter label="Energy" value={70} />
-          <Meter label="Name recognition" value={20} tone="you" />
-          <Meter label="Heat" value={40} tone="danger" />
-          <Meter label="Civic Union lead" value={6} max={20} colour="#2e7d4f" valueText="+6" />
-        </div>
-      </Section>
-
-      <Section title="Ticker">
-        <Ticker
-          items={[
-            'Harbour Party selects candidate for Ashbury West',
-            'Council tax row splits Civic Union group',
-            'By-election called for 12 November',
-          ]}
-        />
-      </Section>
-
-      <Section
-        title="Front page"
-        note="Events arrive as newspaper front pages. Outlets in the game are fictional."
-      >
-        <FrontPage
-          masthead="The Daily Ledger"
-          edition="No. 4,812"
-          price="£1.20"
-          date="2026-10-01"
-          kicker="Exclusive"
-          headline="Council candidate in doorstep row"
-          standfirst="A leaflet printed with the wrong ward sends campaigners back to the photocopier."
-          stamp={
-            <Stamp tone="danger" rotate={-8}>
-              Urgent
-            </Stamp>
-          }
-        >
-          <p>
-            Volunteers spent Saturday morning crossing out a street name on four thousand leaflets
-            after a proof went to the printer unchecked.
-          </p>
-          <p>The candidate called it an honest mistake. Her opponents called it a gift.</p>
-        </FrontPage>
-      </Section>
-
-      <Section title="Panel">
-        <Panel title="Notices" actions={<Button variant="quiet" icon="close" aria-label="Close" />}>
-          <p className="serif">
-            Flat sheet, 1 px rule, label strip. Raised ephemera get a hard shadow.
-          </p>
-        </Panel>
-      </Section>
-
-      <Section title="Pixel icons" note="7×7, drawn in the bitmap font's format.">
-        <ul className="icon-grid">
-          {ICON_NAMES.map((name) => (
-            <li key={name}>
-              <PixelIcon name={name} scale={3} />
-              <span>{name}</span>
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section
-        title="Bitmap font"
-        note={`Original 5×${GLYPH_HEIGHT} glyphs; one table feeds DOM, canvas and voxels.`}
-      >
-        <div className="font-specimen">
-          <PixelText text="MANDATE" scale={6} tracking={1} />
-          {FONT_ROWS.map((row) => (
-            <PixelText key={row} text={row} scale={2} />
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Tokens">
-        <ul className="swatches">
-          {TOKENS.map((t) => (
-            <li key={t}>
-              <span className="swatches__chip" style={{ background: `var(--${t})` }} />
-              <span>--{t}</span>
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section title="Type">
-        <div className="stack">
-          <p className="type-mono-l">DEPARTURE MONO 22 PX</p>
-          <p>Departure Mono 11 px: labels, numbers, top bar, data.</p>
-          <p className="serif">
-            Newsreader: headlines, event and card text. Money is shown as £2,450 and dates as 1
-            October 2026.
-          </p>
-        </div>
-      </Section>
-    </div>
+        ))}
+      </div>
+    </Section>
   )
 }
 
-export function Gallery() {
+function Type() {
   return (
-    <div className="gallery">
+    <Section
+      title="Type"
+      note="Barlow for UI, Barlow Condensed for headers, tabs and tables, Newsreader for narrative. Tabular numbers wherever figures line up."
+    >
+      <div className="type-specimens">
+        <p className="type-cond">Barlow Condensed · Home · Inbox · Calendar</p>
+        <p>Barlow: the interface. Buttons, labels, lists and help text read at 14 px.</p>
+        <p className="serif">
+          Newsreader: “The branch meets on Thursdays in the back room of the Crown, and nobody has
+          stood against the chair in eleven years.”
+        </p>
+        <p className="num type-nums">£1,204,550 · 32.4% · 326 · 2026</p>
+      </div>
+    </Section>
+  )
+}
+
+function Buttons() {
+  return (
+    <Section
+      title="Buttons"
+      note="One primary per view. Icon buttons carry their label in a tooltip."
+    >
+      <div className="row">
+        <Button variant="primary" icon={PlusIcon}>
+          New save
+        </Button>
+        <Button icon={FloppyDiskIcon}>Quicksave</Button>
+        <Button variant="quiet">Cancel</Button>
+        <Button variant="danger" icon={TrashIcon}>
+          Delete for good
+        </Button>
+        <Button disabled>Disabled</Button>
+      </div>
+      <div className="row">
+        <Button size="s" variant="primary">
+          Load
+        </Button>
+        <Button size="s">Overwrite</Button>
+        <IconButton icon={DownloadSimpleIcon} label="Export save" />
+        <IconButton icon={GearSixIcon} label="Settings" shortcut="Esc" variant="secondary" />
+        <IconButton icon={FlagIcon} label="Pinned" pressed />
+      </div>
+    </Section>
+  )
+}
+
+function ChipsTabs() {
+  const [tab, setTab] = useState<'all' | 'unread' | 'news'>('all')
+  return (
+    <Section title="Chips, badges, tabs">
+      <div className="row">
+        <Chip icon={UserIcon}>Ambitious</Chip>
+        <Chip icon={MegaphoneIcon}>Orator</Chip>
+        <Chip tone="good">Rising</Chip>
+        <Chip tone="warn">Stretched</Chip>
+        <Chip tone="bad">Under investigation</Chip>
+        {PARTIES.slice(1).map((p) => (
+          <Chip key={p.name} party={p.colour}>
+            {p.name}
+          </Chip>
+        ))}
+        <Badge count={3} />
+        <Badge count={128} />
+        <Badge count={7} quiet />
+      </div>
+      <Tabs
+        label="Example"
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { key: 'all', label: 'All' },
+          { key: 'unread', label: 'Unread', count: 4 },
+          { key: 'news', label: 'News' },
+        ]}
+      />
+    </Section>
+  )
+}
+
+const burnoutTip = (
+  <>
+    <span>
+      At 80{' '}
+      <Term tip="How worn down you are, 0–100. Rest, holidays and wins bring it down.">stress</Term>{' '}
+      you may burn out: a month of rest, and your rivals notice.
+    </span>
+  </>
+)
+
+const stressTip = (
+  <>
+    <span>
+      High stress lowers every check and can end in{' '}
+      <Term title="Burnout" tip={burnoutTip}>
+        burnout
+      </Term>
+      .
+    </span>
+    <ModifierList
+      total="Change this week"
+      items={[
+        { label: 'Campaign schedule', value: 4, invert: true },
+        { label: 'Workaholic', value: 2, invert: true },
+        { label: 'Sunday off', value: -3, invert: true },
+      ]}
+    />
+  </>
+)
+
+function Tooltips() {
+  return (
+    <Section
+      title="Tooltips"
+      note="CK3: hover for a moment and the bar fills; a locked tooltip can be entered, and its highlighted terms open their own tooltips. Esc closes."
+    >
+      <p className="serif tooltip-demo">
+        Your{' '}
+        <Term title="Stress" tip={stressTip}>
+          stress
+        </Term>{' '}
+        is 46 and rising. The{' '}
+        <Term
+          title="Energy"
+          tip={<span>A daily budget of about ten points. Activities reserve some each day.</span>}
+        >
+          energy
+        </Term>{' '}
+        you spend on the doorstep comes back overnight.
+      </p>
+      <div className="row">
+        <Tooltip
+          title="Fundraising dinner"
+          tip={
+            <ModifierList
+              total="Net"
+              items={[
+                { label: 'Tickets', value: 2400, prefix: '£' },
+                { label: 'Venue', value: -900, prefix: '£' },
+                { label: 'Catering', value: -650, prefix: '£' },
+              ]}
+            />
+          }
+        >
+          <Button icon={CoinsIcon}>Hover for a breakdown</Button>
+        </Tooltip>
+      </div>
+    </Section>
+  )
+}
+
+function ShellDemo() {
+  const [screen, setScreen] = useState<string>('home')
+  const [party, setParty] = useState(PARTIES[1]!)
+  const [speed, setSpeed] = useState<Speed>(0)
+  const [resume, setResume] = useState<RunSpeed>(2)
+  const [day, setDay] = useState(1)
+  const style = {
+    '--party': party.colour,
+    '--party-ink': readableInk(party.colour),
+  } as CSSProperties
+  const later = 'Not available yet'
+  useEffect(() => {
+    if (speed === 0) return
+    const timer = window.setInterval(() => setDay((d) => d + 1), [0, 1000, 500, 200, 80, 16][speed])
+    return () => window.clearInterval(timer)
+  }, [speed])
+  const date = `Thu ${((day - 1) % 30) + 1} Oct 2026`
+  return (
+    <Section
+      title="Shell"
+      note="FM sidebar with unread badges; the header takes the player's party colour; Paradox date, pause and five speed pips; the paused banner."
+    >
+      <div className="row">
+        {PARTIES.map((p) => (
+          <Button
+            key={p.name}
+            size="s"
+            variant={p === party ? 'primary' : 'secondary'}
+            onClick={() => setParty(p)}
+          >
+            {p.name}
+          </Button>
+        ))}
+      </div>
+      <div className="demo-shell">
+        <Sidebar
+          items={[
+            { key: 'home', label: 'Home', icon: HouseIcon },
+            { key: 'inbox', label: 'Inbox', icon: TrayIcon, badge: 3 },
+            { key: 'calendar', label: 'Calendar', icon: CalendarBlankIcon },
+            { key: 'party', label: 'Party', icon: FlagIcon, disabled: later },
+            { key: 'polls', label: 'Polls', icon: ChartLineIcon, disabled: later },
+          ]}
+          footer={[
+            { key: 'saves', label: 'Saves', icon: FloppyDiskIcon },
+            { key: 'settings', label: 'Settings', icon: GearSixIcon },
+          ]}
+          active={screen}
+          onSelect={setScreen}
+          brand="Mandate"
+          brandShort="M"
+        />
+        <div className="demo-shell__main">
+          <header className="demo-topbar" style={style}>
+            <div>
+              <span className="demo-topbar__party">{party.name}</span>
+              <h3 className="demo-topbar__screen">{screen}</h3>
+            </div>
+            <DateSpeed
+              label={date}
+              speed={speed}
+              resumeSpeed={resume}
+              onTogglePause={() => setSpeed(speed === 0 ? resume : 0)}
+              onSpeed={(s) => {
+                setSpeed(s)
+                setResume(s)
+              }}
+              onStep={(n) => setDay((d) => d + n)}
+            />
+          </header>
+          <div className="demo-shell__stage">
+            {speed === 0 && (
+              <PauseBanner
+                reason={day === 1 ? null : 'Elections'}
+                onResume={() => setSpeed(resume)}
+              />
+            )}
+          </div>
+        </div>
+        <Sidebar
+          rail
+          items={[
+            { key: 'home', label: 'Home', icon: HouseIcon },
+            { key: 'inbox', label: 'Inbox', icon: TrayIcon, badge: 3 },
+            { key: 'calendar', label: 'Calendar', icon: CalendarBlankIcon },
+          ]}
+          active={screen}
+          onSelect={setScreen}
+          brand="Mandate"
+          brandShort="M"
+          className="demo-rail"
+        />
+      </div>
+    </Section>
+  )
+}
+
+function TilesDemo() {
+  const [open, setOpen] = useState<string | null>('polls')
+  return (
+    <Section
+      title="Tiles and cards"
+      note="FM26: a tile opens its card in place, one at a time; no stacked pop-ups."
+    >
+      <div className={open ? 'demo-tiles demo-tiles--open' : 'demo-tiles'}>
+        <div className="demo-tiles__grid">
+          <Tile
+            title="Inbox"
+            icon={TrayIcon}
+            badge={2}
+            open={open === 'inbox'}
+            onOpen={() => setOpen(open === 'inbox' ? null : 'inbox')}
+          >
+            <span className="tile__stat">2</span>
+            <span>unread</span>
+          </Tile>
+          <Tile
+            title="Polls"
+            icon={ChartLineIcon}
+            open={open === 'polls'}
+            onOpen={() => setOpen(open === 'polls' ? null : 'polls')}
+          >
+            <span className="tile__stat">31%</span>
+            <span>Civic Union, up 2 on last week</span>
+          </Tile>
+        </div>
+        {open && (
+          <Card
+            title={open === 'polls' ? 'Polls' : 'Inbox'}
+            icon={open === 'polls' ? ChartLineIcon : TrayIcon}
+            onClose={() => setOpen(null)}
+            footer={<Button variant="primary">Go to {open === 'polls' ? 'Polls' : 'Inbox'}</Button>}
+          >
+            <p className="muted">
+              The card opens where the detail belongs, and closes with Esc or the cross.
+            </p>
+          </Card>
+        )}
+      </div>
+    </Section>
+  )
+}
+
+interface Seat {
+  name: string
+  party: PartyColours
+  majority: number
+  turnout: number
+  swing: number | null
+}
+
+const SEATS: readonly Seat[] = [
+  { name: 'Aldermoor', party: PARTIES[1]!, majority: 4210, turnout: 61.2, swing: 3.1 },
+  { name: 'Brackwater East', party: PARTIES[2]!, majority: 812, turnout: 55.8, swing: -1.4 },
+  { name: 'Carnhill and Leys', party: PARTIES[3]!, majority: 12004, turnout: 67.9, swing: 0.6 },
+  { name: 'Dunmore Vale', party: PARTIES[2]!, majority: 96, turnout: 49.3, swing: null },
+  { name: 'Eastfold', party: PARTIES[1]!, majority: 7650, turnout: 58.1, swing: 5.2 },
+]
+
+const SEAT_COLUMNS: readonly Column<Seat>[] = [
+  { key: 'name', label: 'Seat', value: (s) => s.name, firstDir: 'asc' },
+  {
+    key: 'party',
+    label: 'Held by',
+    value: (s) => s.party.name,
+    firstDir: 'asc',
+    render: (s) => <Chip party={s.party.colour}>{s.party.name}</Chip>,
+  },
+  {
+    key: 'majority',
+    label: 'Majority',
+    value: (s) => s.majority,
+    render: (s) => s.majority.toLocaleString('en-GB'),
+    align: 'right',
+  },
+  {
+    key: 'turnout',
+    label: 'Turnout',
+    value: (s) => s.turnout,
+    render: (s) => `${s.turnout.toFixed(1)}%`,
+    align: 'right',
+  },
+  {
+    key: 'swing',
+    label: 'Swing',
+    value: (s) => s.swing,
+    align: 'right',
+    render: (s) =>
+      s.swing === null ? '—' : `${s.swing > 0 ? '+' : '−'}${Math.abs(s.swing).toFixed(1)}`,
+  },
+]
+
+function TableDemo() {
+  const [selected, setSelected] = useState<string | null>('Dunmore Vale')
+  return (
+    <Section
+      title="Table"
+      note="FM: dense, zebra rows, sortable headers, tabular numbers. Fictional seats."
+    >
+      <Panel flush>
+        <Table
+          label="Seats"
+          columns={SEAT_COLUMNS}
+          rows={SEATS}
+          rowKey={(s) => s.name}
+          initialSort={{ key: 'majority', dir: 'asc' }}
+          selected={selected}
+          onSelect={(s) => setSelected(s.name)}
+        />
+      </Panel>
+    </Section>
+  )
+}
+
+function Character() {
+  return (
+    <Section
+      title="Character"
+      note="CK3 framed portraits (silhouettes until the avatar generator) and FM's colour-coded attributes."
+    >
+      <div className="character-demo">
+        <div className="portraits">
+          <PortraitFrame name="You" size="l" you office="Councillor" party={PARTIES[1]} />
+          <PortraitFrame name="Rival" size="m" office="Party chair" party={PARTIES[2]} />
+          <PortraitFrame name="Ally" size="m" party={PARTIES[3]} />
+          <div className="portraits__small">
+            <PortraitFrame name="Contact" size="s" party={PARTIES[1]} />
+            <PortraitFrame name="Contact" size="s" party={PARTIES[2]} />
+            <PortraitFrame name="Contact" size="s" />
+          </div>
+        </div>
+        <AttributeGrid
+          groups={[
+            {
+              title: 'Presence',
+              attributes: [
+                {
+                  name: 'Charisma',
+                  value: 15,
+                  tip: (
+                    <ModifierList
+                      total="Charisma"
+                      items={[
+                        { label: 'Base', value: 11 },
+                        { label: 'Charming', value: 3 },
+                        { label: 'Local hero', value: 1 },
+                      ]}
+                    />
+                  ),
+                },
+                { name: 'Empathy', value: 12 },
+                { name: 'Stamina', value: 7 },
+              ],
+            },
+            {
+              title: 'Mind',
+              attributes: [
+                { name: 'Intellect', value: 18 },
+                { name: 'Cunning', value: 9 },
+                { name: 'Discipline', value: 3 },
+              ],
+            },
+          ]}
+        />
+      </div>
+    </Section>
+  )
+}
+
+function EventDemo() {
+  const [chosen, setChosen] = useState<string | null>(null)
+  return (
+    <Section
+      title="Event window"
+      note="CK3: title, scene, serif body, options with their effects on hover."
+    >
+      <EventWindow
+        kicker="Tuesday 13 October 2026 · Aldermoor"
+        title="A misprint"
+        sceneIcon={ScrollIcon}
+        sceneCaption="Scene render arrives with the 3D characters"
+        options={[
+          {
+            key: 'reprint',
+            label: 'Pay for a reprint',
+            effects: [
+              { label: 'Money', value: -180, prefix: '£' },
+              { label: 'Stress', value: 2, invert: true },
+            ],
+          },
+          {
+            key: 'deliver',
+            label: 'Deliver them anyway and hope nobody rings',
+            effects: [{ label: 'Local reputation', value: -2 }],
+          },
+          {
+            key: 'blame',
+            label: 'Blame the printer, loudly',
+            note: 'The printer also prints for the Harbour Party.',
+            effects: [
+              { label: 'Local fame', value: 1 },
+              { label: 'Printer’s opinion', value: -20 },
+            ],
+          },
+          {
+            key: 'volunteers',
+            label: 'Ask the branch to correct them by hand',
+            disabled: 'Needs 5 volunteers (you have 2)',
+          },
+        ]}
+        onChoose={setChosen}
+      >
+        <p>
+          Four thousand leaflets are back from the printer with your phone number wrong by one
+          digit. The number belongs to a taxi firm in Brackwater, which has already called twice.
+        </p>
+        {chosen && <p className="muted">You chose: {chosen}.</p>}
+      </EventWindow>
+    </Section>
+  )
+}
+
+const OPENING: readonly DialogueLine[] = [
+  {
+    speaker: 'Margaret Hale',
+    text: 'You’re the one who emailed about volunteering? We’ve had three of those this year. Two never came back.',
+  },
+]
+
+const REPLIES: Record<string, { you: string; her: string }> = {
+  help: {
+    you: 'I’ll be at the next meeting. What needs doing?',
+    her: 'Leaflets. Always leaflets. Thursday, seven o’clock, and bring comfortable shoes.',
+  },
+  seat: {
+    you: 'I was hoping to talk about the council seat.',
+    her: 'Were you. Let’s see you deliver a round first, and then we’ll talk about seats.',
+  },
+  others: {
+    you: 'Who were the other two?',
+    her: 'One’s on the council now. The other one moved to Leeds. Make of that what you will.',
+  },
+}
+
+function DialogueDemo() {
+  const [log, setLog] = useState<DialogueLine[]>([...OPENING])
+  const [asked, setAsked] = useState<string[]>([])
+  const choose = (key: string) => {
+    const r = REPLIES[key]!
+    setAsked((a) => [...a, key])
+    setLog((l) => [
+      ...l,
+      { speaker: 'You', text: r.you, you: true },
+      { speaker: 'Margaret Hale', text: r.her },
+    ])
+  }
+  return (
+    <Section
+      title="Conversation"
+      note="Suzerain: portrait left, serif dialogue, numbered choices, the log scrolls."
+    >
+      <Dialogue
+        portrait={
+          <PortraitFrame
+            name="Margaret Hale"
+            size="m"
+            office="Branch secretary"
+            party={PARTIES[1]}
+          />
+        }
+        name="Margaret Hale"
+        role="Branch secretary, Civic Union"
+        log={log}
+        onChoose={choose}
+        choices={[
+          {
+            key: 'help',
+            label: REPLIES.help!.you,
+            tip: <span>She will remember whether you turn up.</span>,
+          },
+          {
+            key: 'seat',
+            label: REPLIES.seat!.you,
+            disabled: asked.includes('seat') ? 'Already asked' : undefined,
+          },
+          {
+            key: 'others',
+            label: REPLIES.others!.you,
+            disabled: asked.includes('others') ? 'Already asked' : undefined,
+          },
+        ]}
+      />
+      <Button
+        size="s"
+        variant="quiet"
+        onClick={() => {
+          setLog([...OPENING])
+          setAsked([])
+        }}
+      >
+        Start again
+      </Button>
+    </Section>
+  )
+}
+
+function Votes() {
+  return (
+    <Section
+      title="Vote bar"
+      note="Frostpunk 2: For from the left, Against from the right, the majority line."
+    >
+      <div className="votes">
+        <VoteBar title="Second reading" count={{ for: 298, against: 241, undecided: 111 }} />
+        <VoteBar title="Opposition day motion" count={{ for: 331, against: 280, undecided: 39 }} />
+        <VoteBar
+          title="Branch vote: new chair"
+          count={{ for: 12, against: 21, undecided: 5 }}
+          total={40}
+        />
+      </div>
+    </Section>
+  )
+}
+
+function TickerDemo() {
+  return (
+    <Section title="Ticker" note="Plague Inc-style news line along the bottom of the screen.">
+      <Ticker
+        items={[
+          'Civic Union holds Aldermoor by 4,210',
+          'Harbour Party chair resigns after row over leaflets',
+          'Turnout down in every seat declared so far',
+        ]}
+      />
+    </Section>
+  )
+}
+
+/** The kit, one theme at a time (tabs switch Dark and Light). */
+export function Gallery({ initialTheme }: { initialTheme: Theme }) {
+  const [theme, setTheme] = useState<Theme>(initialTheme)
+  useEffect(() => {
+    document.body.dataset.theme = theme
+  }, [theme])
+  return (
+    <div className="gallery" data-theme={theme}>
       <header className="gallery__head">
-        <BrandBlock />
-        <div className="gallery__intro">
-          <h1 className="gallery__title">Ballot &amp; Block</h1>
-          <p className="serif">
-            The look of Mandate. The world is a voxel diorama where colour means allegiance; the
-            interface is British political ephemera: ballot papers, rosettes, rubber stamps and
-            front pages. Every component below is live, in both themes.
+        <div>
+          <h1 className="gallery__title">Mandate UI kit</h1>
+          <p className="gallery__lede">
+            The reference stack: Football Manager's shell, inbox and tables; Crusader Kings III's
+            portraits, tooltips and event windows; Suzerain's conversations; Frostpunk 2's vote bar;
+            Paradox time controls. Patterns only; no artwork, logos or paid fonts.
           </p>
         </div>
+        <Tabs
+          label="Theme"
+          value={theme}
+          onChange={setTheme}
+          tabs={[
+            { key: 'dark', label: 'Dark' },
+            { key: 'light', label: 'Light' },
+          ]}
+        />
       </header>
-      <div className="gallery__sheets">
-        <Sheet theme="night" />
-        <Sheet theme="paper" />
-      </div>
+      <main className="gallery__grid">
+        <Tokens />
+        <Type />
+        <Buttons />
+        <ChipsTabs />
+        <Tooltips />
+        <ShellDemo />
+        <TilesDemo />
+        <TableDemo />
+        <Character />
+        <EventDemo />
+        <DialogueDemo />
+        <Votes />
+        <TickerDemo />
+      </main>
+      <footer className="gallery__foot">
+        Fictional parties, places and people throughout. Icons: Phosphor (MIT). Fonts: Barlow,
+        Barlow Condensed and Newsreader (OFL).
+      </footer>
     </div>
   )
 }

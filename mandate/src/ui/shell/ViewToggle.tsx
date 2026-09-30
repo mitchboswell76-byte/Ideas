@@ -1,30 +1,28 @@
-import { Button } from '../kit/index.ts'
+import { CubeIcon, FileTextIcon } from '../kit/icons.ts'
+import { IconButton } from '../kit/index.ts'
 import { useView, viewStore } from '../store/view.ts'
 
-/** `View: [3D] [2D]` — the diorama or the plain document (DESIGN §17). */
+/** 3D or 2D (DESIGN §17). Shown once a screen has a 3D view (`HAS_3D_VIEW`). */
 export function ViewToggle() {
   const view = useView((s) => s.view)
   const webgl = useView((s) => s.webgl)
   const { setView } = viewStore.getState()
   return (
     <div className="view-toggle" role="group" aria-label="View">
-      <span className="view-toggle__label" aria-hidden>
-        View
-      </span>
-      <Button
-        icon="cube"
-        aria-pressed={view === '3d'}
-        aria-label="3D diorama"
-        title={webgl ? '3D diorama' : '3D needs WebGL 2, which this browser does not offer'}
+      <IconButton
+        icon={CubeIcon}
+        label="3D view"
+        detail={webgl ? undefined : 'Needs WebGL 2, which this browser does not offer'}
+        pressed={view === '3d'}
         disabled={!webgl}
         data-testid="view-3d"
         onClick={() => setView('3d')}
       />
-      <Button
-        icon="document"
-        aria-pressed={view === '2d'}
-        aria-label="2D document"
-        title="2D document: no animation, lightest on battery"
+      <IconButton
+        icon={FileTextIcon}
+        label="2D view"
+        detail="Flat and lightest on battery"
+        pressed={view === '2d'}
         data-testid="view-2d"
         onClick={() => setView('2d')}
       />

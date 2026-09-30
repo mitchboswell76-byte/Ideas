@@ -1,24 +1,24 @@
 /**
- * Colours for 3D scenes come from the same CSS tokens as the UI (DESIGN §17), so Night and Paper
- * both work and nothing is hard-coded. Re-read whenever `<html data-theme>` changes.
+ * Colours for 3D scenes come from the same CSS tokens as the UI (DESIGN §17), so both themes work
+ * and nothing is hard-coded. Re-read whenever `<html data-theme>` changes.
  */
 import { useEffect, useState } from 'react'
 
 export interface SceneTokens {
-  ground: string
-  gridDot: string
-  voxel: string
-  inkMuted: string
+  background: string
+  surface: string
+  line: string
+  textMuted: string
 }
 
 function readTokens(): SceneTokens {
   const style = getComputedStyle(document.documentElement)
   const token = (name: string, fallback: string) => style.getPropertyValue(name).trim() || fallback
   return {
-    ground: token('--ground', '#0a0a0b'),
-    gridDot: token('--grid-dot', '#26262b'),
-    voxel: token('--voxel-neutral', '#8a8a8a'),
-    inkMuted: token('--ink-muted', '#8d8980'),
+    background: token('--bg', '#131518'),
+    surface: token('--surface-2', '#212529'),
+    line: token('--line', '#31373e'),
+    textMuted: token('--text-muted', '#a4abb3'),
   }
 }
 

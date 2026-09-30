@@ -2,10 +2,10 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T4c**
-**Last playable link (T4b preview, old look):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; T4c republishes it
-  in the new look — rebuild with `npm run build:preview`, publish with `url` set to this link)
-**Style preview (T4, old look):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; T4c republishes the new kit here)
+**Next session:** start at **T5**
+**Last playable link (T4c):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+  `npm run build:preview`, publish with `url` set to this link)
+**UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
 ## Workflow for the user
 Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Then `/clear`.
@@ -29,7 +29,7 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       three.js/r3f lazy chunk, low-res nearest-upscale render pipeline, graphics presets + GPU detect,
       View 3D ⇄ 2D toggle (2D default if no WebGL / reduced motion / < 900 px), fly-into-wordmark transition;
       publish preview
-- [ ] T4c Reference-stack UI kit + shell + main menu (DESIGN §17 table): Barlow / Barlow Condensed (@fontsource) +
+- [x] T4c Reference-stack UI kit + shell + main menu (DESIGN §17 table): Barlow / Barlow Condensed (@fontsource) +
       Newsreader; Phosphor icons (MIT); dark/light tokens; header tinted with party colour (placeholder until T12).
       Components: Sidebar (FM, badges), TopBar with Paradox date/speed pips + pause banner, Tile→Card (FM26, opens in
       place), Table (FM), AttributeGrid (FM 1–20 colours), Chip, Tabs, nested Tooltip (CK3), EventWindow (CK3),
@@ -175,6 +175,34 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   branding (no GOV.UK/BBC look). T4/T4b look is replaced by T4c; engine, runtime, saves, graphics presets and the
   three.js layer carry over.
 
+- 2026-09-30 T4c UI map: `ui/styles/base.css` (Barlow 400/600, Barlow Condensed 500/700, Newsreader; tokens), `ui/kit/`
+  (one CSS file per group: `controls`, `tooltip`, `nav`, `cards`, `table`, `character`, `vote`, `ticker`; pure helpers
+  `colour.ts` `readableInk`, `attributes.ts` `attributeBand`, `table.ts` `sortRows`, `vote.ts` `voteLayout`,
+  `place.ts` `placeFloating`/`placeBeside`, `numbers.ts` `formatSigned`; `icons.ts` = the only Phosphor import point),
+  `ui/shell/` (`Shell`, `GameSidebar`, `TopBar`, `StatusBar`, `Problems`, `party.ts`), `ui/screens/` (Home, Inbox,
+  Calendar, Saves, Settings), `ui/menu/MainMenu.tsx`, `ui/store/nav.ts` (screen, open card, selected mail),
+  `ui/calendar.ts`, `ui/mail.ts`, `hooks/useMediaQuery.ts` (`useNarrow`, < 900 px). Kit gallery: `kit/gallery/`.
+- 2026-09-30 Themes renamed `dark`/`light` (old `night`/`paper` values migrate). Tokens are dark-first on `:root`.
+  Selection and focus use `--text`, never a hue: party colours only mean parties; good/warn/bad are separate tokens.
+- 2026-09-30 No party yet, so the header tint is a neutral "Independent" placeholder (`ui/shell/party.ts`) until
+  T12/T15; `readableInk` picks the header text colour for any party colour.
+- 2026-09-30 Sidebar shows every DESIGN item; ones without a screen are disabled with a "Not available yet" tooltip.
+  Saves and Settings are screens (in game) and a right-hand pane (main menu); side-sheet dialogs are gone.
+- 2026-09-30 Paused banner sits in the header next to the date (CK3), not over the stage, so it never covers panels.
+- 2026-09-30 Tooltips: open after 300 ms, lock after 1 s (a bar fills), then the pointer can enter and hover `Term`s;
+  nested tooltips open beside their parent (never over it); leaving the stack closes it; Esc closes all. Icon buttons
+  use non-locking label tooltips.
+- 2026-09-30 Inbox = the store's notification log (`LOG_LIMIT` 200) with `id` + `read`; sim `Notification` gained
+  optional `from`/`subject`. A UI-side welcome mail (controls help) starts each new career, like FM's first mail.
+- 2026-09-30 Calendar shows inbox items by date plus one placeholder fixture (May local elections, first Thursday)
+  until elections live in the sim.
+- 2026-09-30 No screen has a 3D view yet: `HAS_3D_VIEW = false` (`ui/store/view.ts`) hides the 3D/2D toggle and the
+  graphics settings, and `WorldLayer` is not mounted, so three.js is not in the build at all for now. `WorldCanvas` is
+  a generic host (`children` = scene). Flip the flag at T6/T7/T9; reattach the slow-frame downgrade then.
+- 2026-09-30 Browser-verified (scratchpad Playwright, not committed): menu → new career, tile cards (one at a time,
+  Esc), speed keys + banner, inbox read/unread badge, calendar month nav, save/export/import, theme switch, reload →
+  Continue, 390 px (no sideways scroll), nested tooltips three deep; single-file builds load with no console errors.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -184,4 +212,11 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   revisit when r3f updates.
 - Artifact viewers block downloads, so "Export .mandate" does nothing in published previews (works in a normal browser
   tab). T8: use the `downloads` capability for the published build, or hide Export there.
-- WorldCanvas chunk is ~245 KB gzip (r3f pulls in all of three); it is lazy, initial JS is ~83 KB gzip.
+- WorldCanvas chunk was ~245 KB gzip (r3f pulls in all of three); lazy. Not built at all until `HAS_3D_VIEW`.
+  Initial JS is ~107 KB gzip after T4c.
+- Inbox items live only in the UI store: not in saves, so a loaded game starts with an empty inbox. Move the inbox
+  into the sim/world when events start producing mail (T11/T15).
+- Number keys 1–5 set the speed everywhere; Dialogue shows numbered choices but can't take number keys yet. Decide
+  at T11 (e.g. capture 1–4 while a conversation is open).
+- Single-file builds inline both woff2 and woff for Newsreader (fontsource CSS lists both); ~90 KB wasted. Fine for
+  now; trim at T8 if size matters.

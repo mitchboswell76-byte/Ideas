@@ -1,67 +1,92 @@
-/* "Ballot & Block" foundations (DESIGN §17): fonts, colour tokens, base elements. */
+/* Foundations (DESIGN §17 "reference stack"): fonts, colour tokens, base elements. */
+@import '@fontsource/barlow/latin-400.css';
+@import '@fontsource/barlow/latin-600.css';
+@import '@fontsource/barlow-condensed/latin-500.css';
+@import '@fontsource/barlow-condensed/latin-700.css';
 @import '@fontsource/newsreader/latin-400.css';
 @import '@fontsource/newsreader/latin-400-italic.css';
 @import '@fontsource/newsreader/latin-700.css';
 
-@font-face {
-  font-family: 'Departure Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('../fonts/departure-mono/DepartureMono-Regular.woff2') format('woff2');
-}
-
 /*
- * Night (default). Components use these tokens only; party colours come from data.
- * Themes apply to any subtree via `data-theme`, so a paper document can sit on a night screen.
+ * Dark graphite (default). Components use these tokens only. Party colours come from data and only
+ * ever mean parties; selection and focus use the text colour, and good / warn / bad are their own.
+ * Themes apply to any subtree via `data-theme`, so the style guide can show both side by side.
  */
 :root,
-[data-theme='night'] {
-  --ground: #0a0a0b;
-  --grid-dot: #26262b;
-  --panel: #121214;
-  --rule: #3a3a40;
-  --ink: #ece8df;
-  --ink-muted: #8d8980;
-  --voxel-neutral: #8a8a8a;
-  --stamp: #d8342a;
-  --you: #f2c230;
-  /* Behind open menus: the ground, mostly opaque (flat, no blur). */
-  --scrim: rgb(10 10 11 / 0.82);
-
-  --font-mono: 'Departure Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
-  /* Departure Mono is drawn on an 11 px grid. */
-  --fs-mono: 11px;
-  --fs-mono-l: 22px;
-  --fs-mono-xl: 33px;
-  --fs-body: 17px;
-
-  /* ~12 fps stepped motion for pixel elements. */
-  --step: 83ms;
-
+[data-theme='dark'] {
+  --bg: #131518;
+  --surface-1: #1a1d21;
+  --surface-2: #212529;
+  --surface-3: #2a2f35;
+  --line: #31373e;
+  --line-strong: #48505a;
+  --text: #e9ebee;
+  --text-muted: #a4abb3;
+  --text-faint: #6e767f;
+  --good: #52b872;
+  --warn: #e2a33c;
+  --bad: #e5574e;
+  /* FM's attribute scale, low to high: red, orange, yellow, green, blue-green. */
+  --attr-1: #e5574e;
+  --attr-2: #ec8d34;
+  --attr-3: #e6cf45;
+  --attr-4: #78c451;
+  --attr-5: #33c2a6;
+  /* The player's personal colour (chosen at T10). */
+  --you: #b79cf2;
+  /* The header's party colour until the player joins one (set inline by the shell). */
+  --party: #56606b;
+  --party-ink: #ffffff;
+  --scrim: rgb(10 11 13 / 0.72);
+  --shadow: 0 6px 18px rgb(0 0 0 / 0.45);
   color-scheme: dark;
 }
 
-[data-theme='paper'] {
-  --ground: #efe9dc;
-  --grid-dot: #d6cebd;
-  --panel: #f8f4ea;
-  --rule: #1a1816;
-  --ink: #161412;
-  --ink-muted: #6b655b;
-  --voxel-neutral: #c9c1b1;
-  --stamp: #b3261e;
-  --scrim: rgb(239 233 220 / 0.82);
+[data-theme='light'] {
+  --bg: #e7eaee;
+  --surface-1: #f5f6f8;
+  --surface-2: #ffffff;
+  --surface-3: #eceff3;
+  --line: #d2d7dd;
+  --line-strong: #a9b1ba;
+  --text: #15181c;
+  --text-muted: #4f5761;
+  --text-faint: #7b838c;
+  --good: #23803f;
+  --warn: #a8650a;
+  --bad: #c0352c;
+  --attr-1: #c8352c;
+  --attr-2: #c96a0e;
+  --attr-3: #9c8400;
+  --attr-4: #3f8f1f;
+  --attr-5: #0f8a76;
+  --you: #7a55d6;
+  --scrim: rgb(30 34 40 / 0.4);
+  --shadow: 0 6px 18px rgb(20 24 30 / 0.18);
   color-scheme: light;
 }
 
-/* Derived tokens are computed where they are declared, so every theme root redeclares them. */
-:root,
+:root {
+  --font-ui: 'Barlow', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-cond: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --fs-xs: 12px;
+  /* Tables. */
+  --fs-s: 13px;
+  --fs-m: 14px;
+  --fs-l: 16px;
+  --fs-xl: 20px;
+  --fs-xxl: 30px;
+  /* Narrative text (events, dialogue, mail). */
+  --fs-serif: 17px;
+  --radius: 4px;
+  --dur-fast: 120ms;
+  --sidebar-w: 212px;
+  --rail-w: 56px;
+}
+
 [data-theme] {
-  /* Hard offset shadow for raised ephemera: solid ink, no blur. */
-  --lift: 2px 2px 0 0 var(--ink);
-  color: var(--ink);
+  color: var(--text);
 }
 
 *,
@@ -78,23 +103,29 @@ body,
 }
 
 body {
-  background: var(--ground);
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  line-height: 1.5;
-  text-rendering: optimizeSpeed;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: unset;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-m);
+  line-height: 1.4;
 }
 
 h1,
 h2,
 h3,
+h4,
 p,
+ol,
+ul,
 figure,
 blockquote {
   margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
 }
 
 button,
@@ -109,13 +140,13 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--you);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--ground);
+  background: var(--text);
+  color: var(--bg);
 }
 
 .visually-hidden {
@@ -130,28 +161,22 @@ a {
   border: 0;
 }
 
-/* The ground: a faint square dot grid. */
-.dot-grid {
-  background-color: var(--ground);
-  background-image: radial-gradient(var(--grid-dot) 1px, transparent 0);
-  background-size: 22px 22px;
-  background-position: 11px 11px;
+.muted {
+  color: var(--text-muted);
 }
 
-.muted {
-  color: var(--ink-muted);
+.num {
+  font-variant-numeric: tabular-nums;
 }
 
 .serif {
   font-family: var(--font-serif);
-  font-size: var(--fs-body);
-  line-height: 1.4;
-  -webkit-font-smoothing: auto;
+  font-size: var(--fs-serif);
+  line-height: 1.45;
 }
 
-.caps {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.cond {
+  font-family: var(--font-cond);
 }
 
 @media (prefers-reduced-motion: reduce) {

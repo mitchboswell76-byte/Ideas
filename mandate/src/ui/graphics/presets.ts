@@ -1,7 +1,6 @@
 /**
  * Graphics presets (DESIGN §17). `scale` is the internal render resolution as a fraction of the
- * canvas's CSS size; the browser upscales with hard pixel edges, so a lower scale is both cheaper
- * and chunkier — the pixel look and the laptop budget are the same setting.
+ * canvas's CSS size; the browser upscales the result, so a lower scale is cheaper on laptop GPUs.
  */
 export type QualityPreset = 'low' | 'medium' | 'high'
 
@@ -18,10 +17,10 @@ export const PRESETS: Readonly<Record<QualityPreset, PresetSpec>> = {
   high: { label: 'High', scale: 1 },
 }
 
-/** Idle scenes redraw in frame-by-frame steps (like the reference's hand-animated parts). */
+/** Idle scenes redraw a few times a second instead of every frame (`useStepper`). */
 export const STEP_FPS = 12
 
-/** If camera flights average slower than this (ms per frame) on Auto, drop a preset next time. */
+/** If animated 3D views average slower than this (ms per frame) on Auto, drop a preset. */
 export const SLOW_FRAME_MS = 40
 
 export function lowerPreset(preset: QualityPreset): QualityPreset {

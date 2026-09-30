@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { cx } from './cx.ts'
+import './ticker.css'
 
 interface TickerProps {
   items: readonly string[]
@@ -10,7 +11,7 @@ interface TickerProps {
 /** Seconds per character of scrolling text, so long and short tickers read at one pace. */
 const SECONDS_PER_CHAR = 0.18
 
-/** Newspaper strapline: a label block and a scrolling line of stories. */
+/** Plague Inc-style news ticker: a label and a scrolling line of stories (DESIGN §17). */
 export function Ticker({ items, label = 'Latest', className }: TickerProps) {
   const chars = items.reduce((n, item) => n + item.length + 4, 0)
   const style = {

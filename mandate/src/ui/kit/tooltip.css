@@ -1,0 +1,137 @@
+/* CK3-style tooltips (DESIGN §17). */
+.tip-anchor {
+  display: inline-flex;
+}
+
+.tip {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(340px, calc(100vw - 16px));
+  padding: 8px 12px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-3);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-s);
+  line-height: 1.4;
+  pointer-events: none;
+  animation: tip-in var(--dur-fast) ease-out;
+}
+
+/* Only a locked tooltip can be entered. */
+.tip[data-locked] {
+  border-color: var(--text-muted);
+  pointer-events: auto;
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.tip__title {
+  margin-bottom: 4px;
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.tip__body {
+  display: grid;
+  gap: 6px;
+}
+
+.tip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.tip__key {
+  padding: 0 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+}
+
+/* The lock bar fills along the bottom edge, then goes when locked. */
+.tip__lock {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--text-muted);
+  transform-origin: left;
+  animation: tip-lock var(--lock-ms, 1s) linear forwards;
+}
+
+.tip[data-locked] .tip__lock {
+  display: none;
+}
+
+@keyframes tip-lock {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Highlighted terms that open nested tooltips. */
+.term {
+  display: inline;
+  border-bottom: 1px dotted currentColor;
+  color: var(--warn);
+  font-weight: 600;
+  cursor: help;
+}
+
+.term:hover,
+.term:focus-visible {
+  color: var(--text);
+}
+
+/* Effect breakdowns. */
+.mods {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.mods__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mods__row dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.mods__row--total {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line-strong);
+  font-weight: 600;
+}
+
+.mods__value--good {
+  color: var(--good);
+}
+
+.mods__value--bad {
+  color: var(--bad);
+}
+
+/* Disabled controls swallow pointer events in some browsers; let the anchor get them. */
+.tip-anchor > :disabled {
+  pointer-events: none;
+}

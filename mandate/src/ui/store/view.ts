@@ -1,6 +1,6 @@
 /**
- * View mode (3D diorama or 2D document) and graphics quality, per browser (DESIGN §17). The GPU is
- * probed once when this module loads; choices persist in localStorage.
+ * View mode (3D or 2D) and graphics quality, per browser (DESIGN §17). The GPU is probed once when
+ * this module loads; choices persist in localStorage.
  */
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
@@ -10,11 +10,17 @@ import { readLocal, writeLocal } from './settings.ts'
 
 export type QualitySetting = 'auto' | QualityPreset
 
+/**
+ * No screen has a 3D view yet (maps arrive at T6/T7, portraits at T9): until one does, the 3D/2D
+ * toggle and the graphics settings stay hidden and the 3D layer is not mounted.
+ */
+export const HAS_3D_VIEW = false
+
 export const QUALITY_SETTINGS: readonly QualitySetting[] = ['auto', ...QUALITY_PRESETS]
 
 const VIEW_KEY = 'mandate.view'
 const QUALITY_KEY = 'mandate.quality'
-/** Auto's current pick: the detected preset, lowered after slow camera flights. */
+/** Auto's current pick: the detected preset, lowered after slow animated views. */
 const AUTO_KEY = 'mandate.quality.auto'
 
 function parseView(value: string | null): ViewMode | null {
@@ -51,7 +57,7 @@ interface ViewState {
   view: ViewMode
   setView(view: ViewMode): void
   setQuality(quality: QualitySetting): void
-  /** Camera flights ran slowly: on Auto, use the next preset down from now on. */
+  /** An animated view ran slowly: on Auto, use the next preset down from now on. */
   reportSlowFrames(): void
 }
 

@@ -1,0 +1,154 @@
+/* Panels, FM26 tiles and cards (DESIGN §17). */
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 8px 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+.panel__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.panel__body {
+  flex: 1;
+  min-height: 0;
+  padding: 14px;
+  overflow: auto;
+}
+
+.panel__body--flush {
+  padding: 0;
+}
+
+/* Tiles. */
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 132px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast),
+    background-color var(--dur-fast);
+}
+
+.tile:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+}
+
+.tile[aria-expanded='true'] {
+  border-color: var(--text);
+}
+
+.tile__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tile__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+.tile__title {
+  flex: 1;
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tile__body {
+  display: grid;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+}
+
+/* Big number or headline inside a tile. */
+.tile__stat {
+  color: var(--text);
+  font-family: var(--font-cond);
+  font-size: var(--fs-xxl);
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile__lead {
+  color: var(--text);
+  font-size: var(--fs-m);
+  font-weight: 600;
+}
+
+/* Cards. */
+.card {
+  animation: card-in var(--dur-fast) ease-out;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+.card__content {
+  display: grid;
+  gap: 12px;
+}
+
+.card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}

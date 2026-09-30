@@ -33,6 +33,10 @@ export interface Notification {
   /** `info` → toast, `news` → ticker, `alert` → needs attention. */
   kind: 'info' | 'news' | 'alert'
   text: string
+  /** Inbox sender, e.g. a character's name or "Party office" (default by kind). */
+  from?: string
+  /** Inbox subject line (default: the start of `text`). */
+  subject?: string
   pause?: PauseReason
   /** ID of the entity it concerns, for click-through. */
   ref?: string

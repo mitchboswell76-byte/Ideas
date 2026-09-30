@@ -16,5 +16,5 @@ createRoot(root).render(
   </StrictMode>,
 )
 
-// Connect the simulation and list saves; the title screen starts or loads a game.
+// Connect the simulation and list saves; the main menu starts or loads a game.
 void gameStore.getState().boot()

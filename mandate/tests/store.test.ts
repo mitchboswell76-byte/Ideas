@@ -149,8 +149,8 @@ describe('game store', () => {
     emit({ type: 'tick', summary: { day: 2, date: 'd2', notifications: [] } })
     expect(store.getState()).toMatchObject({ day: 2, date: 'd2' })
     expect(store.getState().log).toEqual([
-      { kind: 'news', text: 'b', date: 'd1' },
-      { kind: 'news', text: 'a', date: 'd1' },
+      { id: 2, kind: 'news', text: 'b', date: 'd1', read: false },
+      { id: 1, kind: 'news', text: 'a', date: 'd1', read: false },
     ])
     const many = Array.from({ length: LOG_LIMIT + 5 }, (_, i) => note(`n${i}`))
     emit({ type: 'tick', summary: { day: 3, date: 'd3', notifications: many } })
@@ -161,6 +161,39 @@ describe('game store', () => {
     expect(store.getState()).toMatchObject({ speed: 0, resumeSpeed: 2, pausedBy: 'election' })
     emit({ type: 'fatal', message: 'boom' })
     expect(store.getState().fatal).toBe('boom')
+  })
+
+  it('marks inbox items read and unread', () => {
+    const { bridge, emit } = stubBridge()
+    const store = createGameStore({
+      bridge,
+      slots: indexedDbSlots('unused'),
+      settings: memorySettings().settings,
+    })
+    const note = (text: string) => ({ kind: 'info' as const, text })
+    emit({ type: 'tick', summary: { day: 1, date: 'd1', notifications: [note('a'), note('b')] } })
+    const [b, a] = store.getState().log
+    store.getState().markRead(a!.id)
+    expect(store.getState().log.map((n) => n.read)).toEqual([false, true])
+    store.getState().markRead(a!.id, false)
+    expect(store.getState().log.map((n) => n.read)).toEqual([false, false])
+    const before = store.getState().log
+    store.getState().markRead(999)
+    expect(store.getState().log.every((n, i) => n === before[i])).toBe(true)
+    store.getState().markAllRead()
+    expect(store.getState().log.map((n) => n.read)).toEqual([true, true])
+    expect(b!.id).toBeGreaterThan(a!.id)
+  })
+
+  it('starts a new career with the welcome mail, but not a loaded one', async () => {
+    const { store, bridge } = await bootedStore()
+    expect(store.getState().log).toMatchObject([
+      { kind: 'info', from: 'Mandate', date: '2026-10-01', read: false },
+    ])
+    await store.getState().saveTo('a', 'First')
+    await store.getState().loadFrom('a')
+    expect(store.getState().log).toEqual([])
+    bridge.dispose()
   })
 
   it('applies, persists and forwards auto-pause settings', async () => {

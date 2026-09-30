@@ -1,26 +1,6 @@
-import { useSyncExternalStore } from 'react'
+import { useMediaQuery } from './useMediaQuery.ts'
 
-const QUERY = '(prefers-reduced-motion: reduce)'
-
-function subscribe(onChange: () => void): () => void {
-  try {
-    const media = window.matchMedia(QUERY)
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
-  } catch {
-    return () => {}
-  }
-}
-
-function read(): boolean {
-  try {
-    return window.matchMedia(QUERY).matches
-  } catch {
-    return false
-  }
-}
-
-/** The player's "reduce motion" system setting, live: no flicker, bobbing or camera flights. */
+/** The player's "reduce motion" system setting, live: no scrolling ticker or animated scenes. */
 export function useReducedMotion(): boolean {
-  return useSyncExternalStore(subscribe, read, () => false)
+  return useMediaQuery('(prefers-reduced-motion: reduce)')
 }

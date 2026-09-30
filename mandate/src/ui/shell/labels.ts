@@ -1,5 +1,6 @@
 import type { BridgeMode } from '../../runtime/bridge.ts'
 import type { PauseReason } from '../../sim/scheduler.ts'
+import type { ScreenName } from '../store/nav.ts'
 import type { AutosaveCadence } from '../store/settings.ts'
 
 export const PAUSE_LABELS: Record<PauseReason, string> = {
@@ -19,4 +20,12 @@ export const AUTOSAVE_LABELS: Record<AutosaveCadence, string> = {
   monthly: 'Every month',
   yearly: 'Every year',
   off: 'Off',
+}
+
+export const SCREEN_TITLES: Record<ScreenName, string> = {
+  home: 'Home',
+  inbox: 'Inbox',
+  calendar: 'Calendar',
+  saves: 'Saves',
+  settings: 'Settings',
 }

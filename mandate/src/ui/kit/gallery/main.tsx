@@ -8,29 +8,17 @@ import '../../styles/base.css'
 import type { Theme } from '../../store/theme.ts'
 import { Gallery } from './Gallery.tsx'
 
-/** The page chrome follows the host: an Artifact viewer's `data-theme`, else the OS setting. */
+/** Start in the host's theme: an Artifact viewer's `data-theme`, else the OS setting. */
 function hostTheme(): Theme {
   const host = document.documentElement.dataset.theme
-  if (host === 'dark') return 'night'
-  if (host === 'light') return 'paper'
-  return matchMedia('(prefers-color-scheme: light)').matches ? 'paper' : 'night'
+  if (host === 'dark' || host === 'light') return host
+  return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
 }
-
-function syncTheme(): void {
-  document.body.dataset.theme = hostTheme()
-}
-
-syncTheme()
-matchMedia('(prefers-color-scheme: light)').addEventListener('change', syncTheme)
-new MutationObserver(syncTheme).observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: ['data-theme'],
-})
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Missing #root element')
 createRoot(root).render(
   <StrictMode>
-    <Gallery />
+    <Gallery initialTheme={hostTheme()} />
   </StrictMode>,
 )

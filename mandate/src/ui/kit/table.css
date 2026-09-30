@@ -1,0 +1,158 @@
+/* FM tables and attribute grids (DESIGN §17). */
+.table-wrap {
+  min-width: 0;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-cond);
+  font-size: var(--fs-s);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--surface-1);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.table__sort:hover,
+.table__sort--active {
+  color: var(--text);
+}
+
+.table__sort-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.table td {
+  height: 30px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.table__row--button {
+  cursor: pointer;
+}
+
+.table__row--button:hover {
+  background: var(--surface-3) !important;
+}
+
+.table tr[aria-selected='true'] {
+  background: var(--surface-3) !important;
+  box-shadow: inset 3px 0 0 var(--text);
+}
+
+.table__empty td {
+  height: 64px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  text-align: center;
+}
+
+/* Attribute grid. */
+.attrs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px 24px;
+}
+
+.attrs__title {
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  font-family: var(--font-cond);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.attrs__list {
+  margin: 0;
+}
+
+.attr__item,
+.attr__tip {
+  display: flex;
+}
+
+.attr__tip {
+  flex: 1;
+}
+
+.attr {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.attr:hover {
+  background: var(--surface-2);
+}
+
+.attr__value {
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+}
+
+.attr--1 {
+  color: var(--attr-1);
+}
+
+.attr--2 {
+  color: var(--attr-2);
+}
+
+.attr--3 {
+  color: var(--attr-3);
+}
+
+.attr--4 {
+  color: var(--attr-4);
+}
+
+.attr--5 {
+  color: var(--attr-5);
+}
