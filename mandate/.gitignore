@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 dist-kit
 dist-preview
+
+# Downloaded data sources (npm run data)
+data-raw/.cache

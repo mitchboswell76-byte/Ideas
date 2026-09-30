@@ -22,7 +22,8 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
 
 ## Commands (run inside `mandate/`)
 `npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak` ·
-`npm run build:kit` / `build:preview` (kit.html / the game → one HTML file for an Artifact)
+`npm run build:kit` / `build:preview` (kit.html / the game → one HTML file for an Artifact) ·
+`npm run data` (rebuild `src/data/generated/` from pinned sources; see docs/DATA_SOURCES.md)
 Quality gate before every commit: `npm run typecheck && npm run lint && npm test && npm run build`
 
 ## Rules

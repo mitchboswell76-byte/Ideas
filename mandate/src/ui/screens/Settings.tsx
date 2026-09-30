@@ -1,3 +1,4 @@
+import { DATA_CREDITS } from '../../data/credits.ts'
 import { PAUSE_REASONS } from '../../runtime/protocol.ts'
 import { PRESETS } from '../graphics/presets.ts'
 import { Choice, ChoiceGroup } from '../kit/index.ts'
@@ -76,7 +77,7 @@ function GraphicsSettings() {
   )
 }
 
-/** Per-browser settings: theme, autosave, auto-pause (and graphics once there is 3D). */
+/** Per-browser settings: theme, autosave, auto-pause (and graphics once there is 3D), data credits. */
 export function Settings() {
   const { theme, setTheme } = useTheme()
   const autosave = useGame((s) => s.autosave)
@@ -122,6 +123,19 @@ export function Settings() {
         ))}
       </ChoiceGroup>
       {HAS_3D_VIEW && <GraphicsSettings />}
+      <section className="settings__data" aria-labelledby="settings-data">
+        <h2 id="settings-data" className="choices__legend">
+          Data
+        </h2>
+        <dl>
+          {DATA_CREDITS.map((c) => (
+            <div key={c.what}>
+              <dt>{c.what}</dt>
+              <dd>{c.credit}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
     </div>
   )
 }

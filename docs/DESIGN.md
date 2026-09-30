@@ -357,11 +357,15 @@ changes gain only.
 - **World borders:** `world-atlas` npm (Natural Earth 110m, public domain).
 - **UK constituencies (2024 boundaries):** Open Innovations `uk-constituencies-2023.hexjson` from
   `raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/` (reachable from the cloud env).
-- **GE2024 results by constituency** (House of Commons Library, Open Parliament Licence). parliament.uk is blocked from the cloud env. Fallbacks in order:
-  1. GitHub-hosted mirror via raw.githubusercontent.com
-  2. WebFetch
-  3. User uploads `HoC-GE2024-results-by-constituency.csv` into `mandate/data-raw/`
-  4. Regional results + seeded seat variation calibrated to the real seat totals (Lab 411, Con 121, LD 72, SNP 9, SF 7, Ind 6, Reform 5, DUP 5, Green 4, PC 4, SDLP 2, Alliance 1, UUP 1, TUV 1, Speaker 1)
+- **GE2024 results by constituency** (House of Commons Library, Open Parliament Licence). parliament.uk and
+  Wikipedia are blocked from the cloud env. Chosen chain (T5, details in `docs/DATA_SOURCES.md`):
+  1. `data-raw/HoC-GE2024-results-by-constituency.csv` if the user adds it: official, all 650 seats.
+  2. Otherwise the University of Bristol GB file on GitHub (632 seats; results copied from the Commons Library,
+     plus Census 2021/2022 measures).
+  3. Northern Ireland: hand-entered winners only, marked unverified, until the official file is added.
+  Seat totals reproduce the published result (Lab 411, Con 121, LD 72, SNP 9, SF 7, Ind 6, Reform 5, DUP 5,
+  Green 4, PC 4, SDLP 2, Alliance 1, UUP 1, TUV 1, Speaker 1).
+- **Census by constituency:** from the same GB file (ONS Census 2021; Scotland's Census 2022), 21 measures.
 - **Politicians, polls, pay and limits:** web-verified at build time. Each file records `asOf` and its source in `docs/DATA_SOURCES.md`.
 - **Fonts and icons:** Barlow and Barlow Condensed (OFL, @fontsource), Newsreader (OFL, @fontsource), Phosphor
   Icons (MIT). Departure Mono was used by the superseded "Ballot & Block" kit.

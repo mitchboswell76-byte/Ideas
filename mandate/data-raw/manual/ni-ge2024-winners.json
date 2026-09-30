@@ -1,0 +1,24 @@
+{
+  "note": "Winning party in the 18 Northern Ireland seats at the 4 July 2024 general election. Entered by hand because the Commons Library file, Wikipedia and the Electoral Office NI are blocked from the build environment; not checked against the official file. Totals match the published result (SF 7, DUP 5, SDLP 2, Alliance 1, UUP 1, TUV 1, Ind 1). Adding data-raw/HoC-GE2024-results-by-constituency.csv replaces these with official results.",
+  "asOf": "2024-07-04",
+  "winners": {
+    "N05000001": "dup",
+    "N05000002": "sf",
+    "N05000003": "sdlp",
+    "N05000004": "sf",
+    "N05000005": "dup",
+    "N05000006": "dup",
+    "N05000007": "sf",
+    "N05000008": "sdlp",
+    "N05000009": "alliance",
+    "N05000010": "sf",
+    "N05000011": "sf",
+    "N05000012": "tuv",
+    "N05000013": "ind",
+    "N05000014": "uup",
+    "N05000015": "sf",
+    "N05000016": "dup",
+    "N05000017": "dup",
+    "N05000018": "sf"
+  }
+}

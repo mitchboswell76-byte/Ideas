@@ -413,6 +413,26 @@ kbd {
   align-items: start;
 }
 
+.settings__data h2 {
+  margin: 0 0 6px;
+}
+
+.settings__data dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.settings__data dt {
+  font-weight: 600;
+}
+
+.settings__data dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+}
+
 @media (max-width: 1099px) {
   .calendar {
     grid-template-columns: 1fr;

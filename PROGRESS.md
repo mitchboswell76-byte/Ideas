@@ -2,7 +2,7 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T5**
+**Next session:** start at **T6**
 **Last playable link (T4c):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link)
 **UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
@@ -39,8 +39,8 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       Squares, pixel font + Departure Mono and their tests; keep `ui/three` infra, `ui/graphics`, view store (hide the
       3D/2D toggle until a 3D view exists). Keep `data-testid`s used by tests. Rebuild kit gallery; Playwright
       screenshots (dark, light, narrow); republish both preview links.
-- [ ] T5 Data pipeline `scripts/build-data.ts`: hexjson (650 seats), world-atlas 110m, GE2024 results
-      (fallback chain in DESIGN §Data), `docs/DATA_SOURCES.md`
+- [x] T5 Data pipeline `scripts/build-data.ts` (`npm run data`): hexjson (650 seats), world-atlas 110m, GE2024
+      results + census (GB mirror; NI winners hand-entered), `docs/DATA_SOURCES.md`, Settings data credits
 - [ ] T6 World map (Paradox map modes + Plague Inc ticker): flat clean map of Natural Earth countries, map-mode switcher,
       hover/click → country card, pan/zoom; canvas/SVG, optional subtle 3D tilt
 - [ ] T7 UK constituency map: 650-seat hex map with map modes (Party, Swing, Turnout, Demographics), click →
@@ -203,10 +203,31 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   Esc), speed keys + banner, inbox read/unread badge, calendar month nav, save/export/import, theme switch, reload →
   Continue, 390 px (no sideways scroll), nested tooltips three deep; single-file builds load with no console errors.
 
+- 2026-09-30 T5 map: `scripts/build-data.ts` + `scripts/data/` (`sources.ts` pinned URLs + SHA-256 + cache,
+  `csv.ts`, `hexjson.ts`, `ge2024.ts` adapters `fromSummaries`/`fromHocCsv`/`fromManual`, `census.ts`, `world.ts`)
+  → `src/data/generated/` (`uk-seats.json`, `ge2024.json`, `census2021.json`, `world-110m.json`, `countries.json`,
+  committed). Typed access: `src/data/types.ts`, `uk.ts` (`UK_SEATS`, `GE2024`, `CENSUS`), `world.ts` (`COUNTRIES`,
+  `WORLD_110M`), `credits.ts` (shown in Settings → Data). Nothing imports the data yet: import `uk.ts`/`world.ts`
+  lazily at T6/T7 (~500 KB + ~110 KB JSON). Seats are keyed by ONS code; the sim will use `con_<ONS>`.
+- 2026-09-30 GE2024 source chain (parliament.uk/Wikipedia blocked): official HoC CSV in `data-raw/` if present →
+  University of Bristol GB file on GitHub (632 seats, HoC figures) → NI winners hand-entered and `verified: false`
+  (user's choice). Independents'/Speaker's votes are recovered from "other" via the majority. Only fields with a
+  clear upstream licence are used (OPL results, OGL census); the file's 2019 notionals and referendum estimates are
+  dropped because the compilation has no licence.
+- 2026-09-30 Seat names come from the hexjson (keeps Welsh diacritics), overridden by the HoC CSV if supplied.
+  World: ids added for Kosovo/N. Cyprus/Somaliland (`XKX`/`XNC`/`XSL`), Natural Earth abbreviations expanded.
+- 2026-09-30 Node's `fetch` worked through the cloud proxy without `NODE_USE_ENV_PROXY`; the script's error message
+  suggests it if a download fails elsewhere.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
-- GE2024 constituency results: parliament.uk blocked from cloud env. Try fallbacks in DESIGN §Data; may need user to upload CSV.
+- GE2024 Northern Ireland: winners only, hand-entered and unverified (no votes, turnout or MPs). User can add
+  `mandate/data-raw/HoC-GE2024-results-by-constituency.csv` (Commons Library CBP-10009) and run `npm run data` to
+  get official results for all 650 seats plus declaration times; `fromHocCsv` is fixture-tested only.
+- No 2019 notional results (dropped for licence reasons), so T7's "Swing" map mode has no baseline yet: use swing
+  from 2024 in the running game, or find a licensed notional source.
+- Census gaps: Scotland lacks ~10 measures in the source; Northern Ireland has none.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).
 - `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);
   revisit when r3f updates.
