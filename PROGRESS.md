@@ -46,8 +46,12 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [x] T7 UK constituency map: 650-seat hex map with map modes (Party, Majority, Turnout, Demographics; Swing
       disabled until T13), click → constituency card; slowly panning map as the main-menu backdrop (3D seat columns
       moved to T18)
-- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact;
-      ask user about PR into `main`
+- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact.
+      Export in the published build (decided 2026-09-30): Export uses the Artifact `downloads` capability (load
+      `artifact-capabilities` first) and saves plain JSON `mandate-<name>-<date>.json`; Import accepts `.mandate` and
+      `.json`; normal browser tabs keep `.mandate`. First check whether `downloads` really refuses `.mandate`; if it
+      allows it, keep one format. Then create `main` at `3c573a3` (handoff files only), push it, and open a PR of
+      `claude/magical-cori-1sjt0r` → `main` for M0 (decided 2026-09-30)
 
 ## M1 — Nobody to Prime Minister (party route)
 - [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
@@ -285,6 +289,11 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   Ynys Môn; Foyle shows the winner-only note; World still works; dark, light, 390 px with no sideways scroll; no
   console errors; menu drift and UK map pan hold 60 fps under a 4× CPU throttle (headless).
 
+- 2026-09-30 T8 decisions, asked at the end of T7: M0 ends with a new `main` branch at `3c573a3` (handoff files only)
+  and a PR of the Claude branch into it, one PR per milestone after that; the published build exports saves as
+  `.json` through the Artifact download prompt (Import takes both). Claude's claim that the `downloads` capability
+  refuses the `.mandate` extension was not verified: T8 checks it first.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -298,7 +307,7 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);
   revisit when r3f updates.
 - Artifact viewers block downloads, so "Export .mandate" does nothing in published previews (works in a normal browser
-  tab). T8: use the `downloads` capability for the published build, or hide Export there.
+  tab). Decided: T8 exports `.json` through the `downloads` capability there (see the T8 line).
 - WorldCanvas chunk was ~245 KB gzip (r3f pulls in all of three); lazy. Not built at all until `HAS_3D_VIEW`.
   Initial JS is ~107 KB gzip after T4c.
 - Inbox items live only in the UI store: not in saves, so a loaded game starts with an empty inbox. Move the inbox
