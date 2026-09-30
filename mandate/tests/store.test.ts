@@ -131,7 +131,7 @@ describe('game store', () => {
     await vi.waitFor(() => expect(store.getState().date).toBe('2026-10-04'))
 
     await store.getState().loadBytes(new Uint8Array([0, 1]))
-    expect(store.getState().lastError).toBe('Not a valid .mandate save file')
+    expect(store.getState().lastError).toBe('Not a valid save file')
     store.getState().dismissError()
     expect(store.getState().lastError).toBeNull()
     bridge.dispose()

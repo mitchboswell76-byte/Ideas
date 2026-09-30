@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "soak": "tsx scripts/soak.ts",
     "build:preview": "tsx scripts/build-single.ts index.html dist-preview mandate-preview.html",
-    "data": "tsx scripts/build-data.ts"
+    "data": "tsx scripts/build-data.ts",
+    "e2e": "npm run build && npm run build:preview && playwright test",
+    "e2e:perf": "npm run build && npm run build:preview && playwright test --project=perf --no-deps"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",
@@ -30,6 +32,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.1",
     "@types/d3-geo": "^3.1.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",

@@ -7,7 +7,7 @@ import { MODE_LABELS } from './labels.ts'
 const QUIET_DAY = [
   'No news yet: the country has not heard of you',
   'Space pauses the clock; keys 1 to 5 set the speed',
-  'Saves stay in this browser; export a .mandate file to keep a copy',
+  'Saves stay in this browser; export a save file to keep a copy',
 ]
 
 const TICKER_ITEMS = 6

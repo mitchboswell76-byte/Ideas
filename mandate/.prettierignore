@@ -5,3 +5,5 @@ src/data/generated
 data-raw
 dist-kit
 dist-preview
+test-results
+playwright-report

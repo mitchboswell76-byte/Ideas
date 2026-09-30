@@ -8,6 +8,7 @@ import {
   migrate,
   parseSave,
   serialiseSave,
+  unpackSave,
   type Migration,
 } from '../src/sim/save.ts'
 import type { System } from '../src/sim/scheduler.ts'
@@ -61,6 +62,14 @@ describe('save / load', () => {
     expect(save.world).toMatchObject({ renamed: true })
   })
 
+  it('reads a plain JSON export as well as gzip bytes', async () => {
+    const world = createWorld({ seed: 'json' })
+    const json = await unpackSave(await encodeSave(world, SAVED_AT))
+    expect(json).toBe(serialiseSave(world, SAVED_AT))
+    const plain = new TextEncoder().encode(json)
+    expect((await decodeSave(plain)).world).toEqual(world)
+  })
+
   it('rejects saves it cannot read', async () => {
     const world = createWorld({ seed: 'bad' })
     expect(() => migrate({ version: SAVE_VERSION + 1, savedAt: SAVED_AT, world })).toThrow(
@@ -71,7 +80,9 @@ describe('save / load', () => {
     expect(() => migrate({ version: SAVE_VERSION, savedAt: SAVED_AT, world: {} })).toThrow(
       /damaged/,
     )
-    expect(() => parseSave('{not json')).toThrow(/valid JSON/)
-    await expect(decodeSave(new Uint8Array([1, 2, 3, 4]))).rejects.toThrow(/\.mandate/)
+    expect(() => parseSave('{not json')).toThrow(/valid save file/)
+    await expect(decodeSave(new Uint8Array([1, 2, 3, 4]))).rejects.toThrow(/valid save file/)
+    // gzip magic, broken stream
+    await expect(decodeSave(new Uint8Array([0x1f, 0x8b, 0, 0]))).rejects.toThrow(/valid save file/)
   })
 })

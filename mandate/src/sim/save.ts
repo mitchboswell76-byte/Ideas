@@ -1,6 +1,7 @@
 /**
  * Save format (DESIGN §3): `{ version, gameVersion, savedAt, world }` as JSON, gzip-compressed for
- * storage and `.mandate` export. Pure: the caller supplies `savedAt` and does the storing.
+ * storage and `.mandate` export; the published Artifact exports the plain JSON as `.json` instead.
+ * Pure: the caller supplies `savedAt` and does the storing.
  */
 import { GAME_VERSION, SAVE_VERSION } from './version.ts'
 import type { World } from './world.ts'
@@ -79,7 +80,7 @@ export function parseSave(json: string): SaveFile {
   try {
     raw = JSON.parse(json)
   } catch {
-    throw new SaveError('Save is not valid JSON')
+    throw new SaveError('Not a valid save file')
   }
   return migrate(raw)
 }
@@ -98,12 +99,22 @@ export async function encodeSave(world: World, savedAt: string): Promise<Uint8Ar
   return transform(json, new CompressionStream('gzip'))
 }
 
-export async function decodeSave(bytes: Uint8Array<ArrayBuffer>): Promise<SaveFile> {
-  let json: string
+/** gzip streams start with these two bytes; anything else is read as plain JSON. */
+function isGzip(bytes: Uint8Array): boolean {
+  return bytes[0] === 0x1f && bytes[1] === 0x8b
+}
+
+/** The JSON text inside save bytes: a gzip `.mandate` file/slot, or a plain `.json` export. */
+export async function unpackSave(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
+  if (!isGzip(bytes)) return new TextDecoder().decode(bytes)
   try {
-    json = new TextDecoder().decode(await transform(bytes, new DecompressionStream('gzip')))
+    return new TextDecoder().decode(await transform(bytes, new DecompressionStream('gzip')))
   } catch {
-    throw new SaveError('Not a valid .mandate save file')
+    throw new SaveError('Not a valid save file')
   }
-  return parseSave(json)
+}
+
+/** Reads either save file format (see {@link unpackSave}) and migrates it to the current version. */
+export async function decodeSave(bytes: Uint8Array<ArrayBuffer>): Promise<SaveFile> {
+  return parseSave(await unpackSave(bytes))
 }

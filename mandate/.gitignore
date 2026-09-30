@@ -24,6 +24,8 @@ dist-ssr
 *.sw?
 dist-kit
 dist-preview
+test-results
+playwright-report
 
 # Downloaded data sources (npm run data)
 data-raw/.cache

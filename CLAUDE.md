@@ -17,13 +17,14 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
     guide), `ui/shell` (game frame), `ui/screens` (Home, Inbox, …), `ui/menu` (main menu), `ui/three` (lazy r3f host),
     `ui/graphics` (GPU presets, 3D/2D default)
   - `src/data/` bundled JSON data
-  - `scripts/` data build + soak test; `tests/` Vitest
+  - `scripts/` data build + soak test; `tests/` Vitest; `e2e/` Playwright (smoke, Artifact export, perf)
 - `docs/DESIGN.md` full design of every system; `docs/DATA_SOURCES.md` licences + `asOf` dates
 
 ## Commands (run inside `mandate/`)
 `npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak` ·
 `npm run build:kit` / `build:preview` (kit.html / the game → one HTML file for an Artifact) ·
-`npm run data` (rebuild `src/data/generated/` from pinned sources; see docs/DATA_SOURCES.md)
+`npm run data` (rebuild `src/data/generated/` from pinned sources; see docs/DATA_SOURCES.md) ·
+`npm run e2e` (both builds + Playwright smoke/perf; run before publishing an Artifact; `e2e:perf` = perf only)
 Quality gate before every commit: `npm run typecheck && npm run lint && npm test && npm run build`
 
 ## Rules

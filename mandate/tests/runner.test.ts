@@ -239,7 +239,7 @@ describe('SimRunner', () => {
     const bad = new Uint8Array([1, 2, 3])
     expect(await request(runner, host, { type: 'load', bytes: bad })).toMatchObject({
       ok: false,
-      error: 'Not a valid .mandate save file',
+      error: 'Not a valid save file',
     })
     expect(hashJson(await worldOf(runner, host))).toBe(before)
   })

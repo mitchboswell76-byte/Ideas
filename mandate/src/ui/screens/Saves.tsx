@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { unpackSave } from '../../sim/save.ts'
 import { formatBytes, formatSavedAt, formatShortDate } from '../format.ts'
 import {
   DownloadSimpleIcon,
@@ -8,12 +9,50 @@ import {
   UploadSimpleIcon,
 } from '../kit/icons.ts'
 import { Button, Chip, IconButton, Panel, Table, type Column } from '../kit/index.ts'
-import { downloadSave, readSaveFile, saveFileName, SAVE_FILE_EXTENSION } from '../saves/file.ts'
+import {
+  downloadSave,
+  IMPORT_ACCEPT,
+  readSaveFile,
+  saveFileName,
+  SAVE_FILE_EXTENSIONS,
+  type SaveFormat,
+} from '../saves/file.ts'
+import {
+  hostDownloads,
+  hostDownloadsNow,
+  hostErrorCode,
+  type HostDownloads,
+} from '../saves/host.ts'
 import { AUTOSAVE_SLOT, newSlotId, QUICKSAVE_SLOT, type SlotMeta } from '../saves/slots.ts'
 import { gameStore, useGame } from '../store/index.ts'
 import './screens.css'
 
 const RESERVED = new Set([AUTOSAVE_SLOT, QUICKSAVE_SLOT])
+
+/** The Artifact viewer's downloads capability once it has answered (`undefined` while asking). */
+function useHostDownloads(): HostDownloads | null | undefined {
+  const [downloads, setDownloads] = useState(hostDownloadsNow)
+  useEffect(() => {
+    let live = true
+    void hostDownloads().then((d) => live && setDownloads(d))
+    return () => {
+      live = false
+    }
+  }, [])
+  return downloads
+}
+
+/** Message for a viewer save that didn't happen; `null` when the player simply said no. */
+function exportFailure(error: unknown): string | null {
+  switch (hostErrorCode(error)) {
+    case 'declined':
+      return null
+    case 'rate_limited':
+      return 'An export prompt is already open'
+    default:
+      return 'Export is not available in this view'
+  }
+}
 
 function SlotActions({ slot }: { slot: SlotMeta }) {
   const [confirming, setConfirming] = useState(false)
@@ -104,10 +143,24 @@ export function Saves() {
   const fileInput = useRef<HTMLInputElement>(null)
   const game = gameStore.getState()
   const manualCount = slots.filter((s) => !RESERVED.has(s.id)).length
+  const host = useHostDownloads()
+  const format: SaveFormat = host ? 'json' : 'mandate'
 
   const exportSave = async (): Promise<void> => {
     const save = await game.saveBytes()
-    if (save) downloadSave(save.bytes, saveFileName(save.date))
+    if (!save) return
+    const downloads = await hostDownloads()
+    if (!downloads) {
+      downloadSave(save.bytes, saveFileName(save.date, 'mandate'))
+      return
+    }
+    try {
+      const data = await unpackSave(save.bytes)
+      await downloads.save({ filename: saveFileName(save.date, 'json'), data })
+    } catch (error) {
+      const message = exportFailure(error)
+      if (message) game.reportError(message)
+    }
   }
   const importSave = async (file: File | undefined): Promise<void> => {
     if (file) await game.loadBytes(await readSaveFile(file))
@@ -129,7 +182,7 @@ export function Saves() {
           Quicksave
         </Button>
         <Button icon={DownloadSimpleIcon} disabled={!hasGame} onClick={() => void exportSave()}>
-          Export {SAVE_FILE_EXTENSION}
+          Export {SAVE_FILE_EXTENSIONS[format]}
         </Button>
         <Button icon={UploadSimpleIcon} onClick={() => fileInput.current?.click()}>
           Import
@@ -137,14 +190,15 @@ export function Saves() {
         <input
           ref={fileInput}
           type="file"
-          accept={SAVE_FILE_EXTENSION}
+          accept={IMPORT_ACCEPT}
           hidden
           data-testid="import-input"
           onChange={(e) => void importSave(e.target.files?.[0])}
         />
       </div>
       <p className="muted">
-        Saves stay in this browser. Export a {SAVE_FILE_EXTENSION} file to keep a copy elsewhere.
+        Saves stay in this browser. Export a {SAVE_FILE_EXTENSIONS[format]} file to keep a copy
+        elsewhere; Import reads .mandate and .json saves.
       </p>
       <Panel flush>
         <Table

@@ -1,9 +1,34 @@
-/** `.mandate` export/import: the file is the gzip save bytes as stored in a slot. */
+/**
+ * Save export/import. A normal browser tab downloads the gzip save bytes as they are stored in a
+ * slot (`.mandate`). The published Artifact exports the plain JSON as `.json` through the viewer's
+ * downloads capability (see `host.ts`), which refuses `.mandate`. Import reads either: the runner
+ * tells them apart by the gzip header.
+ */
 
-export const SAVE_FILE_EXTENSION = '.mandate'
+export type SaveFormat = 'mandate' | 'json'
 
-export function saveFileName(gameDate: string): string {
-  return `mandate-${gameDate}${SAVE_FILE_EXTENSION}`
+export const SAVE_FILE_EXTENSIONS: Readonly<Record<SaveFormat, string>> = {
+  mandate: '.mandate',
+  json: '.json',
+}
+
+/** `accept` for the import picker. */
+export const IMPORT_ACCEPT = '.mandate,.json,application/json'
+
+/** Lower-case ASCII words joined by hyphens, for file names. */
+function slug(text: string): string {
+  return text
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/** `mandate-<name>-<date>.<ext>`; the name part is left out while there is none (or it slugs away). */
+export function saveFileName(gameDate: string, format: SaveFormat, name?: string): string {
+  const parts = ['mandate', name ? slug(name) : '', gameDate].filter(Boolean)
+  return parts.join('-') + SAVE_FILE_EXTENSIONS[format]
 }
 
 export function downloadSave(bytes: Uint8Array<ArrayBuffer>, fileName: string): void {

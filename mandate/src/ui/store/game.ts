@@ -88,6 +88,8 @@ export interface GameState extends RunnerStatus {
   saveBytes(): Promise<SaveData | null>
   /** Load save bytes (from an imported file). */
   loadBytes(bytes: Uint8Array<ArrayBuffer>): Promise<void>
+  /** Show a failure the UI caught itself (e.g. an export the viewer refused). */
+  reportError(message: string): void
   dismissError(): void
 }
 
@@ -224,6 +226,7 @@ export function createGameStore({
       },
       saveBytes: () => attempt(() => bridge.request({ type: 'save', savedAt: now() })),
       loadBytes: (bytes) => replaceGame(() => bridge.request({ type: 'load', bytes })),
+      reportError: (message) => set({ lastError: message }),
       dismissError: () => set({ lastError: null }),
     }
   })

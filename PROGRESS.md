@@ -1,10 +1,10 @@
 # Progress — Mandate
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
-**Current milestone:** M0 — Foundations
-**Next session:** start at **T8**
-**Last playable link (T7):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
-  `npm run build:preview`, publish with `url` set to this link)
+**Current milestone:** M1 — Nobody to Prime Minister (M0 done; PR of this branch → `main` open for review)
+**Next session:** start at **T9**
+**Last playable link (T8, M0):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+  `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
 **UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
 ## Workflow for the user
@@ -46,12 +46,15 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [x] T7 UK constituency map: 650-seat hex map with map modes (Party, Majority, Turnout, Demographics; Swing
       disabled until T13), click → constituency card; slowly panning map as the main-menu backdrop (3D seat columns
       moved to T18)
-- [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact.
+- [x] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact.
       Export in the published build (decided 2026-09-30): Export uses the Artifact `downloads` capability (load
       `artifact-capabilities` first) and saves plain JSON `mandate-<name>-<date>.json`; Import accepts `.mandate` and
       `.json`; normal browser tabs keep `.mandate`. First check whether `downloads` really refuses `.mandate`; if it
       allows it, keep one format. Then create `main` at `3c573a3` (handoff files only), push it, and open a PR of
       `claude/magical-cori-1sjt0r` → `main` for M0 (decided 2026-09-30)
+
+  Done: `npm run e2e` (16 tests: smoke, Artifact export, perf); `.mandate` refused (checked in the contract
+  types), so the Artifact build exports `.json`; M0 republished; `main` created and PR opened.
 
 ## M1 — Nobody to Prime Minister (party route)
 - [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
@@ -294,6 +297,28 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   `.json` through the Artifact download prompt (Import takes both). Claude's claim that the `downloads` capability
   refuses the `.mandate` extension was not verified: T8 checks it first.
 
+- 2026-09-30 T8 map: `mandate/e2e/` (Playwright, `@playwright/test` pinned to 1.56.1 = the cloud image's Chromium
+  1194) — `fixtures.ts` (fails any test on a console/page error; `newCareer`, `go`, `gameDate`), `artifact.ts`
+  (serves `dist-preview/` at `/artifact.html` in the host's document skeleton, optional fake viewer with
+  `window.claude.use('downloads')`), `smoke.spec.ts`, `artifact.spec.ts`, `perf.spec.ts`; `playwright.config.ts`
+  (`vite preview` on 4173; projects `smoke` then `perf`, perf with tracing off). `npm run e2e` builds both builds
+  first; `npm run e2e:perf` runs perf alone. Not in the per-commit gate (≈40 s + builds): run it before publishing.
+- 2026-09-30 The `downloads` capability's allowlist (runtime contract 0.2.66 types) has `json` but not `mandate`, so the
+  claim was right. Export: in a normal tab `.mandate` (gzip) as before; when the viewer grants `downloads`, the plain
+  save JSON as `mandate-<date>.json` via `downloads.save` (a `<name>-` part is supported by `saveFileName` but
+  nothing passes a name until the character exists, T10). Declined = silent; other refusals show "Export is not
+  available in this view". The capability is asked for at boot (`ui/saves/host.ts`) so the button label is right.
+- 2026-09-30 Import reads both formats: `decodeSave` sniffs the gzip header (`unpackSave`); any unreadable file now
+  says "Not a valid save file" (was "Not a valid .mandate save file").
+- 2026-09-30 Perf method: 4× CPU throttle via CDP, frames counted with rAF (main-thread headroom, not GPU raster).
+  2D screens must hold the Medium target: ≥ 55 fps average and p95 frame ≤ 33 ms. Measured (cloud, headless): menu
+  60, Home at speed 5 60 (worker and main thread), UK map pan + wheel zoom 57.5–58.7, world map 59–60, Artifact build
+  UK map with the sim at speed 3 on the main thread 57.5–58.8; initial JS 157 KB gzip (budget 1.5 MB). Playwright
+  tracing snapshots the DOM on every action and cut the UK map to ~35 fps, hence tracing off for perf. No 3D view
+  exists (`HAS_3D_VIEW` false), so the Low/Medium 3D budgets get their tests with the first 3D view (T9/T18).
+- 2026-09-30 M0 closed: `main` created at `3c573a3` (handoff files only), PR of `claude/magical-cori-1sjt0r` → `main`.
+  Keep working on the Claude branch; one PR per milestone.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -306,8 +331,10 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).
 - `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);
   revisit when r3f updates.
-- Artifact viewers block downloads, so "Export .mandate" does nothing in published previews (works in a normal browser
-  tab). Decided: T8 exports `.json` through the `downloads` capability there (see the T8 line).
+- Artifact export via `downloads` is tested against a fake viewer only; the real claude.ai prompt hasn't been
+  clicked through by a person yet. If it fails, the Saves screen shows the error (check once in the viewer).
+- Perf tests measure the main thread in headless Chromium on a fast machine; the real Intel UHD laptop may differ
+  (GPU raster isn't measured). Worth one manual check on the Dell before M1 ships.
 - WorldCanvas chunk was ~245 KB gzip (r3f pulls in all of three); lazy. Not built at all until `HAS_3D_VIEW`.
   Initial JS is ~107 KB gzip after T4c.
 - Inbox items live only in the UI store: not in saves, so a loaded game starts with an empty inbox. Move the inbox

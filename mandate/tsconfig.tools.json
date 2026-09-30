@@ -19,5 +19,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["scripts", "tests"]
+  "include": ["scripts", "tests", "e2e", "playwright.config.ts"]
 }

@@ -126,9 +126,7 @@ describe('SimBridge', () => {
       'No game is running',
     )
     const bytes = new Uint8Array([1, 2, 3])
-    await expect(bridge.request({ type: 'load', bytes })).rejects.toThrow(
-      'Not a valid .mandate save file',
-    )
+    await expect(bridge.request({ type: 'load', bytes })).rejects.toThrow('Not a valid save file')
     expect(bytes.byteLength).toBe(0) // detached: ownership moved to the runner
     bridge.dispose()
   })
