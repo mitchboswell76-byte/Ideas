@@ -122,13 +122,85 @@ export interface CensusFile {
   seats: CensusSeat[]
 }
 
+/** UN M49 regions (the country-codes file). */
+export const WORLD_REGIONS = ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania'] as const
+export type WorldRegion = (typeof WORLD_REGIONS)[number]
+
+/**
+ * `territory`: a dependency of `sovereign`; `limited`: a state with limited recognition;
+ * `disputed`: a territory whose sovereignty is disputed.
+ */
+export type CountryStatus = 'state' | 'territory' | 'limited' | 'disputed'
+
 export interface CountryInfo {
   /** ISO 3166-1 numeric code, or a user-assigned `X..` code where Natural Earth has none. */
   id: string
   name: string
+  /** ISO 3166-1 alpha-3, null for the `X..` units. */
+  iso3: string | null
+  region: WorldRegion
+  /** M49 intermediate region where there is one (e.g. Caribbean), else the sub-region. */
+  subregion: string
+  capital: string
+  status: CountryStatus
+  /** Set for territories: the id of the state they belong to. */
+  sovereign?: string
+  /** Set unless `status` is `state`, e.g. "British Overseas Territory". */
+  statusText?: string
+  /** Ids of the blocs it belongs to, in `BLOCS` order. */
+  blocs: string[]
+  /** Countries sharing a land border on the 1:110m map. */
+  neighbours: string[]
 }
 
-/** Natural Earth countries as TopoJSON (decoded by the map at T6). */
+export interface Bloc {
+  id: string
+  /** Short name, e.g. "NATO". */
+  name: string
+  full: string
+  about: string
+  /** Member ids, including ones too small for the 1:110m map. */
+  members: string[]
+  /** Members with no shape on the map (small islands), by name. */
+  offMap: string[]
+  /** Organisations that also belong, e.g. the EU in the G20. */
+  alsoIncludes: string[]
+}
+
+export interface CountriesFile {
+  /** When the bloc memberships and hand-entered facts were checked. */
+  asOf: string
+  blocs: Bloc[]
+  countries: CountryInfo[]
+}
+
+/** The world map, projected at build time (Natural Earth I) into SVG paths. */
+export interface WorldMapFile {
+  width: number
+  height: number
+  shapes: WorldShape[]
+  /** Land borders between countries, drawn once. */
+  borders: string
+  /** Coastlines. */
+  coast: string
+}
+
+export interface WorldShape {
+  id: string
+  /** SVG path in map units. */
+  d: string
+  /**
+   * [x0, y0, x1, y1] of the largest part, in map units: what "centre on map" frames (mainland
+   * France, not French Guiana too) and how much room the name has.
+   */
+  focus: [number, number, number, number]
+  /** Where the name goes: the centre of the largest part. */
+  label: [number, number]
+  /** Political map colour index; neighbours never share one, territories take their state's. */
+  colour: number
+}
+
+/** Natural Earth countries as TopoJSON (the source the map paths are projected from). */
 export interface WorldTopology {
   type: 'Topology'
   bbox: number[]

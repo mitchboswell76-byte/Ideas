@@ -1,7 +1,13 @@
-/** World countries (Natural Earth 1:110m). Import lazily from UI code (~110 KB of JSON). */
+/**
+ * World countries (Natural Earth 1:110m units) and blocs. Import lazily from UI code (~40 KB of
+ * JSON); the map paths are in `worldMap.ts`.
+ */
 import countries from './generated/countries.json'
-import topology from './generated/world-110m.json'
-import type { CountryInfo, WorldTopology } from './types.ts'
+import type { Bloc, CountriesFile, CountryInfo } from './types.ts'
 
-export const COUNTRIES: CountryInfo[] = countries.countries
-export const WORLD_110M = topology as WorldTopology
+const file = countries as CountriesFile
+
+export const COUNTRIES: CountryInfo[] = file.countries
+export const BLOCS: Bloc[] = file.blocs
+/** When the blocs and hand-entered country facts were last checked. */
+export const COUNTRIES_AS_OF: string = file.asOf

@@ -88,6 +88,10 @@
   padding: 20px;
 }
 
+.shell__screen.shell__screen--flush {
+  padding: 0;
+}
+
 .problems {
   display: grid;
   gap: 6px;

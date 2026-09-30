@@ -2,7 +2,7 @@
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
 
-export type ScreenName = 'home' | 'inbox' | 'calendar' | 'saves' | 'settings'
+export type ScreenName = 'home' | 'inbox' | 'calendar' | 'world' | 'saves' | 'settings'
 export type CardName = 'inbox' | 'calendar' | 'you' | 'game' | 'start'
 
 interface NavState {

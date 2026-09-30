@@ -19,9 +19,9 @@ import { navStore, useNav, type ScreenName } from '../store/nav.ts'
 const LATER = 'Not available yet'
 
 /** Sidebar entries (DESIGN §17); the ones without a screen yet are shown disabled. */
-type NavKey = ScreenName | 'profile' | 'party' | 'money' | 'media' | 'polls' | 'map' | 'world'
+type NavKey = ScreenName | 'profile' | 'party' | 'money' | 'media' | 'polls' | 'map'
 
-const SCREENS = new Set<string>(['home', 'inbox', 'calendar', 'saves', 'settings'])
+const SCREENS = new Set<string>(['home', 'inbox', 'calendar', 'world', 'saves', 'settings'])
 
 export function GameSidebar() {
   const unread = useGame((s) => s.log.reduce((n, m) => n + (m.read ? 0 : 1), 0))
@@ -36,7 +36,7 @@ export function GameSidebar() {
     { key: 'media', label: 'Media', icon: NewspaperIcon, disabled: LATER },
     { key: 'polls', label: 'Polls', icon: ChartLineIcon, disabled: LATER },
     { key: 'map', label: 'Map', icon: MapTrifoldIcon, disabled: LATER },
-    { key: 'world', label: 'World', icon: GlobeHemisphereWestIcon, disabled: LATER },
+    { key: 'world', label: 'World', icon: GlobeHemisphereWestIcon },
   ]
   const footer: NavItem<NavKey>[] = [
     { key: 'saves', label: 'Saves', icon: FloppyDiskIcon },

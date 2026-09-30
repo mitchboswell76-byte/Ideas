@@ -2,8 +2,8 @@
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M0 — Foundations
-**Next session:** start at **T6**
-**Last playable link (T4c):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Next session:** start at **T7**
+**Last playable link (T6):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link)
 **UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
@@ -41,8 +41,8 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       screenshots (dark, light, narrow); republish both preview links.
 - [x] T5 Data pipeline `scripts/build-data.ts` (`npm run data`): hexjson (650 seats), world-atlas 110m, GE2024
       results + census (GB mirror; NI winners hand-entered), `docs/DATA_SOURCES.md`, Settings data credits
-- [ ] T6 World map (Paradox map modes + Plague Inc ticker): flat clean map of Natural Earth countries, map-mode switcher,
-      hover/click → country card, pan/zoom; canvas/SVG, optional subtle 3D tilt
+- [x] T6 World map (Paradox map modes + Plague Inc ticker): flat clean map of Natural Earth countries, map-mode switcher,
+      hover/click → country card, pan/zoom; canvas/SVG, optional subtle 3D tilt (skipped, see decisions)
 - [ ] T7 UK constituency map: 650-seat hex map with map modes (Party, Swing, Turnout, Demographics), click →
       constituency card; optional 3D seat columns; slowly panning map becomes the main-menu backdrop
 - [ ] T8 Playwright smoke + perf (4× CPU throttle, ≥30 fps Low / 60 Medium in 3D views, 2D mode); publish M0 Artifact;
@@ -219,6 +219,42 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-30 Node's `fetch` worked through the cloud proxy without `NODE_USE_ENV_PROXY`; the script's error message
   suggests it if a download fails elsewhere.
 
+- 2026-09-30 T6 map: `scripts/data/worldmap.ts` (build-time projection: `PathWriter`, `largestRing`, `colourGraph`,
+  `neighbourMap`, `projectWorld`), `scripts/data/world.ts` `countryFacts` → `countries.json` (index + blocs) and
+  `world-map.json` (paths). Typed access: `src/data/world.ts` (`COUNTRIES`, `BLOCS`), `worldMap.ts` (`WORLD_MAP`),
+  `worldTopology.ts` (`WORLD_110M`, unused by the game). UI: `ui/map/viewport.ts` (pure pan/zoom maths: view = zoom
+  + centre point, so resizes keep the middle), `ui/map/MapView.tsx` (generic SVG pan/zoom host for T7 too),
+  `ui/map/map.css` (map tokens), `ui/map/world/{modes.ts, WorldMap.tsx}`, `ui/store/map.ts` (mode, bloc, selection,
+  view, focus requests), `ui/screens/World.tsx` (lazy chunk, 62 KB gzip with its data; initial JS unchanged 108 KB).
+- 2026-09-30 User chose map modes Political + Region + Blocs; Relations and Economy are disabled tabs ("Arrives with
+  world diplomacy (M4)"). `Tabs` gained `disabled?: string` (reason tooltip; arrow keys skip it).
+- 2026-09-30 SVG, projected at build time (Natural Earth I, `d3-geo` + `topojson-client` as dev dependencies only), not
+  canvas: 176 paths pan at 60 fps under a 4× CPU throttle (headless), and hit-testing/hover come free. Only the `<g>`
+  transform changes while moving; fills/borders are memoised. Strokes use `vector-effect: non-scaling-stroke`.
+- 2026-09-30 Antarctica dropped from the data (no state; a fifth of the map's height): 176 units. Focus boxes and
+  labels use the largest projected ring (mainland France; Russia west of the antimeridian). Names appear as you zoom,
+  only where they fit inside the country.
+- 2026-09-30 Colours: political = 6 muted tokens from greedy graph colouring (neighbours never match; territories
+  take their state's colour); region = validated categorical slots, ordered so touching regions (Europe–Asia–Africa,
+  Asia–Oceania, Asia–Americas) pass the CVD check in both themes; blocs = one blue for members. The UK is always
+  outlined in `--you` ("Your country"). Party colours are never used on the world map.
+- 2026-09-30 Country facts: DataHub country-codes (PDDL, pinned) + `data-raw/manual/world-extra.json` (units without
+  ISO codes, capitals incl. Astana and Ciudad de la Paz, statuses). Statuses are descriptive: territory (with its
+  state), "State with limited recognition" (Kosovo, N. Cyprus, Palestine, Somaliland, Taiwan), "Disputed territory"
+  (Western Sahara). A non-independent unit without a status entry fails the build.
+- 2026-09-30 Blocs hand-entered in `data-raw/manual/world-blocs.json`, web-checked 2026-09-30: NATO 32, EU 27, G7 7,
+  G20 19 (+EU, AU), BRICS 10 (Saudi Arabia left out: invited, never confirmed), Commonwealth 56, Five Eyes, UN P5.
+  Members too small for the 1:110m map are listed in the legend note.
+- 2026-09-30 Click selects (no camera move, as in Paradox); list, search (Enter picks the first match), neighbour
+  links and "Centre on map" select and frame the country (max zoom 8 so micro-states aren't blobs). Esc or clicking
+  the sea closes the card. The map is focusable: arrows pan, + / − zoom, Home = whole map.
+- 2026-09-30 Optional 3D tilt skipped: a CSS/three.js tilt costs GPU time on Intel UHD for little gain on a flat
+  map. `HAS_3D_VIEW` stays false; T7's seat columns are the first real 3D candidate. The ticker is the shell's
+  existing status bar.
+- 2026-09-30 Browser-verified (scratchpad Playwright, not committed): dark, light, 390 px (no sideways scroll); hover
+  label, click → card, wheel/drag/keys, Esc, all modes and blocs, search → Qatar framed, neighbour link; single-file
+  build loads the World screen with no console errors. Republished the playable link.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -239,5 +275,7 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   into the sim/world when events start producing mail (T11/T15).
 - Number keys 1–5 set the speed everywhere; Dialogue shows numbered choices but can't take number keys yet. Decide
   at T11 (e.g. capture 1–4 while a conversation is open).
+- World map facts are static until M4: blocs and capitals need re-checking then (`asOf` 2026-09-30). Hover labels
+  are mouse-only; touch players use the country list and card.
 - Single-file builds inline both woff2 and woff for Newsreader (fontsource CSS lists both); ~90 KB wasted. Fine for
   now; trim at T8 if size matters.

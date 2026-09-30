@@ -20,4 +20,10 @@ export const DATA_CREDITS: DataCredit[] = [
   },
   { what: 'Constituency hex map', credit: 'Open Innovations (MIT licence).' },
   { what: 'World borders', credit: 'Natural Earth (public domain), via world-atlas.' },
+  {
+    what: 'Country regions and capitals',
+    credit:
+      'DataHub country codes (Public Domain Dedication and License), with UN M49 regions. ' +
+      'Bloc memberships compiled for this game.',
+  },
 ]

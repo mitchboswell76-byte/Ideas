@@ -168,7 +168,7 @@ function Buttons() {
 }
 
 function ChipsTabs() {
-  const [tab, setTab] = useState<'all' | 'unread' | 'news'>('all')
+  const [tab, setTab] = useState<'all' | 'unread' | 'news' | 'later'>('all')
   return (
     <Section title="Chips, badges, tabs">
       <div className="row">
@@ -194,6 +194,7 @@ function ChipsTabs() {
           { key: 'all', label: 'All' },
           { key: 'unread', label: 'Unread', count: 4 },
           { key: 'news', label: 'News' },
+          { key: 'later', label: 'Later', disabled: 'Disabled tabs explain why in a tooltip' },
         ]}
       />
     </Section>

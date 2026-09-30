@@ -195,6 +195,11 @@
   color: var(--text);
 }
 
+.tabs__tab[aria-disabled='true'] {
+  color: var(--text-faint);
+  cursor: default;
+}
+
 /* Choice lists (settings): a group of radio or checkbox rows. */
 .choices {
   display: grid;

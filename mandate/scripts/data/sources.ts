@@ -32,6 +32,15 @@ export const SOURCES = {
     url: `${RAW}/ralphascott/UKGE24_wpc_census_summaries/d37264281d7ffa9eff6a86a01008c15e331022cc/2024-UK-General-Election-Census-Constituency-Summaries-File-v1.1.csv`,
     sha256: '981cd8b104683c95ffe9b7af5a1dd1a8a2b3e6d728c506212b6b7915a327fe8c',
   },
+  /**
+   * DataHub country codes (Public Domain Dedication and License): UN M49 regions, capitals and
+   * independence status by ISO code.
+   */
+  countryCodes: {
+    file: 'country-codes.csv',
+    url: `${RAW}/datasets/country-codes/6a595f1a6f10b3d00175fe67375da88f64f7f76b/data/country-codes.csv`,
+    sha256: '67b009b529330b0a6043551189f43faa785c9c3cc0011ad2bdb4eac876356c43',
+  },
 } satisfies Record<string, RemoteSource>
 
 export function sha256(data: string | Uint8Array): string {

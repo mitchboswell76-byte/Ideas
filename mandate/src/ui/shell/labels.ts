@@ -26,6 +26,7 @@ export const SCREEN_TITLES: Record<ScreenName, string> = {
   home: 'Home',
   inbox: 'Inbox',
   calendar: 'Calendar',
+  world: 'World',
   saves: 'Saves',
   settings: 'Settings',
 }

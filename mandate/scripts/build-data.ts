@@ -3,7 +3,9 @@
  *  - uk-seats.json     650 Westminster seats: name, nation, region, type, hex cell
  *  - ge2024.json       2024 general election results per seat
  *  - census2021.json   Census measures per seat (England and Wales 2021, Scotland 2022)
- *  - world-110m.json   Natural Earth 1:110m countries (TopoJSON) + countries.json name index
+ *  - world-110m.json   Natural Earth 1:110m countries (TopoJSON), Antarctica dropped
+ *  - world-map.json    the same projected to SVG paths (Natural Earth I) for the World screen
+ *  - countries.json    country index (region, capital, status, neighbours) + blocs
  * Usage: npm run data [-- --refresh]   (--refresh re-downloads instead of using data-raw/.cache)
  * Optional: put the Commons Library's HoC-GE2024-results-by-constituency.csv in data-raw/ to use
  * official results for all 650 seats (and declaration times) instead of the GB mirror + manual NI.
@@ -13,6 +15,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import type {
   CensusFile,
+  CountriesFile,
   Ge2024File,
   Ge2024Party,
   Ge2024Result,
@@ -27,7 +30,14 @@ import { parseCsv } from './data/csv.ts'
 import { fromHocCsv, fromManual, fromSummaries, type ManualWinners } from './data/ge2024.ts'
 import { parseHexjson } from './data/hexjson.ts'
 import { fetchCached, SOURCES } from './data/sources.ts'
-import { prepareWorld, type Topology } from './data/world.ts'
+import {
+  countryFacts,
+  prepareWorld,
+  type BlocsSource,
+  type Topology,
+  type WorldExtra,
+} from './data/world.ts'
+import { neighbourMap, projectWorld } from './data/worldmap.ts'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const RAW = `${ROOT}data-raw/`
@@ -136,6 +146,23 @@ async function main() {
     await readFile(`${ROOT}node_modules/world-atlas/countries-110m.json`, 'utf8'),
   ) as Topology
   const world = prepareWorld(atlas)
+  const readManual = async <T>(file: string) =>
+    JSON.parse(await readFile(`${RAW}manual/${file}`, 'utf8')) as T
+  const extra = await readManual<WorldExtra>('world-extra.json')
+  const blocsSource = await readManual<BlocsSource>('world-blocs.json')
+  const codes = parseCsv(await fetchCached(SOURCES.countryCodes, CACHE, refresh))
+  const facts = countryFacts(
+    world.countries,
+    codes,
+    extra,
+    blocsSource,
+    neighbourMap(world.topology),
+  )
+  const sovereignOf = new Map(
+    facts.countries.flatMap((c) => (c.sovereign ? [[c.id, c.sovereign] as const] : [])),
+  )
+  const worldMap = projectWorld(world.topology, sovereignOf)
+  const countriesFile: CountriesFile = { asOf: blocsSource.asOf, ...facts }
 
   const seatsFile: SeatsFile = { asOf: '2024-07-04', layout: hex.layout, regions, seats }
   const ge2024File: Ge2024File = { asOf: '2024-07-04', parties: GE2024_PARTIES, results }
@@ -150,7 +177,8 @@ async function main() {
   await writeFile(`${OUT}ge2024.json`, stringify(ge2024File))
   await writeFile(`${OUT}census2021.json`, stringify(censusFile))
   await writeFile(`${OUT}world-110m.json`, `${JSON.stringify(world.topology)}\n`)
-  await writeFile(`${OUT}countries.json`, stringify({ countries: world.countries }))
+  await writeFile(`${OUT}countries.json`, stringify(countriesFile))
+  await writeFile(`${OUT}world-map.json`, stringify(worldMap))
 
   const totals = new Map<Ge2024Party, number>()
   for (const r of results) totals.set(r.winner, (totals.get(r.winner) ?? 0) + 1)
@@ -164,6 +192,15 @@ async function main() {
     [...totals]
       .sort((a, b) => b[1] - a[1])
       .map(([p, n]) => `${GE2024_PARTIES[p]} ${n}`)
+      .join(', '),
+  )
+  console.log(
+    'Blocs:',
+    facts.blocs
+      .map(
+        (b) =>
+          `${b.name} ${b.members.length}${b.offMap.length ? ` (${b.offMap.length} off map)` : ''}`,
+      )
       .join(', '),
   )
   console.log('Results from:', [...sources].map(([s, n]) => `${s} ${n}`).join(', '))

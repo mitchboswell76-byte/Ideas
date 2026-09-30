@@ -10,7 +10,9 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 | `uk-seats.json` | 650 Westminster seats (2024 boundaries): ONS code, name, nation, region, county/borough/burgh, hex cell | 2024-07-04 |
 | `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected | 2024-07-04 |
 | `census2021.json` | 21 census measures per seat (GB only) | E&W 2021-03-21, Scotland 2022-03-20 |
-| `world-110m.json`, `countries.json` | 177 countries as TopoJSON + id/name index | Natural Earth via world-atlas 2.0.2 |
+| `world-110m.json` | 176 countries and territories as TopoJSON (Antarctica dropped) | Natural Earth via world-atlas 2.0.2 |
+| `world-map.json` | The same projected to SVG paths (Natural Earth I, 1000 units wide): focus box, label point, political colour per country; border and coast meshes | derived |
+| `countries.json` | Country index: ISO alpha-3, UN M49 region and sub-region, capital, status, land neighbours, blocs; the 8 blocs | 2026-09-30 (blocs, corrections) |
 
 ## Inputs
 
@@ -55,11 +57,44 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 ### World borders
 - **Package:** `world-atlas` 2.0.2 (npm, ISC; © Michael Bostock): Natural Earth 1:110m admin-0 countries, public
   domain.
-- **Processing:** land layer dropped; ids added for the three countries Natural Earth leaves without an ISO code
-  (Kosovo `XKX`, Northern Cyprus `XNC`, Somaliland `XSL`); abbreviated labels expanded ("Dem. Rep. Congo" →
-  "Democratic Republic of the Congo", "Macedonia" → "North Macedonia", "United States of America" →
-  "United States", …). The list includes territories (Greenland, Falkland Islands, Western Sahara, Puerto Rico,
-  New Caledonia) and Antarctica; T6 decides how the map treats them.
+- **Processing:** land layer and Antarctica dropped (no state, and it would take a fifth of the map's height); ids
+  added for the three units Natural Earth leaves without an ISO code (Kosovo `XKX`, Northern Cyprus `XNC`,
+  Somaliland `XSL`); abbreviated labels expanded ("Dem. Rep. Congo" → "Democratic Republic of the Congo",
+  "Macedonia" → "North Macedonia", "United States of America" → "United States", …).
+- **Map paths (`world-map.json`):** projected at build time with `d3-geo` (Natural Earth I, fitted to 1000 units
+  wide) and `topojson-client` (both ISC, dev dependencies only), written as relative one-decimal SVG paths. Each
+  country's focus box and label point come from its largest projected ring (mainland France, not French Guiana;
+  Russia west of the antimeridian). Land neighbours are countries sharing an arc. Political colours: greedy
+  colouring over 6 muted colours so neighbours never match; territories take their state's colour.
+
+### Country regions and capitals
+- **Source:** DataHub `datasets/country-codes`, commit `6a595f1a6f10b3d00175fe67375da88f64f7f76b`,
+  `data/country-codes.csv` (SHA-256 `67b009b529330b0a6043551189f43faa785c9c3cc0011ad2bdb4eac876356c43`). Licence:
+  Public Domain Dedication and License (the README notes ISO's own terms for the code lists).
+- **Used:** ISO numeric (join key, zero-padded) and alpha-3; UN M49 region, sub-region and intermediate region (the
+  intermediate one, e.g. Caribbean, is used where it exists); capital; `is_independent`.
+- **Corrections** (`data-raw/manual/world-extra.json`, hand-entered 2026-09-30): regions and capitals for the three
+  `X` units; diacritics the file drops (Bogotá, Reykjavík, …); Astana (renamed 2022); Ciudad de la Paz (Equatorial
+  Guinea's capital from 2 January 2026, by presidential decree — checked by web search); neutral wording for
+  disputed capitals (Jerusalem, East Jerusalem/Ramallah, Laayoune).
+- **Status:** every unit the source does not mark independent must have a status entry, or the build fails.
+  Territories (with their state): Falkland Islands (UK), Greenland (Denmark), New Caledonia and French Southern and
+  Antarctic Lands (France), Puerto Rico (US). "State with limited recognition": Kosovo, Northern Cyprus, Palestine,
+  Somaliland, Taiwan. "Disputed territory": Western Sahara. Descriptive only; the game takes no position.
+
+### Blocs
+- **File:** `data-raw/manual/world-blocs.json`, hand-entered and checked by web search on 2026-09-30. Members are ISO
+  alpha-3 codes; the build checks every code and lists members too small for the 1:110m map (e.g. Malta, Singapore,
+  most Caribbean and Pacific Commonwealth states).
+- NATO 32 (Finland 2023, Sweden 2024); EU 27; G7 7 (the EU attends); G20 19 countries + EU + African Union (the US,
+  hosting in 2026, has not invited South Africa, which stays listed as a member); BRICS 10 (Brazil, Russia, India,
+  China, South Africa; Egypt, Ethiopia, Iran, UAE from 2024; Indonesia from 2025). **Saudi Arabia is left out:**
+  invited in 2023, it has not confirmed membership (reports around the 2026 New Delhi summit). Commonwealth 56
+  (Gabon and Togo joined 2022; Gabon's suspension ended July 2025). Five Eyes 5; UN Security Council P5 5.
+- Search results used: NATO membership pages (vajiramandravi, legacyias, 2026), BRICS 2026 member lists (Wikipedia
+  18th BRICS summit; businesstoday.in 2026-09-10), Saudi status (swissinfo; theglobeandmail; arabnews.pk 2026),
+  Commonwealth (Wikipedia member states; commonwealthsport.com), EU (appf.europa.eu 2026 lists), G20 (Wikipedia 2026
+  G20 Miami summit; thestatesman), Equatorial Guinea (archdaily; allafrica 2026-01-05). Re-check at M4.
 
 ## Known limits
 - MPs are as elected on 4 July 2024. By-elections, defections and suspensions since then are not applied
