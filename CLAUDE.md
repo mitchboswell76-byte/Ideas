@@ -12,12 +12,19 @@ Browser grand-strategy/life sim: start as nobody in the UK, rise to PM via party
 ## Layout
 - `mandate/` — the game (Vite + React 19 + TypeScript strict)
   - `src/sim/` pure TS engine: no DOM, deterministic (seeded RNG), runs in a Web Worker or Node
-  - `src/ui/` React UI, 3D via @react-three/fiber; `src/data/` bundled JSON data
-  - `scripts/` data build + soak test; `tests/` Vitest
+  - `src/runtime/` sim runner (speed, auto-pause, save/load), Web Worker entry, main-thread bridge; timers OK, no DOM
+  - `src/ui/` React UI, Zustand stores (`ui/store`), saves (`ui/saves`), `ui/kit` (components + `kit/gallery` style
+    guide), `ui/shell` (game frame), `ui/screens` (Home, Inbox, …), `ui/menu` (main menu), `ui/three` (lazy r3f host),
+    `ui/graphics` (GPU presets, 3D/2D default)
+  - `src/data/` bundled JSON data
+  - `scripts/` data build + soak test; `tests/` Vitest; `e2e/` Playwright (smoke, Artifact export, perf)
 - `docs/DESIGN.md` full design of every system; `docs/DATA_SOURCES.md` licences + `asOf` dates
 
 ## Commands (run inside `mandate/`)
-`npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak`
+`npm run dev` · `npm run build` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run soak` ·
+`npm run build:kit` / `build:preview` (kit.html / the game → one HTML file for an Artifact) ·
+`npm run data` (rebuild `src/data/generated/` from pinned sources; see docs/DATA_SOURCES.md) ·
+`npm run e2e` (both builds + Playwright smoke/perf; run before publishing an Artifact; `e2e:perf` = perf only)
 Quality gate before every commit: `npm run typecheck && npm run lint && npm test && npm run build`
 
 ## Rules
@@ -26,5 +33,7 @@ Quality gate before every commit: `npm run typecheck && npm run lint && npm test
 - UK English in all player-facing text. Money in £.
 - Real politicians: no invented crimes/scandals; procedural scandals only hit the player or fictional NPCs.
 - Coup/insurgency stay abstract (numbers, risk, backlash) — no real-world tactics, no real extremist groups.
-- Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand, has Low preset + 2D fallback.
+- Look = copied reference stack (DESIGN §17 table): FM shell/inbox/tables, CK3 characters/tooltips/events, Suzerain
+  dialogue, D4 policy, FP2 votes, Paradox map modes. Copy patterns, never assets, logos, paid fonts or real-org branding.
+- Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand, cached portraits, Low preset + 2D mode.
 - Network is restricted in cloud sessions: npm + raw.githubusercontent.com work; gov.uk/parliament/ONS/Wikipedia don't.

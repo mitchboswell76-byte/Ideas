@@ -1,0 +1,11 @@
+/* World screen (T6): bloc switcher. Layout is shared (`map/map-screen.css`). */
+.world-screen__blocs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.world-screen__bloc[aria-pressed='true'] {
+  border-color: var(--text);
+}

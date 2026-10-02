@@ -1,0 +1,70 @@
+{
+  "asOf": "2026-09-30",
+  "note": "Hand-entered and checked by web search on the asOf date (sources in docs/DATA_SOURCES.md). Members are ISO 3166-1 alpha-3 codes; organisations that belong to a bloc (the EU and African Union in the G20, the EU at the G7) are in `alsoIncludes`.",
+  "blocs": [
+    {
+      "id": "nato",
+      "name": "NATO",
+      "full": "North Atlantic Treaty Organization",
+      "about": "Military alliance whose members commit to collective defence (Article 5). Finland joined in 2023 and Sweden in 2024.",
+      "members": ["ALB", "BEL", "BGR", "CAN", "HRV", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "ITA", "LVA", "LTU", "LUX", "MNE", "NLD", "MKD", "NOR", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE", "TUR", "GBR", "USA"]
+    },
+    {
+      "id": "eu",
+      "name": "EU",
+      "full": "European Union",
+      "about": "Political and economic union of 27 states with a single market. The UK left on 31 January 2020.",
+      "members": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"]
+    },
+    {
+      "id": "g7",
+      "name": "G7",
+      "full": "Group of Seven",
+      "about": "Annual summit of seven large advanced economies.",
+      "members": ["CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA"],
+      "alsoIncludes": ["European Union (attends, not counted as a member)"]
+    },
+    {
+      "id": "g20",
+      "name": "G20",
+      "full": "Group of Twenty",
+      "about": "Forum of 19 countries plus the European Union and the African Union. The US, hosting in 2026, has not invited South Africa, which remains a member.",
+      "members": ["ARG", "AUS", "BRA", "CAN", "CHN", "FRA", "DEU", "IND", "IDN", "ITA", "JPN", "KOR", "MEX", "RUS", "SAU", "ZAF", "TUR", "GBR", "USA"],
+      "alsoIncludes": ["European Union", "African Union"]
+    },
+    {
+      "id": "brics",
+      "name": "BRICS",
+      "full": "BRICS",
+      "about": "Brazil, Russia, India, China and South Africa, enlarged in 2024 (Egypt, Ethiopia, Iran, UAE) and 2025 (Indonesia). Saudi Arabia was invited in 2023 but has not confirmed membership, so it is not shown.",
+      "members": ["BRA", "RUS", "IND", "CHN", "ZAF", "EGY", "ETH", "IRN", "ARE", "IDN"]
+    },
+    {
+      "id": "commonwealth",
+      "name": "Commonwealth",
+      "full": "Commonwealth of Nations",
+      "about": "Voluntary association of 56 states, most of them once part of the British Empire. Gabon and Togo joined in 2022.",
+      "members": [
+        "BWA", "CMR", "SWZ", "GAB", "GMB", "GHA", "KEN", "LSO", "MWI", "MUS", "MOZ", "NAM", "NGA", "RWA", "SYC", "SLE", "ZAF", "TGO", "UGA", "TZA", "ZMB",
+        "BGD", "BRN", "IND", "MYS", "MDV", "PAK", "SGP", "LKA",
+        "ATG", "BHS", "BRB", "BLZ", "CAN", "DMA", "GRD", "GUY", "JAM", "KNA", "LCA", "VCT", "TTO",
+        "CYP", "MLT", "GBR",
+        "AUS", "FJI", "KIR", "NRU", "NZL", "PNG", "WSM", "SLB", "TON", "TUV", "VUT"
+      ]
+    },
+    {
+      "id": "fiveEyes",
+      "name": "Five Eyes",
+      "full": "Five Eyes",
+      "about": "Intelligence-sharing alliance of Australia, Canada, New Zealand, the UK and the US.",
+      "members": ["AUS", "CAN", "NZL", "GBR", "USA"]
+    },
+    {
+      "id": "p5",
+      "name": "UN P5",
+      "full": "UN Security Council permanent members",
+      "about": "The five permanent members of the UN Security Council, each with a veto.",
+      "members": ["CHN", "FRA", "RUS", "GBR", "USA"]
+    }
+  ]
+}

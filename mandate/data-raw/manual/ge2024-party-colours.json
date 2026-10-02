@@ -1,0 +1,22 @@
+{
+  "note": "Map colours for the parties in the 2024 results: approximations of the colours election maps conventionally use for each party (no logos or other branding). Hand-entered for the T7 map; T12's party data will replace them.",
+  "colours": {
+    "con": "#0087dc",
+    "lab": "#e4003b",
+    "ld": "#faa61a",
+    "reform": "#12b6cf",
+    "green": "#02a95b",
+    "snp": "#fdf38e",
+    "pc": "#005b54",
+    "dup": "#d46a4c",
+    "sf": "#326760",
+    "sdlp": "#2aa82c",
+    "uup": "#48a5ee",
+    "alliance": "#f6cb2f",
+    "tuv": "#0c3a6a",
+    "workers": "#8b1a1a",
+    "ind": "#b8b8b8",
+    "speaker": "#ffffff",
+    "other": "#8a8a8a"
+  }
+}

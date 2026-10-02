@@ -1,0 +1,189 @@
+/* The game shell (DESIGN §17): sidebar | header / stage / status bar. */
+.shell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+}
+
+.shell__main {
+  display: grid;
+  /* An explicit column, so the ticker's max-content strip can't widen it. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Header strip in party colours. */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  padding: 0 12px 0 20px;
+  background: var(--party);
+  color: var(--party-ink);
+}
+
+.topbar__title {
+  display: grid;
+  min-width: 0;
+}
+
+.topbar__party {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.topbar__screen {
+  overflow: hidden;
+  font-family: var(--font-cond);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.topbar__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Header buttons take the header's ink. */
+.topbar .btn--quiet {
+  color: inherit;
+}
+
+.topbar .btn--quiet:not(:disabled):hover,
+.topbar .btn[aria-pressed='true'] {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  color: inherit;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.shell__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+.shell__screen {
+  grid-row: 2;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px;
+}
+
+.shell__screen.shell__screen--flush {
+  padding: 0;
+}
+
+.problems {
+  display: grid;
+  gap: 6px;
+  padding: 12px 20px 0;
+}
+
+.problem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--bad);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.problem span {
+  flex: 1;
+}
+
+.problem__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--bad);
+}
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-1);
+}
+
+.statusbar .ticker {
+  flex: 1;
+}
+
+.statusbar__meta {
+  display: flex;
+  gap: 12px;
+  padding-right: 12px;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+@media (max-width: 899px) {
+  .shell__screen {
+    padding: 14px;
+  }
+
+  .topbar {
+    padding-left: 14px;
+  }
+}
+
+@media (max-width: 599px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 8px 6px 12px;
+  }
+
+  .topbar__party {
+    display: none;
+  }
+
+  .topbar__screen {
+    font-size: 20px;
+  }
+
+  .topbar__controls {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .datespeed__date {
+    min-width: 0;
+    font-size: var(--fs-l);
+  }
+
+  .datespeed__step {
+    display: none;
+  }
+
+  .statusbar__meta span:first-child {
+    display: none;
+  }
+
+  .pause-banner__hint {
+    display: none;
+  }
+}

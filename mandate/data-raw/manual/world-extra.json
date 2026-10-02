@@ -1,0 +1,42 @@
+{
+  "asOf": "2026-09-30",
+  "note": "Hand-entered corrections to the country-codes file (docs/DATA_SOURCES.md). `units`: Natural Earth units with no ISO code. `status`: every map unit that is not an ordinary sovereign state; the build fails if country-codes lists a non-independent unit that is missing here. `capitals`: diacritics the source drops, renamed or moved capitals (Astana 2022, Ciudad de la Paz January 2026) and neutral wording where a capital is disputed.",
+  "units": {
+    "XKX": { "iso3": null, "region": "Europe", "subregion": "Southern Europe", "capital": "Pristina" },
+    "XNC": { "iso3": null, "region": "Asia", "subregion": "Western Asia", "capital": "North Nicosia" },
+    "XSL": { "iso3": null, "region": "Africa", "subregion": "Eastern Africa", "capital": "Hargeisa" }
+  },
+  "status": {
+    "238": { "status": "territory", "sovereign": "826", "text": "British Overseas Territory" },
+    "260": { "status": "territory", "sovereign": "250", "text": "Overseas territory of France" },
+    "304": { "status": "territory", "sovereign": "208", "text": "Autonomous territory of the Kingdom of Denmark" },
+    "540": { "status": "territory", "sovereign": "250", "text": "Special collectivity of France" },
+    "630": { "status": "territory", "sovereign": "840", "text": "Unincorporated territory of the United States" },
+    "732": { "status": "disputed", "text": "Disputed territory" },
+    "275": { "status": "limited", "text": "State with limited recognition" },
+    "158": { "status": "limited", "text": "State with limited recognition" },
+    "XKX": { "status": "limited", "text": "State with limited recognition" },
+    "XNC": { "status": "limited", "text": "State with limited recognition" },
+    "XSL": { "status": "limited", "text": "State with limited recognition" }
+  },
+  "capitals": {
+    "076": "Brasília",
+    "120": "Yaoundé",
+    "170": "Bogotá",
+    "188": "San José",
+    "352": "Reykjavík",
+    "498": "Chișinău",
+    "600": "Asunción",
+    "768": "Lomé",
+    "260": "Port-aux-Français",
+    "540": "Nouméa",
+    "398": "Astana",
+    "226": "Ciudad de la Paz",
+    "104": "Naypyidaw",
+    "887": "Sana'a",
+    "840": "Washington, DC",
+    "376": "Jerusalem (disputed)",
+    "275": "East Jerusalem (claimed); Ramallah (seat of government)",
+    "732": "Laayoune (largest city)"
+  }
+}

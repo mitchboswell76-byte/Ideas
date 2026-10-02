@@ -1,0 +1,88 @@
+/* Frostpunk 2-style vote bar (DESIGN §17). Semantic colours, not party colours. */
+.vote {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.vote__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vote__title {
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.vote__counts {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+}
+
+.vote__count strong {
+  color: var(--text);
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+}
+
+.vote__count--for strong {
+  color: var(--good);
+}
+
+.vote__count--against strong {
+  color: var(--bad);
+}
+
+.vote__bar {
+  position: relative;
+  display: flex;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--surface-3);
+}
+
+.vote__seg {
+  height: 100%;
+  transition: width 300ms ease-out;
+}
+
+.vote__seg--for {
+  border-radius: 2px 0 0 2px;
+  background: var(--good);
+}
+
+.vote__seg--undecided {
+  background: var(--surface-3);
+}
+
+.vote__seg--against {
+  border-radius: 0 2px 2px 0;
+  background: var(--bad);
+}
+
+.vote__line {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: var(--majority-at);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+}
+
+.vote__majority {
+  position: relative;
+  left: var(--majority-at);
+  width: max-content;
+  transform: translateX(-50%);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}

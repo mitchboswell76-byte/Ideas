@@ -1,0 +1,69 @@
+/* News ticker. */
+.ticker {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  height: 28px;
+  overflow: hidden;
+}
+
+.ticker__label {
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding: 0 10px;
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-cond);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticker__window {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ticker__track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  animation: ticker var(--ticker-duration, 30s) linear infinite;
+}
+
+.ticker:hover .ticker__track {
+  animation-play-state: paused;
+}
+
+.ticker__items {
+  display: flex;
+  align-items: center;
+}
+
+.ticker__item {
+  padding: 0 14px;
+  font-size: var(--fs-s);
+  white-space: nowrap;
+}
+
+.ticker__item::after {
+  content: '•';
+  margin-left: 28px;
+  color: var(--text-faint);
+}
+
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* No scrolling with reduced motion: show the first stories, clipped. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__track {
+    animation: none;
+  }
+}

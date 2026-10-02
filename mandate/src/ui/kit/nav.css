@@ -1,0 +1,254 @@
+/* Sidebar (FM), time controls and pause banner (Paradox). DESIGN §17. */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-w);
+  min-height: 0;
+  border-right: 1px solid var(--line);
+  background: var(--surface-1);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-cond);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: grid;
+  gap: 1px;
+  padding: 8px 0;
+}
+
+.nav--foot {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+}
+
+.nav__tip {
+  display: flex;
+}
+
+.nav__item {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: var(--fs-m);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav__item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* The current screen: a bar on the left edge, filled icon. */
+.nav__item[aria-current='page'] {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.nav__item[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--text);
+}
+
+.nav__item[aria-disabled='true'] {
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.nav__item[aria-disabled='true']:hover {
+  background: none;
+  color: var(--text-faint);
+}
+
+.nav__icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.nav__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The icon rail (narrow screens, or on request). */
+.sidebar--rail {
+  width: var(--rail-w);
+}
+
+.sidebar--rail .sidebar__brand {
+  justify-content: center;
+  padding: 0;
+  letter-spacing: 0;
+}
+
+.sidebar--rail .nav__item {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar--rail .nav__label {
+  display: none;
+}
+
+.sidebar--rail .nav__badge {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+}
+
+/* Time controls. */
+.datespeed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.datespeed__date {
+  min-width: 128px;
+  font-family: var(--font-cond);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.datespeed__pause {
+  color: inherit;
+}
+
+.datespeed__pips {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+}
+
+/* Five rising bars; lit up to the current speed. */
+.datespeed__pip {
+  width: 8px;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+  background: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.datespeed__pips .tip-anchor:nth-child(1) .datespeed__pip {
+  height: 10px;
+}
+
+.datespeed__pips .tip-anchor:nth-child(2) .datespeed__pip {
+  height: 13px;
+}
+
+.datespeed__pips .tip-anchor:nth-child(3) .datespeed__pip {
+  height: 16px;
+}
+
+.datespeed__pips .tip-anchor:nth-child(4) .datespeed__pip {
+  height: 19px;
+}
+
+.datespeed__pips .tip-anchor:nth-child(5) .datespeed__pip {
+  height: 22px;
+}
+
+.datespeed__pip[data-lit] {
+  background: currentColor;
+  opacity: 1;
+}
+
+.datespeed__pips .tip-anchor {
+  align-items: flex-end;
+}
+
+.datespeed--paused .datespeed__pip[data-lit] {
+  opacity: 0.45;
+}
+
+.datespeed__pip:hover {
+  opacity: 1;
+}
+
+.datespeed__step {
+  display: flex;
+  gap: 2px;
+}
+
+.datespeed__step .btn {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* The paused banner: a pill by the date, on any header colour. */
+.pause-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--warn);
+  border-radius: 15px;
+  background: var(--surface-1);
+  color: var(--text);
+  white-space: nowrap;
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.pause-banner__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--warn);
+}
+
+.pause-banner__reason {
+  color: var(--warn);
+}
+
+.pause-banner__hint {
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}

@@ -1,0 +1,300 @@
+/*
+ * Flat maps (DESIGN §17: Paradox map modes). Map colours are their own tokens: political colours
+ * are muted so they never read as party colours; region colours are the validated categorical
+ * slots, ordered so regions that touch stay apart for colour-blind players too.
+ */
+:root,
+[data-theme='dark'] {
+  --map-sea: #1a232c;
+  --map-land-0: #5d7282;
+  --map-land-1: #85745a;
+  --map-land-2: #67806a;
+  --map-land-3: #7e6679;
+  --map-land-4: #77804f;
+  --map-land-5: #587882;
+  --map-region-asia: #3987e5;
+  --map-region-europe: #199e70;
+  --map-region-africa: #d95926;
+  --map-region-americas: #c98500;
+  --map-region-oceania: #d55181;
+  --map-member: #3987e5;
+  --map-other: #44505b;
+  --map-border: rgb(14 19 24 / 0.85);
+  --map-coast: #0e1419;
+  --map-home: var(--you);
+  --map-hover: rgb(255 255 255 / 0.16);
+  --map-label: #f1f3f5;
+  --map-label-halo: rgb(12 16 20 / 0.8);
+  /* Value ramp (UK map): one party-neutral hue, low → high; lighter is more on a dark map. */
+  --map-seq-0: #705439;
+  --map-seq-1: #8e7155;
+  --map-seq-2: #ad8f72;
+  --map-seq-3: #cdae90;
+  --map-seq-4: #eeceaf;
+  --map-nodata: #3a424b;
+  --map-hex-line: rgb(14 19 24 / 0.55);
+  --map-region-line: rgb(233 235 238 / 0.5);
+  --map-nation-line: #e9ebee;
+}
+
+[data-theme='light'] {
+  --map-sea: #dfe6ec;
+  --map-land-0: #a9bccb;
+  --map-land-1: #cdbb97;
+  --map-land-2: #a9c4a6;
+  --map-land-3: #c4a6bb;
+  --map-land-4: #bcc58f;
+  --map-land-5: #9fc0c9;
+  --map-region-asia: #2a78d6;
+  --map-region-europe: #1baf7a;
+  --map-region-africa: #eb6834;
+  --map-region-americas: #eda100;
+  --map-region-oceania: #e87ba4;
+  --map-member: #2a78d6;
+  --map-other: #c3cad1;
+  --map-border: rgb(255 255 255 / 0.9);
+  --map-coast: #7d8995;
+  /* Redeclared: var() resolves where it is declared. */
+  --map-home: var(--you);
+  --map-hover: rgb(0 0 0 / 0.12);
+  --map-label: #15181c;
+  --map-label-halo: rgb(255 255 255 / 0.85);
+  --map-seq-0: #ba9b7e;
+  --map-seq-1: #9b7d60;
+  --map-seq-2: #7c6044;
+  --map-seq-3: #5f4429;
+  --map-seq-4: #432a0f;
+  --map-nodata: #b9c0c7;
+  --map-hex-line: rgb(255 255 255 / 0.7);
+  --map-region-line: rgb(21 24 28 / 0.45);
+  --map-nation-line: #15181c;
+}
+
+.mapview {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--map-sea);
+}
+
+.mapview__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.mapview__svg:active {
+  cursor: grabbing;
+}
+
+.mapview__svg:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.mapview__controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* World map layers. Strokes stay one width at any zoom. */
+.wmap__countries path {
+  cursor: pointer;
+}
+
+.wmap__borders,
+.wmap__coast,
+.wmap__hover,
+.wmap__home,
+.wmap__selected {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.wmap__borders {
+  stroke: var(--map-border);
+  stroke-width: 0.75px;
+}
+
+.wmap__coast {
+  stroke: var(--map-coast);
+  stroke-width: 0.9px;
+}
+
+.wmap__hover {
+  fill: var(--map-hover);
+  stroke: var(--text-muted);
+  stroke-width: 1.25px;
+}
+
+.wmap__home {
+  stroke: var(--map-home);
+  stroke-width: 1.75px;
+}
+
+.wmap__selected {
+  stroke: var(--text);
+  stroke-width: 2.5px;
+}
+
+.wmap__labels {
+  fill: var(--map-label);
+  stroke: var(--map-label-halo);
+  font-family: var(--font-cond);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  paint-order: stroke;
+  stroke-linejoin: round;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Hover label: the kit's tooltip look, following the pointer. */
+.map-tip {
+  white-space: nowrap;
+}
+
+.map-tip__line {
+  color: var(--text-muted);
+}
+
+.map-legend {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  max-width: min(320px, calc(100% - 20px));
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--fs-xs);
+}
+
+.map-legend--column {
+  max-width: 168px;
+}
+
+.map-legend--column .map-legend__rows {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.map-legend__title {
+  cursor: pointer;
+  font-family: var(--font-cond);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.map-legend[open] .map-legend__title {
+  margin-bottom: 6px;
+}
+
+.map-legend__rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.map-legend__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-legend__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--swatch);
+}
+
+.map-legend__swatch--outline {
+  border: 2px solid var(--swatch);
+  background: none;
+}
+
+.map-legend__note {
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+
+/* UK hex map (T7). */
+.ukmap__hexes path {
+  cursor: pointer;
+  stroke: var(--map-hex-line);
+  stroke-width: 0.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.ukmap__regions,
+.ukmap__nations,
+.ukmap__outline,
+.ukmap__hover,
+.ukmap__selected {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.ukmap__regions {
+  stroke: var(--map-region-line);
+  stroke-width: 1px;
+}
+
+.ukmap__nations {
+  stroke: var(--map-nation-line);
+  stroke-width: 2px;
+}
+
+.ukmap__outline {
+  stroke: var(--map-coast);
+  stroke-width: 1px;
+}
+
+.ukmap__hover {
+  fill: var(--map-hover);
+  stroke: var(--text-muted);
+  stroke-width: 1.5px;
+}
+
+.ukmap__selected {
+  stroke: var(--text);
+  stroke-width: 2.5px;
+}
+
+.ukmap__labels {
+  fill: var(--map-label);
+  stroke: var(--map-label-halo);
+  font-family: var(--font-cond);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  paint-order: stroke;
+  stroke-linejoin: round;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+@media (max-width: 599px) {
+  /* The map is small on a phone: the key starts folded and drops its long notes. */
+  .map-legend__note {
+    display: none;
+  }
+}

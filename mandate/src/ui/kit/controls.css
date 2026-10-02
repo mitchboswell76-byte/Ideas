@@ -1,0 +1,262 @@
+/* Buttons, chips, badges, tabs, choice lists (DESIGN §17). */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  font-family: var(--font-ui);
+  font-size: var(--fs-m);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    border-color var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.btn--s {
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: var(--fs-s);
+}
+
+.btn--s .btn__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn--primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.btn--primary:not(:disabled):hover {
+  background: var(--text-muted);
+}
+
+.btn--secondary {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+}
+
+.btn--secondary:not(:disabled):hover {
+  border-color: var(--text-muted);
+}
+
+.btn--quiet {
+  color: var(--text-muted);
+}
+
+.btn--quiet:not(:disabled):hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.btn--danger {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.btn--danger:not(:disabled):hover {
+  background: var(--bad);
+  color: var(--bg);
+}
+
+.btn--icon {
+  width: 32px;
+  padding: 0;
+}
+
+.btn--icon.btn--s {
+  width: 26px;
+}
+
+.btn[aria-pressed='true'] {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+/* Chips: traits, statuses, party labels. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background: var(--surface-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chip__icon {
+  width: 14px;
+  height: 14px;
+}
+
+.chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chip-colour);
+}
+
+.chip--good {
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.chip--warn {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.chip--bad {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+/* Count badges (sidebar, tabs). */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--bad);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.badge--quiet {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+/* Tabs: condensed capitals, underline on the active tab. */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tabs__tab:hover {
+  color: var(--text);
+}
+
+.tabs__tab[aria-selected='true'] {
+  border-bottom-color: var(--text);
+  color: var(--text);
+}
+
+.tabs__tab[aria-disabled='true'] {
+  color: var(--text-faint);
+  cursor: default;
+}
+
+/* Choice lists (settings): a group of radio or checkbox rows. */
+.choices {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices__legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-family: var(--font-cond);
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+.choice:hover {
+  border-color: var(--line-strong);
+}
+
+.choice:has(input:checked) {
+  border-color: var(--text);
+}
+
+.choice:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.choice input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--text);
+}
+
+.choice__label {
+  font-weight: 600;
+}
+
+.choice__detail {
+  grid-column: 2;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+}

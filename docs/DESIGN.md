@@ -11,13 +11,17 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - **Many roads.** Party politics, activism/movements, business/media, coup, insurgency. They can be combined.
 - **Living simulation.** Opinion, economy, media and rivals move without you; you ride and shape them.
 - **Life, not just a career.** A BitLife-style layer: birth, family, relationships, health, ageing, death and heirs.
-- **Grand-strategy polish.** Stellaris-like UI: dark, cinematic, readable, with 3D centrepieces.
+- **Proven look, not an invented one.** Every layer of the interface copies a named, acclaimed game (§17):
+  Football Manager's shell and data screens, Crusader Kings III's characters, tooltips and events, and so on.
 - **Real but editable.** Real parties, politicians, outlets and countries, stored as data with `asOf` dates.
 
 ## §2 Time and scheduler
 
-- 1 tick = 1 in-game day. Speeds: 0 pause, then 1–5. Speed 5 is uncapped (as fast as the tick budget allows).
-- Real-time interval per tick: speed 1 = 1000 ms, speed 2 = 500 ms, speed 3 = 200 ms, speed 4 = 80 ms, speed 5 = next frame.
+- 1 tick = 1 in-game day. Speeds: 0 pause, then 1–5. Keys: Space pauses/resumes (previous speed), 1–5 set speed.
+- Real-time interval per tick: speed 1 = 1000 ms, speed 2 = 500 ms, speed 3 = 200 ms, speed 4 = 80 ms, speed 5 = 16 ms
+  (one per frame; if ticks outgrow that it runs back-to-back, i.e. as fast as the tick budget allows).
+  `TICK_MS` in `src/runtime/protocol.ts`. A late timer (throttled tab) catches up at most one tick.
+- While paused the player can step +N days; steps run in time slices and stop early on an auto-pause.
 - The scheduler runs systems by cadence. The order within a tick is fixed (deterministic).
   - **Daily:** activities progress, energy, money flows, heat decay, event rolls (low probability).
   - **Weekly (Monday):** polls, media cycle, opinion drift, donor behaviour.
@@ -33,14 +37,20 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - IDs are prefixed strings (`chr_…`, `pty_lab`, `con_E14001074`, `cty_GBR`).
 - A system is `{ id, cadence, run(world, ctx) }`. `ctx` = `{ rng, bus, day, emit }`.
 - **Determinism:** only `ctx.rng` (sfc32, seeded). There is no wall-clock time inside the sim.
-- **Commands from the UI** (e.g. `startActivity`, `chooseEventOption`, `setSpeed`) are queued and applied at the start of the next tick.
+- **Commands from the UI** (e.g. `startActivity`, `chooseEventOption`) are queued and applied at the start of the next tick.
+  Speed, pause and stepping are runner controls, not sim commands.
 - **Save format:** `{ version, savedAt, world }`, JSON compressed with CompressionStream (gzip) and stored in IndexedDB.
   Export/import is a `.mandate` file. Migrations live in `save.ts` as `migrations[version]`.
-- **Worker protocol:**
-  - UI → worker: `{type:'cmd', cmd}`
-  - Worker → UI: `{type:'tick', summary}` (compact: date, money, fame, heat, energy, headline changes, notifications)
-  - Detail queries: `{type:'query', id, what, args}` → `{type:'result', id, data}`
-  - If creating a Worker fails, the same engine runs on the main thread in time-sliced chunks.
+- **Worker protocol** (`src/runtime/protocol.ts`; the runner is `SimRunner`, the UI side `createSimBridge`):
+  - UI → runner: `{type:'cmd', cmd}` · `{type:'speed', speed}` · `{type:'togglePause'}` · `{type:'step', days}` ·
+    `{type:'autoPause', settings}` · `{type:'request', id, req}` with `req` = `newGame` | `save` | `load` | `query {what, args}`
+  - Runner → UI: `{type:'ready'}` · `{type:'tick', summary}` (compact: date, money, fame, heat, energy, headline changes,
+    notifications) · `{type:'status', speed, resumeSpeed, pausedBy}` · `{type:'result', id, ok, data|error}` · `{type:'fatal', message}`
+  - Detail queries are a data-driven registry (`src/runtime/queries.ts`); add an entry, not a message type.
+  - Main-thread fallback if `Worker` is missing, its constructor throws, it errors before `ready`, or `ready` takes > 5 s.
+    Same runner and messages (structured-cloned); step batches yield every 8 ms (50 ms in the worker).
+- **Save slots:** IndexedDB `mandate` with stores `slots` (metadata) and `saveData` (gzip bytes), one transaction per write.
+  Reserved slot ids `auto`, `quick`. Settings (auto-pause) in localStorage.
 
 ## §4 Character
 
@@ -63,9 +73,23 @@ Figures marked **(verify)** must be checked by web search before being hard-code
   Favours owed and secrets known (kompromat, M2).
 - **Background:** birthplace (country + optional constituency), nationality/citizenship, class origin, parents (jobs, politics, wealth), religion, education.
 - **Eligibility:** standing for Parliament needs age ≥ 18 and British/Irish/qualifying Commonwealth citizenship. Some jobs (civil servants, police, military) must resign to stand.
-- **Portrait:** layered SVG with parameters: faceShape, skinTone, hair{style,colour}, eyes, brows, nose, mouth, facialHair, glasses, clothing, accessory (rosette in party colour).
-  - Ageing: greying hair and lines added past set ages.
-  - The same generator makes NPC portraits. Real politicians get generated portraits (no photos).
+- **3D avatar (stylised, customisable):** every character is a stylised 3D person in the vein of The Sims or Two
+  Point Hospital: soft, readable shapes, not realism. Built in code from parametric meshes, so there are no large
+  model downloads.
+  - Parts: head (shape morphs: width, jaw, cheeks, chin, brow), eyes, brows, nose, mouth, ears, hair (mesh
+    variants + colour), facial hair, glasses, body (height, build), clothing (top, jacket/suit, tie, trousers/skirt,
+    shoes), accessories (rosette, lanyard, placard, hard hat, poppy).
+  - Expressions (neutral, smile, grim, worried, angry) as morph targets. Idle poses: stand, arms folded, podium, wave.
+  - Ageing: hair greys or recedes, lines appear, posture changes past set ages. Outfits change with role
+    (student → councillor → MP suit).
+  - **Creator (T10):** copies the CK3 ruler designer and The Sims' Create-a-Sim: categories on the left, turntable
+    avatar in the centre (drag to rotate, zoom to face), sliders and swatches on the right, randomise and presets.
+  - **Portraits:** CK3-style framed portraits. The bust is rendered once to a small offscreen target and cached as
+    an image (`Portrait` component); re-rendered only when appearance changes; no live 3D canvas per panel. The frame
+    shows party colour and office. Without WebGL: a flat illustrated silhouette in the same colours.
+  - NPCs use the same generator. Real politicians get avatars generated from editable parameters (hair, glasses,
+    build), with no photos and no photo-derived likenesses.
+- **Personal colour:** chosen at creation; used for the player's rosette, portrait frame and UI highlights (`--you`).
 - **Death and heirs:** health can fail with age or stress. The player may continue as a protégé or child who inherits part of the money, contacts and fame.
 
 ## §5 Life mode (playable backstory)
@@ -82,6 +106,9 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - Cards are keyed to real years for formative moments: 2008 crash, 2010 tuition fees protests, 2014 Scottish referendum, 2016 EU referendum, 2020 COVID, 2022 cost of living. A card fires only if the character was the right age.
 - Outcomes: attribute/skill growth, traits, ideology drift, contacts (friends who later become NPC allies), qualifications, starting money.
 - Quick start generates a backstory by sampling the same cards automatically.
+- **Presentation** copies BitLife: a year-by-year age log ("Age 7: You won the school spelling bee."), an
+  **Age +** button, and each choice shown in a CK3-style event window (§17). In real time the same log continues as
+  the career timeline on the Profile screen.
 
 ## §6 Opinion model
 
@@ -266,36 +293,93 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 - **Authoritarian governance (M5):** emergency powers, press control, packing institutions, rigging elections, with legitimacy, unrest and international response.
 - **Other countries (M6):** US first (primaries, conventions, Electoral College, Congress, filibuster, SCOTUS), then others via generic election engines and institution templates.
 
-## §17 Visual design
+## §17 Visual design — the reference stack
 
-- **Look:** dark navy/graphite "situation room" (default) with a light theme.
-  - Glass panels (translucent, blur, 1px hairline borders), party colours as accents.
-  - Newspaper-serif headlines for news; Inter for UI.
-  - Stellaris-style framed portraits and panel headers.
-- **Tokens:** all colours are CSS variables on `:root`, redefined for `[data-theme=light]`. No hard-coded colours in components.
-- **Motion:** Framer Motion for panel transitions and toasts; respect `prefers-reduced-motion`.
-- **3D scenes** (@react-three/fiber + drei):
-  1. Globe: sphere with country polygons (triangulated from the TopoJSON), hover glow, atmosphere shader, day/night terminator from the in-game date, great-circle arcs, fly-to-UK camera.
-  2. UK hex map: InstancedMesh columns (one draw call). Height = majority or vote share; colour = party. Election night animates heights.
-  3. Commons chamber: stylised benches (government right of the Speaker, opposition left), 650 instanced seat markers, animated divisions.
-  4. Later: low-poly backdrops (Downing Street, rally stage, TV studio).
-- **Performance** (Dell Latitude, Intel integrated GPU):
-  - `frameloop="demand"`; device pixel ratio ≤ 1.5; presets Low/Medium/High chosen at first launch from the GPU renderer string/benchmark.
-  - Low = no post-processing, fewer polygons, no shadows. Pause rendering when the tab is hidden.
-  - 2D SVG fallback if WebGL is unavailable or the user picks it.
-- **Budgets:** sim tick median < 2 ms; ≥ 30 fps on Low in 3D views; initial JS < 1.5 MB gzip (lazy-load 3D scenes).
+The user rejected two invented looks ("situation room"; "Ballot & Block" voxels) as generic or unwanted and asked for
+a design that **copies proven games at every level**. Each layer below names its source. We copy layouts,
+interaction patterns and conventions only: never artwork, logos, trademarks or paid fonts. No real organisation's
+branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport font is licence-restricted).
+
+### What each layer copies
+| Layer | Copy from | What exactly |
+|---|---|---|
+| App shell + navigation | Football Manager (FM24-era sidebar; FM26 tile → card) | Left sidebar with unread badges: Home, Inbox, Calendar, Profile, Party, Money, Media, Polls, Map, World. Header strip tinted in **your party's colours** (FM tints it with club colours). Home = tile dashboard; a tile opens a detail card |
+| Time controls | Paradox (CK3, Victoria 3) | Date, pause and five speed pips top-right; Space pauses; a banner says why the game paused |
+| Inbox + calendar | Football Manager | Inbox list (sender portrait, subject, date, unread dot) + reading pane with reply/action buttons. Calendar month grid: elections, conferences, council meetings, PMQs |
+| Character sheet | FM player profile + CK3 character window | Attribute grid with FM's colour-coded 1–20 values; traits as icon chips; relations with opinion numbers; big framed portrait |
+| Portraits | CK3 framing, stylised art (§4) | Cached 3D bust in a frame showing party colour and office |
+| Tooltips | CK3 nested tooltips | Highlighted terms inside a tooltip open their own tooltip; hold to lock; effect breakdowns list every modifier |
+| Events / decisions | CK3 event window | Title, scene image (3D render), body text, 2–4 options; each option's effects in its tooltip |
+| Conversations | Suzerain | Portrait left, dialogue in the serif, numbered choices, scrollable log |
+| Policy (M3) | Democracy 4 | Policy web: category clusters of round nodes, lines to affected voter groups and stats, green/red effect lines |
+| Votes (T19–T20) | Frostpunk 2 council | Horizontal For / Against / Undecided bar with the majority line; hemicycle seat chart |
+| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7): 650-seat hex map with Party, Majority (marginal → safe), Turnout, Demographics (21 census measures); Swing disabled until polling (T13); 3D seat columns at election night (T18). Value modes use one party-neutral ramp (sand → umber), never party colours |
+| Election night (T18) | Broadcast convention, unbranded | Seat totals bar with the majority line, swing gauge, declared-seats feed, the map filling in |
+| Tables + charts | Football Manager | Dense sortable tables, zebra rows, 13 px, tabular numbers; thin line charts with endpoint dots |
+| Main menu | Paradox / FM main menus | Left-column menu (New career, Continue, Load, Settings) over a full-bleed backdrop: the 650 seats in their 2024 colours, drifting slowly (static with reduced motion; hidden on narrow screens) |
+| Character creator (T10) | CK3 ruler designer + Sims Create-a-Sim | See §4 |
+| Life mode (T11) | BitLife | See §5 |
+
+Avoid FM26's criticised habit of stacking pop-ups: cards open in place (a side panel or the main area), one at a time.
+
+### Visual system
+- **Fonts** (open licence, bundled offline): **Barlow** for UI text, **Barlow Condensed** for headers, tabs and
+  tables, **Newsreader** for narrative text (events, dialogue, news). Tabular numerals wherever numbers line up.
+- **Icons:** Phosphor Icons (MIT), regular weight for UI and fill weight for active states. No emoji.
+- **Colour:** dark graphite UI (default) and a light theme, as CSS tokens on `:root` with `[data-theme]` overrides.
+  The header strip takes your party's colours. Attribute values use FM's scale: low red → orange → yellow → green →
+  high blue-green. Semantic good / warning / bad colours are separate from party colours, and party colours only ever
+  mean parties.
+- **Still banned:** glassmorphism and blur, decorative gradients and glows, emoji icons, Inter.
+- **Motion:** quick, functional transitions (panel slides, tooltip fades ≤ 150 ms); respect `prefers-reduced-motion`.
+
+### 3D (three.js + @react-three/fiber; lazy-loaded)
+- Used for characters (portrait renders, the creator's turntable, event scene images) and, from T6/T7, an optional
+  map tilt and election-night seat columns. No voxel diorama.
+- Kept from T4b: the persistent canvas layer, graphics presets with GPU detection and adaptive downgrade, on-demand
+  rendering (`useStepper`), and the 3D/2D view setting.
+
+### 2D mode (first-class)
+The whole game without WebGL: same UI, flat maps, illustrated portrait silhouettes. Default when WebGL is unavailable,
+`prefers-reduced-motion`, or viewport < 900 px; the setting is always offered.
+
+### Performance (Dell Latitude, Intel UHD 620-class GPU)
+- Render on demand; full-rate loops only while animating; pause when the tab is hidden.
+- Portraits are cached images, never one live canvas per panel. Reduced internal resolution on Low.
+- **Budgets:** sim tick median < 2 ms; 60 fps on Medium, ≥ 30 fps on Low in 3D views; initial JS < 1.5 MB gzip.
+
+### Audio (optional, T22)
+Procedural UI sounds and an ambient loop via Web Audio (no audio files). Starts only after a user gesture; mute
+changes gain only.
 
 ## §18 Data sources
 
-- **World borders:** `world-atlas` npm (Natural Earth 110m, public domain).
+- **World borders:** `world-atlas` npm (Natural Earth 110m, public domain), projected to SVG paths at build time.
+- **Country regions and capitals:** DataHub `country-codes` (PDDL; UN M49 regions), with hand corrections.
+- **Blocs** (NATO, EU, G7, G20, BRICS, Commonwealth, Five Eyes, UN P5): hand-entered, web-checked, `asOf` dated.
 - **UK constituencies (2024 boundaries):** Open Innovations `uk-constituencies-2023.hexjson` from
   `raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/` (reachable from the cloud env).
-- **GE2024 results by constituency** (House of Commons Library, Open Parliament Licence). parliament.uk is blocked from the cloud env. Fallbacks in order:
-  1. GitHub-hosted mirror via raw.githubusercontent.com
-  2. WebFetch
-  3. User uploads `HoC-GE2024-results-by-constituency.csv` into `mandate/data-raw/`
-  4. Regional results + seeded seat variation calibrated to the real seat totals (Lab 411, Con 121, LD 72, SNP 9, SF 7, Ind 6, Reform 5, DUP 5, Green 4, PC 4, SDLP 2, Alliance 1, UUP 1, TUV 1, Speaker 1)
+- **GE2024 results by constituency** (House of Commons Library, Open Parliament Licence). parliament.uk and
+  Wikipedia are blocked from the cloud env. Chosen chain (T5, details in `docs/DATA_SOURCES.md`):
+  1. `data-raw/HoC-GE2024-results-by-constituency.csv` if the user adds it: official, all 650 seats.
+  2. Otherwise the University of Bristol GB file on GitHub (632 seats; results copied from the Commons Library,
+     plus Census 2021/2022 measures).
+  3. Northern Ireland: hand-entered winners only, marked unverified, until the official file is added.
+  Seat totals reproduce the published result (Lab 411, Con 121, LD 72, SNP 9, SF 7, Ind 6, Reform 5, DUP 5,
+  Green 4, PC 4, SDLP 2, Alliance 1, UUP 1, TUV 1, Speaker 1).
+- **Census by constituency:** from the same GB file (ONS Census 2021; Scotland's Census 2022), 21 measures.
 - **Politicians, polls, pay and limits:** web-verified at build time. Each file records `asOf` and its source in `docs/DATA_SOURCES.md`.
+- **Fonts and icons:** Barlow and Barlow Condensed (OFL, @fontsource), Newsreader (OFL, @fontsource), Phosphor
+  Icons (MIT). Departure Mono was used by the superseded "Ballot & Block" kit.
+- **Art-direction research (2026-09-29):** y-n10.com (Cannes Lions / D&AD 2021 entries: "road movie", "80s game
+  with a modern look"); 2026 brutalism/anti-AI trend pieces; Obra Dinn 1-bit dithering; Mini Metro/Vignelli
+  minimalism; Dorfromantik diorama readability; three.js low-res upscaling and voxel meshing notes. Superseded.
+- **Reference-stack research (2026-09-29):** CK3 cited as the best Paradox UI, nested tooltips singled out
+  (forum.rpg.net best-UI thread); FM26 UI feature (tiles → cards; Efficiency, Familiarity, Predictability) and its
+  mixed reception (gosugamers review); Suzerain's map → notification → dialogue loop (Wikipedia); Frostpunk 2 council
+  vote bar (pcgamesn); Democracy 4's vector UI (techraptor); Atlus on the cost of Persona-style menus (pushsquare);
+  govuk-frontend is MIT but its Transport font is restricted (npm); MakeHuman exports are CC0 (considered for
+  realistic busts, not chosen); Game UI Database (gameuidatabase.com) as a reference library.
 
 ## §19 Content rules
 
@@ -307,7 +391,7 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 
 | Milestone | Content |
 |---|---|
-| M0 | Foundations: engine, shell, theme, data pipeline, 3D globe + hex map |
+| M0 | Foundations: engine, runtime, reference-stack UI kit + shell, main menu, data pipeline, world + UK maps |
 | M1 | Life layer + party route to PM: character, life mode, opinion, elections, money, media, events, AI |
 | M2 | Activism/movements, business/media route, espionage/kompromat, courts/prison |
 | M3 | Governing, full UK economy, devolved elections, Commons/Lords legislation, 3D backdrops |

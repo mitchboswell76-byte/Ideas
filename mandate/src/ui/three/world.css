@@ -1,0 +1,12 @@
+/* The 3D layer sits behind the UI; panels above it keep their own backgrounds. */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+}
+
+/* Reduced internal resolution on Low is upscaled by the browser. */
+.world canvas {
+  image-rendering: auto;
+}
