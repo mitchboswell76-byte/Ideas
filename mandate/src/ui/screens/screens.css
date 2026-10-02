@@ -37,35 +37,120 @@ kbd {
   background: transparent;
 }
 
-/* Home. */
+/* Home (Linear overview): page heading, lists in the main column, status panels beside. */
 .home {
   display: grid;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  grid-template-areas:
+    'head head'
+    'main side';
+  gap: 16px 20px;
   align-items: start;
+  max-width: 1280px;
 }
 
-.home--card {
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-}
-
-.tiles {
+.page-head {
+  grid-area: head;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
+  gap: 4px;
+  padding-bottom: 4px;
 }
 
-.home--card .tiles {
-  grid-template-columns: 1fr;
+.page-head__title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
-.home--card .tile {
-  min-height: 0;
+.page-head__sub {
+  color: var(--text-muted);
+  font-size: var(--fs-body);
 }
 
-.tile__row {
+.home__main,
+.home__side {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.home__main {
+  grid-area: main;
+}
+
+.home__side {
+  grid-area: side;
+}
+
+.button-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+/* Linear-style rows: one line each, title then muted meta, date on the right. */
+.list {
+  display: grid;
+}
+
+.list__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  font-size: var(--fs-m);
+  text-align: left;
+  cursor: pointer;
+}
+
+.list li:first-child .list__row,
+.list li:first-child.list__row {
+  border-top: 0;
+}
+
+.list__row:hover {
+  background: var(--hover);
+}
+
+.list__row--static {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  cursor: default;
+}
+
+.list__row--static:hover {
+  background: none;
+}
+
+.list__title {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list__meta {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.list__date {
+  min-width: 72px;
+  color: var(--text-faint);
+  font-size: var(--fs-s);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.list-empty {
+  padding: 16px 14px;
+  color: var(--text-muted);
 }
 
 .mini-list {
@@ -87,7 +172,7 @@ kbd {
 }
 
 .mini-list__row:hover {
-  background: var(--surface-2);
+  background: var(--hover);
 }
 
 .mini-list__row--static {
@@ -105,7 +190,7 @@ kbd {
 
 .mini-list__title {
   overflow: hidden;
-  font-weight: 600;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -130,10 +215,10 @@ kbd {
 }
 
 .you__name {
-  font-family: var(--font-cond);
-  font-size: var(--fs-xxl);
-  font-weight: 700;
-  line-height: 1;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .facts {
@@ -149,7 +234,7 @@ kbd {
 
 .facts dd {
   margin: 0;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .facts--keys dt {
@@ -217,10 +302,9 @@ kbd {
 }
 
 .mail-row__from {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
 .mail-row__subject {
@@ -256,11 +340,13 @@ kbd {
   justify-items: start;
 }
 
+/* A letter's subject: a serif headline, like the events. */
 .mail__subject {
-  font-family: var(--font-cond);
+  font-family: var(--font-serif);
   font-size: 26px;
   font-weight: 700;
-  line-height: 1.1;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .mail__from {
@@ -290,17 +376,14 @@ kbd {
 }
 
 .month__row--head {
-  border-bottom: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
 }
 
 .month__weekday {
-  padding: 6px 8px;
+  padding: 8px;
   color: var(--text-muted);
-  font-family: var(--font-cond);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
 .month__day {
@@ -323,18 +406,18 @@ kbd {
 }
 
 .month__day:hover {
-  background: var(--surface-2);
+  background: var(--hover);
 }
 
 .month__day[aria-pressed='true'] {
   background: var(--surface-3);
-  box-shadow: inset 0 0 0 2px var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
 }
 
 .month__date {
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
+  font-size: var(--fs-m);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .month__day--past .month__date {
@@ -439,11 +522,32 @@ kbd {
   }
 }
 
-@media (max-width: 899px) {
-  .home--card {
-    grid-template-columns: 1fr;
+@media (max-width: 1099px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'head'
+      'main'
+      'side';
+  }
+}
+
+@media (max-width: 599px) {
+  /* Phones: title and date only. */
+  .list__row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
+  .list__row--static {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .list__meta {
+    display: none;
+  }
+}
+
+@media (max-width: 899px) {
   .inbox {
     grid-template-columns: 1fr;
   }

@@ -32,6 +32,29 @@ test('main menu → new career → every screen', async ({ page }) => {
   }
 })
 
+test('command menu: Ctrl+K, filter, Enter runs, Esc closes, typing leaves the clock alone', async ({
+  page,
+}) => {
+  await newCareer(page)
+  const menu = page.getByRole('dialog', { name: 'Command menu' })
+  await page.keyboard.press('Control+k')
+  await expect(menu).toBeVisible()
+  // Digits and spaces typed into the search must not change the speed or unpause.
+  await page.keyboard.type('go 1 map')
+  await expect(page.getByRole('button', { name: /^Paused/ })).toBeVisible()
+  await expect(menu.getByRole('option')).toHaveCount(0)
+  await page.getByRole('textbox', { name: 'Search commands' }).fill('map')
+  await expect(menu.getByRole('option').first()).toHaveText(/Map/)
+  await page.keyboard.press('Enter')
+  await expect(menu).toBeHidden()
+  await expect(page.getByRole('banner').getByRole('heading', { level: 1 })).toHaveText('Map')
+
+  await page.getByRole('button', { name: 'Command menu' }).click()
+  await expect(menu).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
+})
+
 test('clock: step, Space, speed keys', async ({ page }) => {
   await newCareer(page)
   expect(await gameDate(page)).toBe('2026-10-01')

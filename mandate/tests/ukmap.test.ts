@@ -236,3 +236,14 @@ describe('UK map labels and layout', () => {
     expect(selected).toBe('E14001421')
   })
 })
+
+describe('menu backdrop tones', () => {
+  it('follows a colour lightness: black darkest, white lightest, yellow above red', async () => {
+    const { oklabLightness, tonalMix } = await import('../src/ui/map/uk/tone.ts')
+    expect(oklabLightness('#000000')).toBeCloseTo(0, 5)
+    expect(oklabLightness('#ffffff')).toBeCloseTo(1, 3)
+    expect(tonalMix('#000000')).toBe(8)
+    expect(tonalMix('#ffffff')).toBe(26)
+    expect(tonalMix('#fdf38e')).toBeGreaterThan(tonalMix('#e4003b'))
+  })
+})

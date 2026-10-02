@@ -296,14 +296,16 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 ## §17 Visual design — the reference stack
 
 The user rejected two invented looks ("situation room"; "Ballot & Block" voxels) as generic or unwanted and asked for
-a design that **copies proven games at every level**. Each layer below names its source. We copy layouts,
+a design that **copies proven games at every level**; at T8c they asked for "simple but beautiful, not AI-looking",
+copied from popular, acclaimed games and websites. Each layer below names its source. We copy layouts,
 interaction patterns and conventions only: never artwork, logos, trademarks or paid fonts. No real organisation's
 branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport font is licence-restricted).
 
 ### What each layer copies
 | Layer | Copy from | What exactly |
 |---|---|---|
-| App shell + navigation | Football Manager (FM24-era sidebar; FM26 tile → card) | Left sidebar with unread badges: Home, Inbox, Calendar, Profile, Party, Money, Media, Polls, Map, World. Header strip tinted in **your party's colours** (FM tints it with club colours). Home = tile dashboard; a tile opens a detail card |
+| App shell + navigation | Linear (layout, density, type habits) with FM's contents | Compact left sidebar on the window background with unread badges: Home, Inbox, Calendar, Profile, Party, Money, Media, Polls, Map, World. The screen sits in one raised panel; slim header with a party / screen breadcrumb and a thin stripe in **your party's colour** (FM's club colours, kept to a line). Home = Linear-style overview: dated heading, Inbox and Upcoming lists, You / Game / Keys panels (FM26's tile hub was dropped: reviewers called it cluttered) |
+| Command menu (T8c) | Linear / Raycast Ctrl+K | Ctrl+K or ⌘K (or the header button): type to filter screens, time controls and game actions; arrows, Enter, Esc |
 | Time controls | Paradox (CK3, Victoria 3) | Date, pause and five speed pips top-right; Space pauses; a banner says why the game paused |
 | Inbox + calendar | Football Manager | Inbox list (sender portrait, subject, date, unread dot) + reading pane with reply/action buttons. Calendar month grid: elections, conferences, council meetings, PMQs |
 | Character sheet | FM player profile + CK3 character window | Attribute grid with FM's colour-coded 1–20 values; traits as icon chips; relations with opinion numbers; big framed portrait |
@@ -313,24 +315,29 @@ branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport fo
 | Conversations | Suzerain | Portrait left, dialogue in the serif, numbered choices, scrollable log |
 | Policy (M3) | Democracy 4 | Policy web: category clusters of round nodes, lines to affected voter groups and stats, green/red effect lines |
 | Votes (T19–T20) | Frostpunk 2 council | Horizontal For / Against / Undecided bar with the majority line; hemicycle seat chart |
-| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7, T8b): the 650 seats on their real 2024 boundaries by default (BBC/FT election-map style: thin borders, seat names appear as you zoom, "Zoom to" a city), with a Map / Hexes switch to an equal-size hex cartogram for counting seats; modes Party, Majority (marginal → safe), Turnout, Demographics (21 census measures); Swing disabled until polling (T13); 3D seat columns at election night (T18). Value modes use one party-neutral ramp (sand → umber), never party colours |
+| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7, T8b): the 650 seats on their real 2024 boundaries by default (BBC/FT election-map style: thin borders, seat names appear as you zoom, "Zoom to" a city), with a Map / Hexes switch to an equal-size hex cartogram for counting seats; modes Party, Majority (marginal → safe), Turnout, Demographics (21 census measures); Swing disabled until polling (T13); 3D seat columns at election night (T18). Value modes use one party-neutral ramp (violet, T8c; was sand → umber), never party colours |
 | Election night (T18) | Broadcast convention, unbranded | Seat totals bar with the majority line, swing gauge, declared-seats feed, the map filling in |
-| Tables + charts | Football Manager | Dense sortable tables, zebra rows, 13 px, tabular numbers; thin line charts with endpoint dots |
-| Main menu | Paradox / FM main menus | Left-column menu (New career, Continue, Load, Settings) over a full-bleed backdrop: the 650 seats in their 2024 colours, drifting slowly (static with reduced motion; hidden on narrow screens) |
+| Tables + charts | Football Manager density, Linear rows | Dense sortable tables, hairline rows (no zebra), 13 px, tabular numbers; thin line charts with endpoint dots |
+| Main menu | Paradox / FM main menus, broadsheet masthead | Left-column menu (New career, Continue, Load, Settings) under a serif masthead, over a full-bleed backdrop: the 650 seats as a tonal grey map (lightness follows each 2024 winner), drifting slowly (static with reduced motion; hidden on narrow screens) |
 | Character creator (T10) | CK3 ruler designer + Sims Create-a-Sim | See §4 |
 | Life mode (T11) | BitLife | See §5 |
 
 Avoid FM26's criticised habit of stacking pop-ups: cards open in place (a side panel or the main area), one at a time.
 
 ### Visual system
-- **Fonts** (open licence, bundled offline): **Barlow** for UI text, **Barlow Condensed** for headers, tabs and
-  tables, **Newsreader** for narrative text (events, dialogue, news). Tabular numerals wherever numbers line up.
+- **Fonts** (open licence, bundled offline): **Schibsted Grotesk** (made for the Schibsted news group's sites) for the
+  interface in sentence case, 13 px UI and 14 px paragraphs; **Newsreader** for narrative text (events, dialogue,
+  letters, news), event and mail headlines and the main-menu masthead. Tabular numerals wherever numbers line up.
+  Map region names keep spaced capitals (the cartographic convention). Barlow / Barlow Condensed retired at T8c.
 - **Icons:** Phosphor Icons (MIT), regular weight for UI and fill weight for active states. No emoji.
-- **Colour:** dark graphite UI (default) and a light theme, as CSS tokens on `:root` with `[data-theme]` overrides.
-  The header strip takes your party's colours. Attribute values use FM's scale: low red → orange → yellow → green →
-  high blue-green. Semantic good / warning / bad colours are separate from party colours, and party colours only ever
-  mean parties.
-- **Still banned:** glassmorphism and blur, decorative gradients and glows, emoji icons, Inter.
+- **Colour:** dark grey UI (default) and a light theme, as CSS tokens on `:root` with `[data-theme]` overrides.
+  Surfaces step evenly in OKLCH lightness (Linear's method) with a faint cool tint; text is off-white, never pure
+  white on black. The header stripe takes your party's colour. Attribute values use FM's scale: low red → orange →
+  yellow → green → high blue-green. Semantic good / warning / bad come from the Okabe–Ito colour-blind-safe set and
+  always ship with an icon or word; party colours only ever mean parties. No brown or olive anywhere in chrome or map
+  palettes; value ramps are violet. Research behind these rules: PROGRESS decisions, 2026-10-02 (T8c).
+- **Still banned:** glassmorphism and blur, decorative gradients and glows, emoji icons, Inter (and other generated-UI
+  defaults: an indigo/purple accent on chrome, big rounded cards with soft shadows, centred hero text).
 - **Motion:** quick, functional transitions (panel slides, tooltip fades ≤ 150 ms); respect `prefers-reduced-motion`.
 
 ### 3D (three.js + @react-three/fiber; lazy-loaded)

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { formatShortDate } from '../format.ts'
-import { readableInk } from '../kit/colour.ts'
-import { DateSpeed, PauseBanner } from '../kit/index.ts'
+import { CommandIcon } from '../kit/icons.ts'
+import { DateSpeed, IconButton, PauseBanner } from '../kit/index.ts'
 import { gameStore, useGame } from '../store/index.ts'
 import { useNav } from '../store/nav.ts'
 import { HAS_3D_VIEW } from '../store/view.ts'
@@ -10,10 +10,11 @@ import { NO_PARTY } from './party.ts'
 import { ViewToggle } from './ViewToggle.tsx'
 
 /**
- * The header strip, tinted in the player's party colours (FM), with the time controls and, while
- * paused, the banner saying why (Paradox).
+ * The header: party and screen as a breadcrumb, a stripe in the player's party colour (FM's club
+ * colours, kept to a thin line), the time controls and, while paused, the banner saying why
+ * (Paradox).
  */
-export function TopBar() {
+export function TopBar({ onCommands }: { onCommands: () => void }) {
   const screen = useNav((s) => s.screen)
   const date = useGame((s) => s.date)
   const speed = useGame((s) => s.speed)
@@ -21,17 +22,27 @@ export function TopBar() {
   const pausedBy = useGame((s) => s.pausedBy)
   const game = gameStore.getState()
   const party = NO_PARTY
-  const style = {
-    '--party': party.colour,
-    '--party-ink': readableInk(party.colour),
-  } as CSSProperties
+  const style = { '--party': party.colour } as CSSProperties
   return (
     <header className="topbar" style={style}>
       <div className="topbar__title">
-        <span className="topbar__party">{party.name}</span>
+        <span className="topbar__party">
+          <span className="topbar__dot" aria-hidden />
+          {party.name}
+        </span>
+        <span className="topbar__sep" aria-hidden>
+          /
+        </span>
         <h1 className="topbar__screen">{SCREEN_TITLES[screen]}</h1>
       </div>
       <div className="topbar__controls">
+        <IconButton
+          icon={CommandIcon}
+          label="Command menu"
+          shortcut="Ctrl K"
+          variant="quiet"
+          onClick={onCommands}
+        />
         {HAS_3D_VIEW && <ViewToggle />}
         {speed === 0 && (
           <PauseBanner

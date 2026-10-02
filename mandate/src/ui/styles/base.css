@@ -1,87 +1,134 @@
-/* Foundations (DESIGN §17 "reference stack"): fonts, colour tokens, base elements. */
-@import '@fontsource/barlow/latin-400.css';
-@import '@fontsource/barlow/latin-600.css';
-@import '@fontsource/barlow-condensed/latin-500.css';
-@import '@fontsource/barlow-condensed/latin-700.css';
+/*
+ * Foundations (DESIGN §17): fonts, colour tokens, base elements.
+ *
+ * T8c look: Linear's layout habits (sentence case, 4 px grid, hairlines, evenly stepped greys) set in
+ * a newspaper grotesque. Colour follows the colour research (PROGRESS, 2026-10-02): dark grey, not
+ * black, with off-white text (halation); calm low-saturation chrome, leaving saturated colour to
+ * data (saturation drives arousal); no brown or olive (the least-liked hues); status colours from the
+ * Okabe–Ito colour-blind-safe set, always paired with an icon or word.
+ */
+
 @import '@fontsource/newsreader/latin-400.css';
 @import '@fontsource/newsreader/latin-400-italic.css';
 @import '@fontsource/newsreader/latin-700.css';
 
 /*
- * Dark graphite (default). Components use these tokens only. Party colours come from data and only
- * ever mean parties; selection and focus use the text colour, and good / warn / bad are their own.
- * Themes apply to any subtree via `data-theme`, so the style guide can show both side by side.
+ * Schibsted Grotesk (OFL): the grotesque made for the Schibsted news group's sites, so the
+ * interface reads like a newsroom tool rather than a generic app (Inter, the default of countless
+ * generated UIs, stays banned). Variable weight 400–900; tabular figures via `tnum`.
+ */
+@font-face {
+  font-family: 'Schibsted Grotesk Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('../../../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Latin Extended (Welsh ŵ, Romanian ș ă): only fetched when such a character is on screen. */
+@font-face {
+  font-family: 'Schibsted Grotesk Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('../../../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-ext-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/*
+ * Dark (default). Surfaces step evenly in OKLCH lightness (bg 0.205 → raised 0.29) with a faint cool
+ * tint; components use these tokens only. Party colours come from data and only ever mean parties;
+ * selection and focus use the text colour; good / warn / bad are their own. Themes apply to any
+ * subtree via `data-theme`, so the style guide can show both side by side.
  */
 :root,
 [data-theme='dark'] {
-  --bg: #131518;
-  --surface-1: #1a1d21;
-  --surface-2: #212529;
-  --surface-3: #2a2f35;
-  --line: #31373e;
-  --line-strong: #48505a;
-  --text: #e9ebee;
-  --text-muted: #a4abb3;
-  --text-faint: #6e767f;
-  --good: #52b872;
-  --warn: #e2a33c;
-  --bad: #e5574e;
+  --bg: #15171a;
+  --surface-1: #1b1d20;
+  --surface-2: #212326;
+  --surface-3: #292b2f;
+  --line: #2f3235;
+  --line-strong: #47494d;
+  --text: #e7eaee;
+  --text-muted: #aeb1b6;
+  --text-faint: #7e8084;
+  /* Okabe–Ito bluish green, orange, vermillion, lightened for a dark ground. */
+  --good: #47c496;
+  --warn: #f5ae39;
+  --bad: #f57050;
   /* FM's attribute scale, low to high: red, orange, yellow, green, blue-green. */
-  --attr-1: #e5574e;
-  --attr-2: #ec8d34;
+  --attr-1: #f57050;
+  --attr-2: #f0913a;
   --attr-3: #e6cf45;
   --attr-4: #78c451;
   --attr-5: #33c2a6;
   /* The player's personal colour (chosen at T10). */
   --you: #b79cf2;
   /* The header's party colour until the player joins one (set inline by the shell). */
-  --party: #56606b;
+  --party: #6b737d;
   --party-ink: #ffffff;
-  --scrim: rgb(10 11 13 / 0.72);
-  --shadow: 0 6px 18px rgb(0 0 0 / 0.45);
+  --hover: rgb(255 255 255 / 0.05);
+  --scrim: rgb(8 9 11 / 0.7);
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(0 0 0 / 0.2);
   color-scheme: dark;
 }
 
 [data-theme='light'] {
-  --bg: #e7eaee;
-  --surface-1: #f5f6f8;
+  --bg: #f2f5fa;
+  --surface-1: #f7faff;
   --surface-2: #ffffff;
   --surface-3: #eceff3;
-  --line: #d2d7dd;
-  --line-strong: #a9b1ba;
-  --text: #15181c;
-  --text-muted: #4f5761;
-  --text-faint: #7b838c;
-  --good: #23803f;
-  --warn: #a8650a;
-  --bad: #c0352c;
-  --attr-1: #c8352c;
+  --line: #dde0e4;
+  --line-strong: #b8bbbf;
+  --text: #1c1e21;
+  --text-muted: #535559;
+  --text-faint: #7e8084;
+  --good: #007c59;
+  --warn: #a35f00;
+  --bad: #c0401f;
+  --attr-1: #c0401f;
   --attr-2: #c96a0e;
   --attr-3: #9c8400;
   --attr-4: #3f8f1f;
   --attr-5: #0f8a76;
   --you: #7a55d6;
+  --hover: rgb(20 24 30 / 0.05);
   --scrim: rgb(30 34 40 / 0.4);
-  --shadow: 0 6px 18px rgb(20 24 30 / 0.18);
+  --shadow: 0 8px 24px rgb(20 24 30 / 0.12), 0 0 0 1px rgb(20 24 30 / 0.06);
   color-scheme: light;
 }
 
 :root {
-  --font-ui: 'Barlow', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-cond: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-ui: 'Schibsted Grotesk Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --fs-xs: 12px;
-  /* Tables. */
-  --fs-s: 13px;
-  --fs-m: 14px;
-  --fs-l: 16px;
+  /* Captions, badges. */
+  --fs-xs: 11px;
+  /* Secondary text, group labels, table meta. */
+  --fs-s: 12px;
+  /* UI default: controls, lists, tables. */
+  --fs-m: 13px;
+  /* Paragraphs. */
+  --fs-body: 14px;
+  /* Card and panel titles. */
+  --fs-l: 15px;
+  /* Screen headings. */
   --fs-xl: 20px;
-  --fs-xxl: 30px;
+  /* Display numbers. */
+  --fs-xxl: 28px;
   /* Narrative text (events, dialogue, mail). */
   --fs-serif: 17px;
-  --radius: 4px;
+  --radius: 6px;
+  --radius-l: 8px;
   --dur-fast: 120ms;
-  --sidebar-w: 212px;
+  --sidebar-w: 220px;
   --rail-w: 56px;
 }
 
@@ -107,7 +154,9 @@ body {
   color: var(--text);
   font-family: var(--font-ui);
   font-size: var(--fs-m);
-  line-height: 1.4;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1,
@@ -175,8 +224,11 @@ a {
   line-height: 1.45;
 }
 
-.cond {
-  font-family: var(--font-cond);
+/* A group label (Linear): small, sentence case, muted. */
+.label {
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
 @media (prefers-reduced-motion: reduce) {

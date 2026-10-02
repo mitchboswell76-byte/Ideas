@@ -7,7 +7,7 @@
   position: fixed;
   z-index: 1000;
   max-width: min(340px, calc(100vw - 16px));
-  padding: 8px 12px 10px;
+  padding: 8px 11px 10px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   background: var(--surface-3);
@@ -15,7 +15,7 @@
   color: var(--text);
   font-family: var(--font-ui);
   font-size: var(--fs-s);
-  line-height: 1.4;
+  line-height: 1.45;
   pointer-events: none;
   animation: tip-in var(--dur-fast) ease-out;
 }
@@ -34,11 +34,8 @@
 
 .tip__title {
   margin-bottom: 4px;
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-size: var(--fs-m);
+  font-weight: 600;
 }
 
 .tip__body {
@@ -50,7 +47,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .tip__key {
@@ -84,18 +81,19 @@
   }
 }
 
-/* Highlighted terms that open nested tooltips. */
+/* Terms that open nested tooltips (CK3): marked by a dotted underline, not by a hue. */
 .term {
   display: inline;
-  border-bottom: 1px dotted currentColor;
-  color: var(--warn);
+  border-bottom: 1px dotted var(--text-muted);
+  color: var(--text);
   font-weight: 600;
   cursor: help;
 }
 
 .term:hover,
 .term:focus-visible {
-  color: var(--text);
+  border-bottom-style: solid;
+  border-bottom-color: var(--text);
 }
 
 /* Effect breakdowns. */
@@ -121,6 +119,10 @@
   padding-top: 4px;
   border-top: 1px solid var(--line-strong);
   font-weight: 600;
+}
+
+.mods__row dt {
+  color: var(--text-muted);
 }
 
 .mods__value--good {

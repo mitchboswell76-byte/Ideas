@@ -1,12 +1,12 @@
 # Progress — Mandate
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
-**Current milestone:** M0 follow-ups (T8b done, T8c next), then M1 — Nobody to Prime Minister. M0 was merged into
+**Current milestone:** M1 — Nobody to Prime Minister (M0 follow-ups T8b, T8c done). M0 was merged into
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
-**Next session:** start at **T8c** (UI restyle), then T9
-**Last playable link (T8b):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Next session:** start at **T9**
+**Last playable link (T8c):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
-**UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
+**UI kit (T8c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
 ## Workflow for the user
 Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Then `/clear`.
@@ -59,7 +59,7 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 - [x] T8b UK map on real boundaries (user, 2026-10-02: "I don't like the hexagon design, it's not clear enough"):
       2024 constituency boundaries (ONS via Open Innovations geography-bits, OGL) projected at build time; Map / Hexes
       switch (remembered); seat names appear as you zoom; "Zoom to" 10 cities; menu backdrop on real shapes
-- [ ] T8c UI restyle (user, 2026-10-02: "simple but beautiful; must not look AI-made; copy popular, acclaimed games
+- [x] T8c UI restyle (user, 2026-10-02: "simple but beautiful; must not look AI-made; copy popular, acclaimed games
       and sites: fonts, spacing, design"). Research summary and choices in the decisions log (2026-10-02). Work:
       1. Tokens + type: Inter Variable (OFL, `@fontsource-variable/inter`; Inter Display cut via `opsz` for
          headings) replaces Barlow / Barlow Condensed; 13 px UI, 14 px body, tabular figures in tables; sentence case
@@ -77,6 +77,9 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
       Avoid the "AI look": no gradients, glass, glows or blur; no default indigo/purple accent; no emoji; no big
       rounded cards with soft drop shadows; no centred hero text. Split into two sessions if large (1–2 + kit,
       then 3–6).
+
+  Done in one session: tokens + type, shell, kit, Home lists, Ctrl+K command menu, main menu, map palettes, gallery.
+  Typeface is Schibsted Grotesk, not Inter (see decisions); colour rules from the research below.
 
 ## M1 — Nobody to Prime Minister (party route)
 - [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
@@ -369,6 +372,45 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   ("simple but beautiful, not AI-looking"): Linear for the shell and type, broadsheet data-journalism patterns for
   news and data pages (generic, no FT/Economist branding), game references kept for game moments (CK3, Suzerain,
   FP2). Copy patterns only (CLAUDE.md rule), no logos or brand colours.
+
+- 2026-10-02 T8c colour research (user asked to "check wider academia on the most appealing colourway"). Findings
+  used, with sources:
+  - Hue preference: people like blues and dislike dark yellow (olive) and dark orange (brown), the colours of things
+    they dislike (Palmer & Schloss 2010, PNAS, ecological valence theory). Valdez & Mehrabian (1994, J. Exp. Psych.:
+    General): blue, blue-green, green, purple-blue, purple and red-purple most pleasant; yellow and green-yellow least.
+    → No brown or olive in chrome or map palettes; value ramps violet (was sand → umber); the world map's political
+    palette lost its brown and olive (and its two near-identical blue-greys: worst pair ΔE 1.8 → 11).
+  - Saturation and brightness drive arousal and pleasure (Valdez & Mehrabian 1994; Wilms & Oberfeld 2018,
+    Psychological Research): saturated colours raise arousal, brighter ones read as more pleasant. → Calm,
+    low-saturation chrome for a long-session game; saturated colour reserved for data (party colours) and alerts.
+  - Pair harmony: preference rises with hue similarity and lightness contrast (Schloss & Palmer 2011, Attention,
+    Perception & Psychophysics). → One cool hue family for chrome, strong text/surface lightness contrast.
+  - Polarity: dark text on light reads better (positive-polarity advantage; Piepenbrock, Mayr & Buchner, Ergonomics
+    2013–14; Ergonomics 2025 found higher cognitive scores in light mode), while dark mode is reported as more
+    comfortable in dim light. → Keep both themes (dark default for a game), body text 14 px, narrative in the serif
+    at 17 px; avoid pure white on pure black (halation, worse for astigmatism): text #e7eaee on #15171a.
+  - Colour vision deficiency affects about 8% of men and 0.5% of women; the Okabe–Ito palette is the standard safe set.
+    → good / warn / bad are Okabe–Ito bluish green, orange and vermillion, always with an icon or word; map palettes
+    checked with the dataviz validator (value ramps pass every ordinal check in both themes).
+  - The menu backdrop drew dimmed party colours, which turns yellow and orange into exactly the disliked olive and
+    brown on a dark ground; it is now a tonal grey map (seat lightness follows the winner's colour).
+  Party colours themselves are unchanged (they are data and real-world conventions). Most journals and design sites are
+  blocked from the cloud env, so findings come from search results and abstracts, not full texts.
+- 2026-10-02 T8c look: Linear's layout habits (compact sidebar on the window background, the screen in one raised
+  panel, slim header with a party / screen breadcrumb and a 2 px party-colour stripe, sentence case, 13 px UI, hairline
+  tables without zebra rows, evenly stepped OKLCH greys) plus its Ctrl+K command menu (`ui/commands.ts` pure filter +
+  `isCommandShortcut`, `ui/shell/CommandMenu.tsx` native modal dialog, `hooks/useCommandShortcut.ts`, header button).
+  Home is an overview (dated heading, Inbox and Upcoming lists, You / Game / Keys panels); the nav store lost its Home
+  card state. Main menu: Newsreader masthead, quiet list items, tonal backdrop (`ui/map/uk/tone.ts`). Events and mail
+  subjects take serif headlines. Kit gained nothing new beyond `Segmented` (T8b); `.label`, `.list`, `.page-head` are
+  screen-level styles.
+- 2026-10-02 Typeface: first switched to Inter (Linear's font), then reverted the same session because DESIGN §17
+  already banned Inter as the generated-UI default and the user asked for "not AI-looking". Chosen instead: Schibsted
+  Grotesk (OFL, made for the Schibsted news group; variable 400–900; has `tnum`; 47 KB latin + 21 KB latin-ext, only
+  latin and latin-ext are bundled). IBM Plex Sans was rejected (no tabular figures in the fontsource build).
+- 2026-10-02 T8c measured: all 17 e2e tests pass; 57–60 fps under a 4× CPU throttle on every 2D screen; 212 unit
+  tests. The player's default personal colour (`--you`, violet) now shares a hue family with the UK value ramp:
+  revisit when T10 lets the player pick it.
 
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit

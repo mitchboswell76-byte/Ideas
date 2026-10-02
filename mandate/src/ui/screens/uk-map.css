@@ -16,13 +16,20 @@
   margin-top: 14px;
 }
 
+/* The card is narrow: a smaller, tighter table so the share column fits. */
+.seat-card__votes .table {
+  font-size: var(--fs-s);
+}
+
+.seat-card__votes .table th,
+.seat-card__votes .table td {
+  padding: 0 8px;
+}
+
 .seat-card__heading {
-  margin: 16px 0 8px;
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 18px 0 8px;
+  font-size: var(--fs-m);
+  font-weight: 600;
 }
 
 .facts__pair {

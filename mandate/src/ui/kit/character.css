@@ -46,13 +46,10 @@
   overflow: hidden;
   background: var(--frame-party, var(--surface-1));
   color: var(--frame-ink, var(--text));
-  font-family: var(--font-cond);
   font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 600;
   text-align: center;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -90,18 +87,17 @@
 
 .event__kicker {
   color: var(--text-muted);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
+/* Events are narrative: a broadsheet headline in the serif. */
 .event__title {
-  font-family: var(--font-cond);
+  font-family: var(--font-serif);
   font-size: 26px;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .event__scene {
@@ -191,9 +187,8 @@
 }
 
 .dialogue__name {
-  font-family: var(--font-cond);
   font-size: var(--fs-l);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .dialogue__role {
@@ -230,10 +225,8 @@
 
 .dialogue__speaker {
   color: var(--text-faint);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
 .dialogue__line--you .serif {

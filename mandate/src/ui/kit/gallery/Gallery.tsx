@@ -123,11 +123,12 @@ function Type() {
   return (
     <Section
       title="Type"
-      note="Barlow for UI, Barlow Condensed for headers, tabs and tables, Newsreader for narrative. Tabular numbers wherever figures line up."
+      note="Schibsted Grotesk (a news group's typeface) for the interface, in sentence case; Newsreader for narrative, headlines and the masthead. Tabular numbers wherever figures line up."
     >
       <div className="type-specimens">
-        <p className="type-cond">Barlow Condensed · Home · Inbox · Calendar</p>
-        <p>Barlow: the interface. Buttons, labels, lists and help text read at 14 px.</p>
+        <p className="type-display">Schibsted Grotesk · Home · Inbox · Calendar</p>
+        <p>The interface: buttons, labels and lists at 13 px, paragraphs at 14 px.</p>
+        <p className="type-headline">Chancellor faces revolt over fuel duty</p>
         <p className="serif">
           Newsreader: “The branch meets on Thursdays in the back room of the Crown, and nobody has
           stood against the chair in eleven years.”
@@ -305,7 +306,7 @@ function ShellDemo() {
   return (
     <Section
       title="Shell"
-      note="FM sidebar with unread badges; the header takes the player's party colour; Paradox date, pause and five speed pips; the paused banner."
+      note="Linear-style sidebar with FM's unread badges; the header is a breadcrumb with a stripe in the player's party colour; Paradox date, pause and five speed pips; the paused banner."
     >
       <div className="row">
         {PARTIES.map((p) => (
@@ -339,8 +340,14 @@ function ShellDemo() {
         />
         <div className="demo-shell__main">
           <header className="demo-topbar" style={style}>
-            <div>
-              <span className="demo-topbar__party">{party.name}</span>
+            <div className="demo-topbar__title">
+              <span className="demo-topbar__party">
+                <span className="demo-topbar__dot" aria-hidden />
+                {party.name}
+              </span>
+              <span className="demo-topbar__sep" aria-hidden>
+                /
+              </span>
               <h3 className="demo-topbar__screen">{screen}</h3>
             </div>
             <DateSpeed
@@ -387,7 +394,7 @@ function TilesDemo() {
   return (
     <Section
       title="Tiles and cards"
-      note="FM26: a tile opens its card in place, one at a time; no stacked pop-ups."
+      note="A tile opens its card in place, one at a time; no stacked pop-ups. Home uses lists instead (T8c)."
     >
       <div className={open ? 'demo-tiles demo-tiles--open' : 'demo-tiles'}>
         <div className="demo-tiles__grid">
@@ -482,7 +489,7 @@ function TableDemo() {
   return (
     <Section
       title="Table"
-      note="FM: dense, zebra rows, sortable headers, tabular numbers. Fictional seats."
+      note="FM density with Linear rows: hairlines, no zebra stripes, sortable headers, tabular numbers. Fictional seats."
     >
       <Panel flush>
         <Table
@@ -736,9 +743,10 @@ export function Gallery({ initialTheme }: { initialTheme: Theme }) {
         <div>
           <h1 className="gallery__title">Mandate UI kit</h1>
           <p className="gallery__lede">
-            The reference stack: Football Manager's shell, inbox and tables; Crusader Kings III's
-            portraits, tooltips and event windows; Suzerain's conversations; Frostpunk 2's vote bar;
-            Paradox time controls. Patterns only; no artwork, logos or paid fonts.
+            The reference stack: Linear's layout, type habits and command menu; Football Manager's
+            inbox and tables; Crusader Kings III's portraits, tooltips and event windows; Suzerain's
+            conversations; Frostpunk 2's vote bar; Paradox time controls. Patterns only; no artwork,
+            logos or paid fonts.
           </p>
         </div>
         <Tabs
@@ -767,8 +775,8 @@ export function Gallery({ initialTheme }: { initialTheme: Theme }) {
         <TickerDemo />
       </main>
       <footer className="gallery__foot">
-        Fictional parties, places and people throughout. Icons: Phosphor (MIT). Fonts: Barlow,
-        Barlow Condensed and Newsreader (OFL).
+        Fictional parties, places and people throughout. Icons: Phosphor (MIT). Fonts: Schibsted
+        Grotesk and Newsreader (OFL).
       </footer>
     </div>
   )

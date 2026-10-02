@@ -1,0 +1,124 @@
+/* Command menu (Linear / Raycast Ctrl+K): a centred list over a dimmed screen. */
+.cmdk {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(460px, calc(100vh - 120px));
+  margin: 14vh auto auto;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-2);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.cmdk[open] {
+  display: flex;
+  flex-direction: column;
+  animation: cmdk-in var(--dur-fast) ease-out;
+}
+
+@keyframes cmdk-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.cmdk::backdrop {
+  background: var(--scrim);
+}
+
+.cmdk__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cmdk__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.cmdk__input {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: var(--fs-l);
+}
+
+.cmdk__input::placeholder {
+  color: var(--text-faint);
+}
+
+.cmdk__list {
+  flex: 1;
+  min-height: 0;
+  padding: 6px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.cmdk__group {
+  padding: 10px 10px 4px;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  font-weight: 500;
+}
+
+.cmdk__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  font-size: var(--fs-m);
+  cursor: pointer;
+}
+
+.cmdk__item > span:first-child {
+  flex: 1;
+}
+
+.cmdk__item--active {
+  background: var(--surface-3);
+}
+
+.cmdk__meta {
+  color: var(--text-faint);
+  font-size: var(--fs-s);
+}
+
+.cmdk__key,
+.cmdk__foot kbd {
+  min-width: 20px;
+  padding: 1px 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+.cmdk__empty {
+  padding: 24px 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.cmdk__foot {
+  display: flex;
+  gap: 16px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--text-faint);
+  font-size: var(--fs-s);
+}

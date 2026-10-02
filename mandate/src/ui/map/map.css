@@ -2,16 +2,21 @@
  * Flat maps (DESIGN §17: Paradox map modes). Map colours are their own tokens: political colours
  * are muted so they never read as party colours; region colours are the validated categorical
  * slots, ordered so regions that touch stay apart for colour-blind players too.
+ *
+ * T8c (colour research, PROGRESS 2026-10-02): no brown or olive anywhere (the least-liked hues).
+ * Political: six muted hues spread round the wheel with alternating lightness (worst pair ΔE 11
+ * dark, was 1.8); borders do the rest. Value ramp: one violet hue (pleasant, and no UK party's
+ * colour), validated as an ordinal ramp in both themes.
  */
 :root,
 [data-theme='dark'] {
   --map-sea: #1a232c;
-  --map-land-0: #5d7282;
-  --map-land-1: #85745a;
-  --map-land-2: #67806a;
-  --map-land-3: #7e6679;
-  --map-land-4: #77804f;
-  --map-land-5: #587882;
+  --map-land-0: #3e668f;
+  --map-land-1: #429599;
+  --map-land-2: #3f704b;
+  --map-land-3: #897db2;
+  --map-land-4: #825172;
+  --map-land-5: #be7e82;
   --map-region-asia: #3987e5;
   --map-region-europe: #199e70;
   --map-region-africa: #d95926;
@@ -26,11 +31,11 @@
   --map-label: #f1f3f5;
   --map-label-halo: rgb(12 16 20 / 0.8);
   /* Value ramp (UK map): one party-neutral hue, low → high; lighter is more on a dark map. */
-  --map-seq-0: #705439;
-  --map-seq-1: #8e7155;
-  --map-seq-2: #ad8f72;
-  --map-seq-3: #cdae90;
-  --map-seq-4: #eeceaf;
+  --map-seq-0: #6b578f;
+  --map-seq-1: #8571ab;
+  --map-seq-2: #a08cc5;
+  --map-seq-3: #bbaade;
+  --map-seq-4: #d7c9f3;
   --map-nodata: #3a424b;
   --map-seat-line: rgb(14 19 24 / 0.8);
   --map-region-line: rgb(233 235 238 / 0.5);
@@ -39,12 +44,12 @@
 
 [data-theme='light'] {
   --map-sea: #dfe6ec;
-  --map-land-0: #a9bccb;
-  --map-land-1: #cdbb97;
-  --map-land-2: #a9c4a6;
-  --map-land-3: #c4a6bb;
-  --map-land-4: #bcc58f;
-  --map-land-5: #9fc0c9;
+  --map-land-0: #95b5d6;
+  --map-land-1: #9cd7da;
+  --map-land-2: #97bc9d;
+  --map-land-3: #cdc3ee;
+  --map-land-4: #cca3bd;
+  --map-land-5: #f0c4c6;
   --map-region-asia: #2a78d6;
   --map-region-europe: #1baf7a;
   --map-region-africa: #eb6834;
@@ -59,11 +64,11 @@
   --map-hover: rgb(0 0 0 / 0.12);
   --map-label: #15181c;
   --map-label-halo: rgb(255 255 255 / 0.85);
-  --map-seq-0: #ba9b7e;
-  --map-seq-1: #9b7d60;
-  --map-seq-2: #7c6044;
-  --map-seq-3: #5f4429;
-  --map-seq-4: #432a0f;
+  --map-seq-0: #a18cc8;
+  --map-seq-1: #866fb0;
+  --map-seq-2: #6d5398;
+  --map-seq-3: #543a7c;
+  --map-seq-4: #3b235d;
   --map-nodata: #b9c0c7;
   --map-seat-line: rgb(255 255 255 / 0.7);
   --map-region-line: rgb(21 24 28 / 0.45);
@@ -150,9 +155,7 @@
 .wmap__labels {
   fill: var(--map-label);
   stroke: var(--map-label-halo);
-  font-family: var(--font-cond);
   font-weight: 500;
-  letter-spacing: 0.02em;
   paint-order: stroke;
   stroke-linejoin: round;
   text-anchor: middle;
@@ -177,8 +180,8 @@
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface-1);
-  font-size: var(--fs-xs);
+  background: color-mix(in srgb, var(--surface-2) 94%, transparent);
+  font-size: var(--fs-s);
 }
 
 .map-legend--column {
@@ -192,11 +195,8 @@
 
 .map-legend__title {
   cursor: pointer;
-  font-family: var(--font-cond);
   font-size: var(--fs-s);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .map-legend[open] .map-legend__title {
@@ -218,8 +218,10 @@
 .map-legend__swatch {
   width: 12px;
   height: 12px;
-  border-radius: 2px;
+  border-radius: 3px;
   background: var(--swatch);
+  /* A hairline keeps very light swatches (the Speaker's white) visible on a light panel. */
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
 }
 
 .map-legend__swatch--outline {
@@ -287,11 +289,11 @@
   stroke-width: 2.5px;
 }
 
+/* Region names in spaced capitals, the cartographic convention for areas (OS maps, atlases). */
 .ukmap__labels {
   fill: var(--map-label);
   stroke: var(--map-label-halo);
-  font-family: var(--font-cond);
-  font-weight: 700;
+  font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   paint-order: stroke;

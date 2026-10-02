@@ -10,7 +10,7 @@ import { fillOf, legendFor, legendNote, modeLine, UK_MODE_LABELS, type ModeSpec 
 
 /** Region names show while the map is zoomed out; seats take over as you zoom in. */
 const REGION_LABEL_MAX_ZOOM = 2.5
-const REGION_LABEL_PX = 13
+const REGION_LABEL_PX = 10.5
 
 const seatName = (id: string) => SEAT_BY_ID.get(id)?.name ?? id
 

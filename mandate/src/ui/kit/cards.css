@@ -1,27 +1,27 @@
-/* Panels, FM26 tiles and cards (DESIGN §17). */
+/* Panels, tiles and cards (DESIGN §17): hairline borders, no drop shadows. */
 .panel {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface-1);
+  border-radius: var(--radius-l);
+  background: var(--surface-2);
 }
 
 .panel__head {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 8px 0 14px;
   border-bottom: 1px solid var(--line);
 }
 
 .panel__icon {
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: var(--text-muted);
 }
 
@@ -29,12 +29,9 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: var(--fs-m);
+  font-weight: 600;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -61,10 +58,10 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 132px;
-  padding: 12px 14px 14px;
+  min-height: 124px;
+  padding: 14px 16px 16px;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-l);
   background: var(--surface-2);
   color: var(--text);
   text-align: left;
@@ -76,11 +73,11 @@
 
 .tile:hover {
   border-color: var(--line-strong);
-  background: var(--surface-3);
 }
 
 .tile[aria-expanded='true'] {
-  border-color: var(--text);
+  border-color: var(--text-muted);
+  background: var(--surface-3);
 }
 
 .tile__head {
@@ -90,18 +87,16 @@
 }
 
 .tile__icon {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   color: var(--text-muted);
 }
 
 .tile__title {
   flex: 1;
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
 .tile__body {
@@ -114,17 +109,17 @@
 /* Big number or headline inside a tile. */
 .tile__stat {
   color: var(--text);
-  font-family: var(--font-cond);
   font-size: var(--fs-xxl);
-  font-weight: 700;
-  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
 .tile__lead {
   color: var(--text);
   font-size: var(--fs-m);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Cards. */
@@ -135,7 +130,7 @@
 @keyframes card-in {
   from {
     opacity: 0;
-    transform: translateX(12px);
+    transform: translateY(4px);
   }
 }
 

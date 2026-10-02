@@ -1,17 +1,17 @@
-/* Buttons, chips, badges, tabs, choice lists (DESIGN §17). */
+/* Buttons, chips, badges, tabs, choice lists (DESIGN §17; Linear's sizes and weights). */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 32px;
+  min-height: 30px;
   padding: 0 12px;
   border: 1px solid transparent;
   border-radius: var(--radius);
   background: none;
   font-family: var(--font-ui);
   font-size: var(--fs-m);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -28,8 +28,8 @@
 
 .btn__icon {
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .btn--s {
@@ -39,26 +39,29 @@
 }
 
 .btn--s .btn__icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
+/* No accent hue: the primary action is the text colour, inverted. */
 .btn--primary {
   background: var(--text);
   color: var(--bg);
 }
 
 .btn--primary:not(:disabled):hover {
-  background: var(--text-muted);
+  background: color-mix(in srgb, var(--text) 86%, var(--bg));
 }
 
 .btn--secondary {
-  border-color: var(--line-strong);
-  background: var(--surface-3);
+  border-color: var(--line);
+  background: var(--surface-2);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.08);
 }
 
 .btn--secondary:not(:disabled):hover {
-  border-color: var(--text-muted);
+  border-color: var(--line-strong);
+  background: var(--surface-3);
 }
 
 .btn--quiet {
@@ -66,12 +69,12 @@
 }
 
 .btn--quiet:not(:disabled):hover {
-  background: var(--surface-3);
+  background: var(--hover);
   color: var(--text);
 }
 
 .btn--danger {
-  border-color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 55%, transparent);
   color: var(--bad);
 }
 
@@ -81,7 +84,7 @@
 }
 
 .btn--icon {
-  width: 32px;
+  width: 30px;
   padding: 0;
 }
 
@@ -101,17 +104,17 @@
   gap: 5px;
   height: 22px;
   padding: 0 8px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
   border-radius: 11px;
   background: var(--surface-2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
+  font-size: var(--fs-s);
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .chip__icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .chip__dot {
@@ -122,17 +125,17 @@
 }
 
 .chip--good {
-  border-color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 45%, transparent);
   color: var(--good);
 }
 
 .chip--warn {
-  border-color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
   color: var(--warn);
 }
 
 .chip--bad {
-  border-color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 45%, transparent);
   color: var(--bad);
 }
 
@@ -147,7 +150,7 @@
   border-radius: 9px;
   background: var(--bad);
   color: #fff;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -158,10 +161,10 @@
   color: var(--text-muted);
 }
 
-/* Tabs: condensed capitals, underline on the active tab. */
+/* Tabs: sentence case, underline on the active tab. */
 .tabs {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
@@ -171,19 +174,22 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 36px;
-  padding: 0 12px;
+  height: 38px;
+  margin-bottom: -1px;
+  padding: 0 10px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: none;
   color: var(--text-muted);
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
+  font-size: var(--fs-m);
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.tabs__tab svg {
+  width: 15px;
+  height: 15px;
 }
 
 .tabs__tab:hover {
@@ -246,13 +252,10 @@
 }
 
 .choices__legend {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   padding: 0;
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: var(--fs-m);
+  font-weight: 600;
 }
 
 .choice {
@@ -260,7 +263,7 @@
   grid-template-columns: auto 1fr;
   gap: 2px 10px;
   align-items: center;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface-2);
@@ -272,7 +275,8 @@
 }
 
 .choice:has(input:checked) {
-  border-color: var(--text);
+  border-color: var(--text-muted);
+  background: var(--surface-3);
 }
 
 .choice:has(input:disabled) {
@@ -281,14 +285,14 @@
 }
 
 .choice input {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   margin: 0;
   accent-color: var(--text);
 }
 
 .choice__label {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .choice__detail {

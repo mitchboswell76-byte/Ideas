@@ -1,11 +1,11 @@
-/* Sidebar (FM), time controls and pause banner (Paradox). DESIGN §17. */
+/* Sidebar (Linear layout, FM contents), time controls and pause banner (Paradox). DESIGN §17. */
 .sidebar {
   display: flex;
   flex-direction: column;
   width: var(--sidebar-w);
   min-height: 0;
-  border-right: 1px solid var(--line);
-  background: var(--surface-1);
+  padding: 0 8px 8px;
+  background: var(--bg);
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -13,25 +13,35 @@
 .sidebar__brand {
   display: flex;
   align-items: center;
+  gap: 10px;
   height: 52px;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--line);
-  font-family: var(--font-cond);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  padding: 0 8px;
+  font-size: var(--fs-l);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* A plain square monogram: no logo artwork. */
+.sidebar__brand::before {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--text);
+  box-shadow: inset 0 0 0 5px var(--bg);
+  outline: 1.5px solid var(--text);
+  outline-offset: -1.5px;
 }
 
 .nav {
   display: grid;
   gap: 1px;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
 .nav--foot {
   margin-top: auto;
-  border-top: 1px solid var(--line);
 }
 
 .nav__tip {
@@ -43,39 +53,29 @@
   display: flex;
   flex: 1;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  height: 38px;
-  padding: 0 16px;
+  height: 30px;
+  padding: 0 8px;
   border: 0;
+  border-radius: var(--radius);
   background: none;
   color: var(--text-muted);
   font-size: var(--fs-m);
-  font-weight: 600;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
 }
 
 .nav__item:hover {
-  background: var(--surface-2);
+  background: var(--hover);
   color: var(--text);
 }
 
-/* The current screen: a bar on the left edge, filled icon. */
+/* The current screen: a raised row and a filled icon. */
 .nav__item[aria-current='page'] {
   background: var(--surface-3);
   color: var(--text);
-}
-
-.nav__item[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  border-radius: 0 2px 2px 0;
-  background: var(--text);
 }
 
 .nav__item[aria-disabled='true'] {
@@ -90,8 +90,8 @@
 
 .nav__icon {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .nav__label {
@@ -109,12 +109,18 @@
 .sidebar--rail .sidebar__brand {
   justify-content: center;
   padding: 0;
-  letter-spacing: 0;
+  font-size: 0;
 }
 
 .sidebar--rail .nav__item {
   justify-content: center;
+  height: 36px;
   padding: 0;
+}
+
+.sidebar--rail .nav__icon {
+  width: 18px;
+  height: 18px;
 }
 
 .sidebar--rail .nav__label {
@@ -123,23 +129,21 @@
 
 .sidebar--rail .nav__badge {
   position: absolute;
-  top: 3px;
-  right: 5px;
+  top: 2px;
+  right: 2px;
 }
 
 /* Time controls. */
 .datespeed {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .datespeed__date {
-  min-width: 128px;
-  font-family: var(--font-cond);
-  font-size: var(--fs-xl);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  min-width: 104px;
+  font-size: var(--fs-m);
+  font-weight: 600;
   text-align: right;
   white-space: nowrap;
 }
@@ -152,44 +156,42 @@
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  height: 22px;
+  height: 16px;
+  padding: 0 2px;
 }
 
 /* Five rising bars; lit up to the current speed. */
 .datespeed__pip {
-  width: 8px;
+  width: 6px;
   padding: 0;
-  border: 1px solid currentColor;
-  border-radius: 1px;
-  background: none;
-  color: inherit;
-  opacity: 0.6;
+  border: 0;
+  border-radius: 1.5px;
+  background: var(--line-strong);
   cursor: pointer;
 }
 
 .datespeed__pips .tip-anchor:nth-child(1) .datespeed__pip {
-  height: 10px;
+  height: 6px;
 }
 
 .datespeed__pips .tip-anchor:nth-child(2) .datespeed__pip {
-  height: 13px;
+  height: 8.5px;
 }
 
 .datespeed__pips .tip-anchor:nth-child(3) .datespeed__pip {
-  height: 16px;
+  height: 11px;
 }
 
 .datespeed__pips .tip-anchor:nth-child(4) .datespeed__pip {
-  height: 19px;
+  height: 13.5px;
 }
 
 .datespeed__pips .tip-anchor:nth-child(5) .datespeed__pip {
-  height: 22px;
+  height: 16px;
 }
 
 .datespeed__pip[data-lit] {
-  background: currentColor;
-  opacity: 1;
+  background: var(--text);
 }
 
 .datespeed__pips .tip-anchor {
@@ -197,11 +199,11 @@
 }
 
 .datespeed--paused .datespeed__pip[data-lit] {
-  opacity: 0.45;
+  background: var(--text-faint);
 }
 
 .datespeed__pip:hover {
-  opacity: 1;
+  background: var(--text-muted);
 }
 
 .datespeed__step {
@@ -209,34 +211,26 @@
   gap: 2px;
 }
 
-.datespeed__step .btn {
-  color: inherit;
-  opacity: 0.8;
-}
-
-/* The paused banner: a pill by the date, on any header colour. */
+/* The paused banner: a small pill by the date. */
 .pause-banner {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 14px;
-  border: 1px solid var(--warn);
-  border-radius: 15px;
-  background: var(--surface-1);
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px 0 8px;
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
   color: var(--text);
+  font-size: var(--fs-s);
+  font-weight: 600;
   white-space: nowrap;
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   cursor: pointer;
 }
 
 .pause-banner__icon {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   color: var(--warn);
 }
 
@@ -246,9 +240,5 @@
 
 .pause-banner__hint {
   color: var(--text-muted);
-  font-family: var(--font-ui);
-  font-size: var(--fs-xs);
   font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
 }

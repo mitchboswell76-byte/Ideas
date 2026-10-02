@@ -20,11 +20,10 @@ body {
 }
 
 .gallery__title {
-  font-family: var(--font-cond);
+  font-family: var(--font-serif);
   font-size: 40px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: -0.025em;
 }
 
 .gallery__lede {
@@ -60,11 +59,8 @@ body {
 }
 
 .specimen__title {
-  font-family: var(--font-cond);
-  font-size: var(--fs-xl);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: var(--fs-l);
+  font-weight: 600;
 }
 
 .specimen__note {
@@ -81,10 +77,8 @@ body {
 
 .specimen__label {
   color: var(--text-muted);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--fs-s);
+  font-weight: 500;
 }
 
 /* Wide specimens span the grid. */
@@ -137,9 +131,8 @@ body {
   padding: 4px 0;
   border-radius: 2px;
   background: var(--surface-2);
-  font-family: var(--font-cond);
-  font-size: var(--fs-l);
-  font-weight: 700;
+  font-size: var(--fs-m);
+  font-weight: 650;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -149,16 +142,20 @@ body {
   gap: 10px;
 }
 
-.type-cond {
-  font-family: var(--font-cond);
+.type-display {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.type-headline {
+  font-family: var(--font-serif);
   font-size: 26px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
 }
 
 .type-nums {
-  font-family: var(--font-cond);
   font-size: var(--fs-xl);
   font-weight: 500;
 }
@@ -199,30 +196,40 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px 16px;
-  min-height: 52px;
-  padding: 6px 12px 6px 18px;
-  background: var(--party);
-  color: var(--party-ink);
+  min-height: 48px;
+  padding: 8px 10px 6px 16px;
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 2px 0 var(--party);
 }
 
-.demo-topbar .btn--quiet {
-  color: inherit;
+.demo-topbar__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .demo-topbar__party {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  opacity: 0.8;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+}
+
+.demo-topbar__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--party);
+}
+
+.demo-topbar__sep {
+  color: var(--text-faint);
 }
 
 .demo-topbar__screen {
-  font-family: var(--font-cond);
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.05;
-  text-transform: uppercase;
+  font-size: var(--fs-m);
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .demo-shell__stage {
