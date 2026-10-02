@@ -8,6 +8,7 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 | Output | Content | As of |
 |---|---|---|
 | `uk-seats.json` | 650 Westminster seats (2024 boundaries): ONS code, name, nation, region, county/borough/burgh, hex cell | 2024-07-04 |
+| `uk-map.json` | The same seats' real boundaries projected to SVG paths (transverse Mercator on 2°W, 2000 units tall): per-seat path, focus box, label point and room; seat, region and nation border meshes and the coast; region label points; city zoom boxes | 2024-07-04 |
 | `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected; map colour per party | 2024-07-04 |
 | `census2021.json` | 21 census measures per seat (GB only) | E&W 2021-03-21, Scotland 2022-03-20 |
 | `world-110m.json` | 176 countries and territories as TopoJSON (Antarctica dropped) | Natural Earth via world-atlas 2.0.2 |
@@ -22,6 +23,23 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 - **SHA-256:** `7a99cbd2f9574ee7e3fcb55a106189b7342d35c899e96554f51c06b6c73469d0`
 - **Licence:** MIT (© Open Innovations).
 - **Used for:** seat list, names (keeps "Ynys Môn", "Glyndŵr"), region codes, hex positions (`odd-r`).
+
+### Constituency boundaries (real map)
+- **Files:** `data/PCON24CD/<ONS code>.geojsonl` (one GeoJSON feature per seat, 650 files), Open Innovations
+  ([geography-bits](https://github.com/open-innovations/geography-bits)), branch `master`.
+- **Pin:** the repository has no releases, so the build pins the SHA-256 of the 650 files' contents joined in seat
+  order with NUL separators: `80e91f97da3e272c8b36ae2ae71e88fbbbc7c4cd88ef570f97e18a9f0ae2ae21` (cached as
+  `data-raw/.cache/pcon24-boundaries.geojsonl`). A changed upstream file fails the build instead of changing the map.
+- **Upstream and licence:** ONS Westminster Parliamentary Constituencies (July 2024) boundaries, already generalised
+  by Open Innovations, Open Government Licence v3.0. Attribution (from the repository's licence): "Source: Office for
+  National Statistics licensed under the Open Government Licence v.3.0. Contains OS data © Crown copyright and
+  database right 2021."
+- **Processing (`scripts/data/ukmap.ts`):** rings rewound for d3 (RFC 7946 winds the other way); one TopoJSON
+  topology (quantised to 1e6) so neighbours share borders exactly; Visvalingam simplification keeping 30% of points;
+  rings under 1e-5 square degrees dropped and every ring rewound again (simplifying can collapse or flip a sliver,
+  which d3 would read as the whole sphere; the build fails if any shape comes out inside-out); label points are each
+  seat's pole of inaccessibility (`polylabel`); region labels use the merged region.
+- **City zoom boxes:** `data-raw/manual/uk-map-places.json`, hand-drawn lon/lat boxes round 10 built-up areas.
 
 ### GE2024 results and census measures (Great Britain)
 - **File:** `2024-UK-General-Election-Census-Constituency-Summaries-File-v1.1.csv`, University of Bristol

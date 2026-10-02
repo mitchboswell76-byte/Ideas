@@ -18,6 +18,12 @@ export const DATA_CREDITS: DataCredit[] = [
       "(Scotland's Census 2022). Contains public sector information licensed under the Open " +
       'Government Licence v3.0.',
   },
+  {
+    what: 'Constituency boundaries',
+    credit:
+      'Source: Office for National Statistics licensed under the Open Government Licence v3.0. ' +
+      'Contains OS data © Crown copyright and database right 2021. Via Open Innovations.',
+  },
   { what: 'Constituency hex map', credit: 'Open Innovations (MIT licence).' },
   { what: 'World borders', credit: 'Natural Earth (public domain), via world-atlas.' },
   {

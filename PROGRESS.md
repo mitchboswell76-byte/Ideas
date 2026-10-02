@@ -1,9 +1,10 @@
 # Progress — Mandate
 
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
-**Current milestone:** M1 — Nobody to Prime Minister (M0 done; PR https://github.com/mitchboswell76-byte/Ideas/pull/1 of this branch → `main`)
-**Next session:** start at **T9**
-**Last playable link (T8, M0):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Current milestone:** M0 follow-ups (T8b done, T8c next), then M1 — Nobody to Prime Minister. M0 was merged into
+  `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
+**Next session:** start at **T8c** (UI restyle), then T9
+**Last playable link (T8b):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
 **UI kit (T4c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
@@ -55,6 +56,27 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
 
   Done: `npm run e2e` (16 tests: smoke, Artifact export, perf); `.mandate` refused (checked in the contract
   types), so the Artifact build exports `.json`; M0 republished; `main` created and PR opened.
+- [x] T8b UK map on real boundaries (user, 2026-10-02: "I don't like the hexagon design, it's not clear enough"):
+      2024 constituency boundaries (ONS via Open Innovations geography-bits, OGL) projected at build time; Map / Hexes
+      switch (remembered); seat names appear as you zoom; "Zoom to" 10 cities; menu backdrop on real shapes
+- [ ] T8c UI restyle (user, 2026-10-02: "simple but beautiful; must not look AI-made; copy popular, acclaimed games
+      and sites: fonts, spacing, design"). Research summary and choices in the decisions log (2026-10-02). Work:
+      1. Tokens + type: Inter Variable (OFL, `@fontsource-variable/inter`; Inter Display cut via `opsz` for
+         headings) replaces Barlow / Barlow Condensed; 13 px UI, 14 px body, tabular figures in tables; sentence case
+         everywhere (no condensed all-caps labels); 4 px spacing grid; 1 px hairlines; surfaces as evenly stepped
+         greys (Linear's LCH approach: bg < panel < raised < overlay), both themes; still no accent hue (selection
+         and focus use `--text`; party colours only mean parties). Newsreader stays for news, letters, event text.
+      2. Shell (Linear): compact sidebar (13 px items, 16 px icons, muted group labels, count badges), slim 44 px
+         header (screen title + breadcrumb, party colour as a thin stripe, not a grey slab), compact date/speed.
+      3. Home: lists instead of four tiles (Inbox preview, Upcoming, You, Game), since FM26's tile hub is the part
+         reviewers called cluttered.
+      4. Ctrl/⌘K command menu (Linear/Raycast): go to any screen, save, load, speed, theme.
+      5. Restyle kit pieces into the new tokens (CK3 event window and tooltips, Suzerain dialogue, FP2 vote bar,
+         tables, cards, map legend/tooltips); main menu (wordmark, menu list) to match.
+      6. Kit gallery, Playwright screenshots (dark, light, 390 px), `npm run e2e`, republish kit + game.
+      Avoid the "AI look": no gradients, glass, glows or blur; no default indigo/purple accent; no emoji; no big
+      rounded cards with soft drop shadows; no centred hero text. Split into two sessions if large (1–2 + kit,
+      then 3–6).
 
 ## M1 — Nobody to Prime Minister (party route)
 - [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
@@ -319,12 +341,45 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-09-30 M0 closed: `main` created at `3c573a3` (handoff files only), PR of `claude/magical-cori-1sjt0r` → `main`.
   Keep working on the Claude branch; one PR per milestone.
 
+- 2026-10-02 PR 1 (M0) merged into `main` by the user; the Claude branch was fast-forwarded to `main` (no new
+  history). Later milestones get their own PRs from the same branch.
+- 2026-10-02 T8b map: `scripts/data/ukmap.ts` (`parseBoundary`, `rewind`/`rewindGeometry`, `placeLabel`, `projectUk`)
+  → `src/data/generated/uk-map.json` (`UkMapFile`), typed access `src/data/ukMap.ts` (`UK_MAP`, lazy). `sources.ts`
+  gained `RemoteSet` + `fetchSetCached` (many files, one content hash). UI: `ui/map/uk/data.ts` `GEOMETRY` (one
+  `UkGeometry` per layout: shapes, border layers, labels, `box`, `maxZoom`, `focusZoom`), `UkMap.tsx` (was
+  `UkHexMap.tsx`), `labels.ts` `seatLabelsThatFit`, `ui/store/map.ts` `ukLayoutStore` (localStorage) + map store
+  `frame(box)`, `viewport.ts` per-map `Frame.maxZoom`, kit `Segmented`. Backdrop draws the real shapes.
+- 2026-10-02 User chose real boundaries by default with a Map / Hexes switch (BBC/FT pattern: geography for where,
+  equal hexes for counting seats). Transverse Mercator on 2°W (National Grid meridian), 2000 units tall, true
+  positions (no Shetland inset). Visvalingam simplification keeps 30% of points (~400 KB JSON, ~140 KB gzip alone);
+  London stays legible at the "Zoom to London" level. Real map zooms to 40× (London seats are ~3 km), hexes to 12×.
+- 2026-10-02 d3-geo pitfalls met: RFC 7946 rings wind anticlockwise (d3 reads that as the whole sphere), and
+  simplification can collapse or flip slivers; rings are rewound after parsing and after simplifying, rings under
+  1e-5 sq. degrees dropped, and the build fails if any seat's area exceeds a hemisphere. `quantile(topology, p)`
+  keeps the share `p` of points (it sorts descending).
+- 2026-10-02 Seat borders are one mesh (drawn once) in the background colour at 0.9 px, so same-party seats stay
+  distinct; seat names (Barlow 600, 11 px, halo) show where they fit round each seat's pole of inaccessibility.
+- 2026-10-02 Design research for T8c (web; most design sites are blocked from the cloud env, so search results
+  plus known patterns): Football Manager 26's UI, our current base, was widely panned as cluttered ("a brilliant
+  game trapped in a clunky shell", Operation Sports; "a beautiful game trapped in an ugly interface", Absolute
+  Geeks); Manor Lords (progressive disclosure, hover to expand) and Old World (sleek, small footprint) are praised
+  for clean strategy UI. Linear is the most-copied app UI (redesign notes: LCH-generated themes so surfaces step
+  evenly, Inter Display headings, less visual noise, denser navigation). Vercel Geist and Raycast were considered:
+  Geist reads sterile for a game; Raycast's glass and blur cost GPU on Intel UHD. The user left the choice to Claude
+  ("simple but beautiful, not AI-looking"): Linear for the shell and type, broadsheet data-journalism patterns for
+  news and data pages (generic, no FT/Economist branding), game references kept for game moments (CK3, Suzerain,
+  FP2). Copy patterns only (CLAUDE.md rule), no logos or brand colours.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
 - GE2024 Northern Ireland: winners only, hand-entered and unverified (no votes, turnout or MPs). User can add
   `mandate/data-raw/HoC-GE2024-results-by-constituency.csv` (Commons Library CBP-10009) and run `npm run data` to
   get official results for all 650 seats plus declaration times; `fromHocCsv` is fixture-tested only.
+- UK boundaries (T8b) are pinned by a content hash, not a commit (geography-bits has no releases): if Open Innovations
+  edits a file, `npm run data -- --refresh` fails until the new hash is checked and pinned in `scripts/data/sources.ts`.
+- The `ukMap` chunk (boundaries + 2024 results) is ~175 KB gzip and also loads behind the main menu (backdrop), after
+  first paint. If menu load time matters, give the backdrop a coarser copy of the shapes.
 - No 2019 notional results (dropped for licence reasons): the UK map's Swing mode is disabled until T13, where swing
   will be measured from 2024 in the running game.
 - Census gaps: Scotland lacks ~10 measures in the source; Northern Ireland has none.

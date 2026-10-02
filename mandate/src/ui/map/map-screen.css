@@ -34,6 +34,15 @@
   background: var(--bg);
 }
 
+/* Right-hand end of the mode bar: city zoom and layout switch. */
+.map-screen__tools {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-left: auto;
+  padding: 4px 0;
+}
+
 .map-screen__option {
   display: inline-flex;
   align-items: center;

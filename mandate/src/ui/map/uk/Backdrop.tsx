@@ -1,15 +1,13 @@
 /**
- * The main menu's backdrop (DESIGN §17): the 650 seats coloured by their 2024 winners, drifting
- * slowly (a CSS transform on one cached layer, so the GPU does the work). Loads seats and results
- * only, not the census.
+ * The main menu's backdrop (DESIGN §17): the 650 seats on their real boundaries, coloured by their
+ * 2024 winners, drifting slowly (a CSS transform on one cached layer, so the GPU does the work).
+ * Loads seats' shapes and results only, not the census.
  */
 import { useEffect, useState } from 'react'
 import { GE2024 } from '../../../data/ge2024.ts'
-import { UK_SEATS } from '../../../data/ukSeats.ts'
+import { UK_MAP } from '../../../data/ukMap.ts'
 import { cx } from '../../kit/index.ts'
-import { buildHexMap } from './hex.ts'
 
-const HEX = buildHexMap(UK_SEATS.seats, UK_SEATS.regions)
 const WINNER = new Map(GE2024.results.map((r) => [r.id, r.winner]))
 
 export default function UkBackdrop() {
@@ -22,13 +20,14 @@ export default function UkBackdrop() {
     <div className={cx('backdrop', shown && 'backdrop--shown')} data-testid="menu-backdrop">
       <svg
         className="backdrop__map"
-        viewBox={`0 0 ${HEX.width} ${HEX.height}`}
+        viewBox={`0 0 ${UK_MAP.width} ${UK_MAP.height}`}
         preserveAspectRatio="xMidYMin meet"
       >
-        {HEX.cells.map((c) => (
-          <path key={c.id} d={c.d} fill={GE2024.colours[WINNER.get(c.id)!]} />
+        {UK_MAP.shapes.map((s) => (
+          <path key={s.id} d={s.d} fill={GE2024.colours[WINNER.get(s.id)!]} />
         ))}
-        <path className="backdrop__nations" d={HEX.nations} />
+        <path className="backdrop__seats" d={UK_MAP.seatBorders} />
+        <path className="backdrop__nations" d={UK_MAP.nationBorders} />
       </svg>
     </div>
   )

@@ -103,6 +103,22 @@ test('export .mandate, import it and its JSON, reject a bad file', async ({ page
 test('UK and world maps: modes, search, card, Esc', async ({ page }) => {
   await newCareer(page)
   await go(page, 'Map')
+  // Real boundaries by default; a city zoom moves in; Hexes swaps the layout (and remembers it).
+  await expect(page.locator('.ukmap__fills--map path')).toHaveCount(650)
+  const wholeMap = page.getByRole('button', { name: 'Whole map' })
+  await expect(wholeMap).toBeDisabled()
+  await page.getByRole('combobox', { name: 'Zoom to' }).selectOption('London')
+  await expect(wholeMap).toBeEnabled()
+  const layout = page.getByRole('group', { name: 'Map layout' })
+  await layout.getByRole('button', { name: 'Hexes' }).click()
+  await expect(page.locator('.ukmap__fills--hex path')).toHaveCount(650)
+  await expect(page.getByRole('combobox', { name: 'Zoom to' })).toHaveCount(0)
+  await page.reload()
+  await page.getByTestId('title-new').click()
+  await go(page, 'Map')
+  await expect(page.locator('.ukmap__fills--hex path')).toHaveCount(650)
+  await layout.getByRole('button', { name: 'Map' }).click()
+  await expect(page.locator('.ukmap__fills--map path')).toHaveCount(650)
   for (const mode of ['Majority', 'Turnout', 'Demographics', 'Party']) {
     await page.getByRole('tab', { name: mode }).click()
     await expect(page.getByRole('tab', { name: mode })).toHaveAttribute('aria-selected', 'true')

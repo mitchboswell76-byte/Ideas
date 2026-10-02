@@ -78,3 +78,60 @@ export async function fetchCached(
   await writeFile(path, bytes)
   return Buffer.from(bytes).toString('utf8')
 }
+
+/** Many small files, one per id, pinned by the SHA-256 of their contents joined in id order. */
+export interface RemoteSet {
+  /** Cache file holding the joined contents. */
+  file: string
+  url: (id: string) => string
+  sha256: string
+}
+
+/**
+ * 2024 Westminster constituency boundaries, one GeoJSON feature per seat: Open Innovations'
+ * "geography-bits" copy of the ONS boundaries (Open Government Licence v3.0). The repository has
+ * no tagged releases, so the pin is the content hash (a changed upstream file fails the build).
+ */
+export const BOUNDARIES: RemoteSet = {
+  file: 'pcon24-boundaries.geojsonl',
+  url: (id) => `${RAW}/open-innovations/geography-bits/master/data/PCON24CD/${id}.geojsonl`,
+  sha256: '80e91f97da3e272c8b36ae2ae71e88fbbbc7c4cd88ef570f97e18a9f0ae2ae21',
+}
+
+/** Returns one text per id (cache first, else downloaded `concurrency` at a time). */
+export async function fetchSetCached(
+  set: RemoteSet,
+  ids: readonly string[],
+  cacheDir: string,
+  refresh = false,
+  concurrency = 16,
+): Promise<string[]> {
+  const path = join(cacheDir, set.file)
+  const split = (joined: string) => joined.split('\u0000')
+  if (!refresh && existsSync(path)) {
+    const cached = await readFile(path, 'utf8')
+    if (sha256(cached) === set.sha256 && split(cached).length === ids.length) return split(cached)
+  }
+  const texts = new Array<string>(ids.length)
+  let next = 0
+  const worker = async () => {
+    while (next < ids.length) {
+      const i = next++
+      const url = set.url(ids[i]!)
+      const res = await fetch(url).catch((err: unknown) => {
+        throw new Error(`Download failed for ${url}: ${(err as Error).message}`, { cause: err })
+      })
+      if (!res.ok) throw new Error(`Download failed for ${url}: HTTP ${res.status}`)
+      texts[i] = (await res.text()).trim()
+    }
+  }
+  await Promise.all(Array.from({ length: concurrency }, worker))
+  const joined = texts.join('\u0000')
+  const hash = sha256(joined)
+  if (hash !== set.sha256) {
+    throw new Error(`${set.file}: SHA-256 ${hash} does not match the pinned ${set.sha256}`)
+  }
+  await mkdir(cacheDir, { recursive: true })
+  await writeFile(path, joined)
+  return texts
+}

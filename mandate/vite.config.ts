@@ -6,6 +6,8 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: './',
   plugins: [react()],
+  // The lazy map chunks are mostly bundled data (UK boundaries ~565 KB, ~175 KB gzip).
+  build: { chunkSizeWarningLimit: 700 },
   test: {
     include: ['tests/**/*.test.ts'],
     environment: 'node',

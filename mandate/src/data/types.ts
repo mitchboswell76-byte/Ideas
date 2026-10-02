@@ -57,6 +57,38 @@ export interface SeatsFile {
   seats: Seat[]
 }
 
+/** The 650 seats' real boundaries, projected at build time (transverse Mercator on 2°W). */
+export interface UkMapFile {
+  width: number
+  height: number
+  shapes: UkShape[]
+  /** Borders between seats of the same region, drawn once. */
+  seatBorders: string
+  /** Borders between regions of the same nation. */
+  regionBorders: string
+  /** Borders between nations. */
+  nationBorders: string
+  /** Coastlines (and the land border with Ireland). */
+  coast: string
+  /** One label per region, at the point furthest inside it. */
+  regionLabels: { id: string; x: number; y: number }[]
+  /** Quick zooms to the cities whose seats are too small to see from afar. */
+  places: { name: string; box: [number, number, number, number] }[]
+}
+
+export interface UkShape {
+  /** ONS constituency code. */
+  id: string
+  /** SVG path in map units. */
+  d: string
+  /** [x0, y0, x1, y1] of the largest part: what "centre on map" frames. */
+  focus: [number, number, number, number]
+  /** Where the name goes: the point of the largest part furthest from its edge. */
+  label: [number, number]
+  /** Distance from `label` to the nearest edge, in map units (how much room the name has). */
+  room: number
+}
+
 export interface Ge2024Result {
   id: string
   winner: Ge2024Party

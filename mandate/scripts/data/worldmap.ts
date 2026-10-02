@@ -91,7 +91,7 @@ export class PathWriter implements GeoContext {
   beginPath(): void {}
 
   arc(): void {
-    throw new Error('The world map has no point geometries')
+    throw new Error('Map shapes have no point geometries')
   }
 
   result(): string {
@@ -101,14 +101,14 @@ export class PathWriter implements GeoContext {
 
 type Geo = GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon, { name: string }>
 
-function pathOf(projection: GeoProjection, object: GeoJSON.GeoJsonObject): string {
+export function pathOf(projection: GeoProjection, object: GeoJSON.GeoJsonObject): string {
   const writer = new PathWriter()
   geoPath(projection, writer)(object as GeoJSON.Feature)
   return writer.result()
 }
 
 /** Collects projected rings, so parts can be measured after antimeridian clipping. */
-class RingCollector implements GeoContext {
+export class RingCollector implements GeoContext {
   rings: [number, number][][] = []
   moveTo(x: number, y: number): void {
     this.rings.push([[x, y]])
@@ -119,7 +119,7 @@ class RingCollector implements GeoContext {
   closePath(): void {}
   beginPath(): void {}
   arc(): void {
-    throw new Error('The world map has no point geometries')
+    throw new Error('Map shapes have no point geometries')
   }
 }
 

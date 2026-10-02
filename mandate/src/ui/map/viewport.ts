@@ -1,5 +1,5 @@
 /**
- * Pan and zoom for the flat maps (world now, UK hexes at T7). Pure. A view is a zoom level `k`
+ * Pan and zoom for the flat maps (world, UK). Pure. A view is a zoom level `k`
  * (1 = the whole map fits the frame) and the map point `x, y` at the centre of the frame, so a
  * resize keeps the same place in the middle.
  */
@@ -16,6 +16,8 @@ export interface Frame {
   height: number
   mapWidth: number
   mapHeight: number
+  /** Closest zoom this map allows; `MAX_ZOOM` if not set. */
+  maxZoom?: number
 }
 
 export interface Point {
@@ -30,6 +32,8 @@ export const MIN_ZOOM = 1
 export const MAX_ZOOM = 12
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
+
+export const maxZoomOf = (frame: Frame) => frame.maxZoom ?? MAX_ZOOM
 
 /** Pixels per map unit at k = 1: the whole map fits. */
 export function baseScale(frame: Frame): number {
@@ -46,7 +50,7 @@ export function homeView(frame: Frame): View {
 
 /** Zoom within limits, and keep the map in the frame (centred on an axis where it is smaller). */
 export function clampView(view: View, frame: Frame): View {
-  const k = clamp(view.k, MIN_ZOOM, MAX_ZOOM)
+  const k = clamp(view.k, MIN_ZOOM, maxZoomOf(frame))
   const s = baseScale(frame) * k
   const axis = (centre: number, frameSize: number, mapSize: number) => {
     const half = frameSize / 2 / s
@@ -77,7 +81,7 @@ export function toMap(view: View, frame: Frame, screen: Point): Point {
 /** Zoom by `factor` about a frame pixel, which stays over the same map point (wheel, pinch). */
 export function zoomAt(view: View, frame: Frame, screen: Point, factor: number): View {
   const anchor = toMap(view, frame, screen)
-  const k = clamp(view.k * factor, MIN_ZOOM, MAX_ZOOM)
+  const k = clamp(view.k * factor, MIN_ZOOM, maxZoomOf(frame))
   const s = baseScale(frame) * k
   return clampView(
     {

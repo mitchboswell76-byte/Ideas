@@ -40,10 +40,19 @@
   will-change: transform;
 }
 
+.backdrop__seats,
 .backdrop__nations {
   fill: none;
   stroke: var(--bg);
-  stroke-width: 0.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.backdrop__seats {
+  stroke-width: 0.5px;
+}
+
+.backdrop__nations {
+  stroke-width: 1.5px;
 }
 
 @keyframes backdrop-drift {

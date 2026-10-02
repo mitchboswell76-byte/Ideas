@@ -200,6 +200,42 @@
   cursor: default;
 }
 
+/* Segmented control: views of the same thing (Map / Hexes). The pressed item is raised. */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.segmented__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: calc(var(--radius) - 1px);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-s);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented__item:hover {
+  color: var(--text);
+}
+
+.segmented__item[aria-pressed='true'] {
+  background: var(--surface-3);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
 /* Choice lists (settings): a group of radio or checkbox rows. */
 .choices {
   display: grid;

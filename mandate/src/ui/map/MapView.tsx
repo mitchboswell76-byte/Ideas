@@ -12,7 +12,7 @@ import { IconButton, cx } from '../kit/index.ts'
 import {
   clampView,
   homeView,
-  MAX_ZOOM,
+  maxZoomOf,
   MIN_ZOOM,
   panBy,
   transformOf,
@@ -40,6 +40,8 @@ interface MapViewProps {
   /** Map size in map units. */
   mapWidth: number
   mapHeight: number
+  /** Closest zoom (default `MAX_ZOOM`). */
+  maxZoom?: number
   /** Null shows the whole map. */
   view: View | null
   onViewChange: (view: View) => void
@@ -67,6 +69,7 @@ interface MapViewProps {
 export function MapView({
   mapWidth,
   mapHeight,
+  maxZoom,
   view,
   onViewChange,
   label,
@@ -98,7 +101,7 @@ export function MapView({
   }, [])
 
   const frame: Frame | null =
-    size && size.width > 0 && size.height > 0 ? { ...size, mapWidth, mapHeight } : null
+    size && size.width > 0 && size.height > 0 ? { ...size, mapWidth, mapHeight, maxZoom } : null
   const current = frame ? clampView(view ?? homeView(frame), frame) : null
 
   // Gestures read the latest view from refs; `change` updates the ref at once so several events
@@ -112,7 +115,7 @@ export function MapView({
     handlers.current = { onViewChange, onPick, onHover }
   })
 
-  const frameKey = frame ? `${frame.width}x${frame.height}` : ''
+  const frameKey = frame ? `${frame.width}x${frame.height}x${mapWidth}x${mapHeight}` : ''
   // Only when the size changes (`frame` is a new object every render); the ref is set by now.
   useEffect(() => {
     if (frameRef.current) onFrame?.(frameRef.current)
@@ -259,7 +262,7 @@ export function MapView({
           shortcut="+"
           size="s"
           variant="secondary"
-          disabled={!current || current.k >= MAX_ZOOM}
+          disabled={!current || !frame || current.k >= maxZoomOf(frame)}
           onClick={() => zoomCentre(ZOOM_STEP)}
         />
         <IconButton

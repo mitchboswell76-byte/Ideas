@@ -1,6 +1,7 @@
 /**
  * Builds the bundled data in `src/data/generated/` from pinned sources (see docs/DATA_SOURCES.md):
  *  - uk-seats.json     650 Westminster seats: name, nation, region, type, hex cell
+ *  - uk-map.json       their real boundaries projected to SVG paths, border meshes, labels
  *  - ge2024.json       2024 general election results per seat, plus party map colours
  *  - census2021.json   Census measures per seat (England and Wales 2021, Scotland 2022)
  *  - world-110m.json   Natural Earth 1:110m countries (TopoJSON), Antarctica dropped
@@ -29,7 +30,8 @@ import { CENSUS_FIELDS, censusFromSummaries, emptyCensus } from './data/census.t
 import { parseCsv } from './data/csv.ts'
 import { fromHocCsv, fromManual, fromSummaries, type ManualWinners } from './data/ge2024.ts'
 import { parseHexjson } from './data/hexjson.ts'
-import { fetchCached, SOURCES } from './data/sources.ts'
+import { BOUNDARIES, fetchCached, fetchSetCached, SOURCES } from './data/sources.ts'
+import { parseBoundary, projectUk, type PlaceBox } from './data/ukmap.ts'
 import {
   countryFacts,
   prepareWorld,
@@ -155,6 +157,12 @@ async function main() {
     return { id: code, name, nation: nationOf(code) }
   })
 
+  const boundaries = (await fetchSetCached(BOUNDARIES, ids, CACHE, refresh)).map(parseBoundary)
+  const placesFile = JSON.parse(await readFile(`${RAW}manual/uk-map-places.json`, 'utf8')) as {
+    places: PlaceBox[]
+  }
+  const ukMap = projectUk(boundaries, seats, regions, placesFile.places)
+
   const census = new Map(summaryRows.map((row) => [row.ONSConstID, censusFromSummaries(row)]))
   const censusSeats = ids.map((id) => census.get(id) ?? emptyCensus(id))
 
@@ -199,6 +207,7 @@ async function main() {
   }
   await mkdir(OUT, { recursive: true })
   await writeFile(`${OUT}uk-seats.json`, stringify(seatsFile))
+  await writeFile(`${OUT}uk-map.json`, stringify(ukMap))
   await writeFile(`${OUT}ge2024.json`, stringify(ge2024File))
   await writeFile(`${OUT}census2021.json`, stringify(censusFile))
   await writeFile(`${OUT}world-110m.json`, `${JSON.stringify(world.topology)}\n`)

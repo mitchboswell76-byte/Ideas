@@ -15,9 +15,11 @@ import {
   Chip,
   formatCount,
   formatPercent,
+  Segmented,
   Table,
   Tabs,
   type Column,
+  type SegmentItem,
   type TabItem,
 } from '../kit/index.ts'
 import '../map/map-screen.css'
@@ -26,6 +28,7 @@ import {
   CENSUS_FIELDS,
   PARTY_COLOURS,
   partyName,
+  PLACES as CITIES,
   REGION_NAME,
   SEAT_BY_ID,
   SEAT_DATA,
@@ -43,9 +46,9 @@ import {
   type ModeSpec,
   type UkMode,
 } from '../map/uk/modes.ts'
-import { UkHexMap } from '../map/uk/UkHexMap.tsx'
+import { UkMap } from '../map/uk/UkMap.tsx'
 import { useEscapeDeselect } from '../map/useEscapeDeselect.ts'
-import { ukMapStore, useMapState } from '../store/map.ts'
+import { ukLayoutStore, ukMapStore, useMapState, useUkLayout, type UkLayout } from '../store/map.ts'
 import './screens.css'
 import './uk-map.css'
 
@@ -82,15 +85,46 @@ const PLACES = [...SEATS]
 
 const focusOn = (id: string) => ukMapStore.getState().focusOn(id)
 
+const LAYOUTS: SegmentItem<UkLayout>[] = [
+  { key: 'map', label: 'Map' },
+  { key: 'hex', label: 'Hexes' },
+]
+
+/** Jump to a city on the real map, where London's seats are slivers from afar. */
+function CityZoom() {
+  return (
+    <label className="map-screen__option">
+      Zoom to
+      <select
+        value=""
+        onChange={(e) => {
+          const city = CITIES.find((c) => c.name === e.target.value)
+          if (city) ukMapStore.getState().frame(city.box)
+        }}
+      >
+        <option value="" disabled>
+          City…
+        </option>
+        {CITIES.map((c) => (
+          <option key={c.name} value={c.name}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 /**
- * The Map screen (T7): the 650 Westminster seats as a hex map with Paradox-style modes, and the
- * constituency card or seat list beside it. Swing arrives with polling (T13); 3D seat columns with
- * election night (T18).
+ * The Map screen: the 650 Westminster seats on their real boundaries (or as equal hexes) with
+ * Paradox-style modes, and the constituency card or seat list beside it. Swing arrives with polling
+ * (T13); 3D seat columns with election night (T18).
  */
 export function UkMapScreen() {
   const mode = useMapState(ukMapStore, (s) => s.mode)
   const option = useMapState(ukMapStore, (s) => s.option)
   const selected = useMapState(ukMapStore, (s) => s.selected)
+  const { layout } = useUkLayout()
   const field: CensusField = isField(option) ? option : 'age65plus'
   useEscapeDeselect(ukMapStore)
 
@@ -120,8 +154,17 @@ export function UkMapScreen() {
             </select>
           </label>
         )}
+        <div className="map-screen__tools">
+          {layout === 'map' && <CityZoom />}
+          <Segmented
+            label="Map layout"
+            items={LAYOUTS}
+            value={layout}
+            onChange={(next) => ukLayoutStore.getState().setLayout(next)}
+          />
+        </div>
       </div>
-      <UkHexMap spec={spec} fieldLabel={CENSUS_FIELDS[field]} />
+      <UkMap layout={layout} spec={spec} fieldLabel={CENSUS_FIELDS[field]} />
       <aside className="map-screen__side">
         {selected && SEAT_BY_ID.has(selected) ? (
           <SeatCard id={selected} />

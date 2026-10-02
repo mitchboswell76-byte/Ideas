@@ -35,6 +35,7 @@ import {
   PortraitFrame,
   Sidebar,
   Table,
+  Segmented,
   Tabs,
   Term,
   Ticker,
@@ -169,8 +170,9 @@ function Buttons() {
 
 function ChipsTabs() {
   const [tab, setTab] = useState<'all' | 'unread' | 'news' | 'later'>('all')
+  const [layout, setLayout] = useState<'map' | 'hex'>('map')
   return (
-    <Section title="Chips, badges, tabs">
+    <Section title="Chips, badges, tabs, segmented">
       <div className="row">
         <Chip icon={UserIcon}>Ambitious</Chip>
         <Chip icon={MegaphoneIcon}>Orator</Chip>
@@ -197,6 +199,17 @@ function ChipsTabs() {
           { key: 'later', label: 'Later', disabled: 'Disabled tabs explain why in a tooltip' },
         ]}
       />
+      <div className="row">
+        <Segmented
+          label="Layout"
+          value={layout}
+          onChange={setLayout}
+          items={[
+            { key: 'map', label: 'Map' },
+            { key: 'hex', label: 'Hexes' },
+          ]}
+        />
+      </div>
     </Section>
   )
 }

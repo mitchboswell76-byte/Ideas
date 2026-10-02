@@ -197,3 +197,14 @@ describe('world map build', () => {
     ).toThrow(/no free colour/)
   })
 })
+
+describe('per-map zoom limit', () => {
+  const frame = { width: 800, height: 600, mapWidth: 1000, mapHeight: 2000, maxZoom: 40 }
+
+  it('lets a map zoom past the default limit when it sets its own', () => {
+    expect(zoomAt(homeView(frame), frame, { x: 400, y: 300 }, 1000).k).toBe(40)
+    expect(clampView({ k: 100, x: 500, y: 1000 }, frame).k).toBe(40)
+    const { maxZoom: _, ...plain } = frame
+    expect(clampView({ k: 100, x: 500, y: 1000 }, plain).k).toBe(MAX_ZOOM)
+  })
+})

@@ -32,7 +32,7 @@
   --map-seq-3: #cdae90;
   --map-seq-4: #eeceaf;
   --map-nodata: #3a424b;
-  --map-hex-line: rgb(14 19 24 / 0.55);
+  --map-seat-line: rgb(14 19 24 / 0.8);
   --map-region-line: rgb(233 235 238 / 0.5);
   --map-nation-line: #e9ebee;
 }
@@ -65,7 +65,7 @@
   --map-seq-3: #5f4429;
   --map-seq-4: #432a0f;
   --map-nodata: #b9c0c7;
-  --map-hex-line: rgb(255 255 255 / 0.7);
+  --map-seat-line: rgb(255 255 255 / 0.7);
   --map-region-line: rgb(21 24 28 / 0.45);
   --map-nation-line: #15181c;
 }
@@ -232,14 +232,23 @@
   color: var(--text-muted);
 }
 
-/* UK hex map (T7). */
-.ukmap__hexes path {
+/* UK map: real boundaries (seat borders are one mesh) or hexes (each hex is outlined). */
+.ukmap__fills path {
   cursor: pointer;
-  stroke: var(--map-hex-line);
+}
+
+.ukmap__fills--hex path {
+  stroke: var(--map-seat-line);
   stroke-width: 0.5px;
   vector-effect: non-scaling-stroke;
 }
 
+.ukmap__seats {
+  stroke: var(--map-seat-line);
+  stroke-width: 0.9px;
+}
+
+.ukmap__seats,
 .ukmap__regions,
 .ukmap__nations,
 .ukmap__outline,
@@ -285,6 +294,19 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  paint-order: stroke;
+  stroke-linejoin: round;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Seat names on the real map, once zoomed in far enough for them to fit. */
+.ukmap__seat-labels {
+  fill: var(--map-label);
+  stroke: var(--map-label-halo);
+  font-family: var(--font-ui);
+  font-weight: 600;
   paint-order: stroke;
   stroke-linejoin: round;
   text-anchor: middle;
