@@ -1,0 +1,132 @@
+{
+  "note": "Northern Ireland results at the 4 July 2024 general election, transcribed by hand on 2026-10-03 from the UK Parliament results pages (each seat lists its page); the Commons Library CSV, the Electoral Office NI and Wikipedia are blocked from the build environment. Checked: candidates sum to the valid vote, majorities and turnouts match the pages, and party totals match the published NI totals (SF 210,891; DUP 172,058; Alliance 117,191; UUP 94,779; SDLP 86,861; TUV 48,685). Party codes not in the game list (pbp People Before Profit, aontu Aontú, ccla Cross-Community Labour Alternative) count as other. Adding data-raw/HoC-GE2024-results-by-constituency.csv replaces these with the official file.",
+  "asOf": "2024-07-04",
+  "seats": {
+    "N05000001": {
+      "electorate": 72917,
+      "rejected": 184,
+      "mp": {"first": "Gavin", "last": "Robinson", "gender": "male"},
+      "candidates": [["dup", 19894], ["alliance", 17218], ["tuv", 1918], ["uup", 1818], ["green", 1077], ["sdlp", 619], ["ind", 162]],
+      "source": "https://electionresults.parliament.uk/elections/3286"
+    },
+    "N05000002": {
+      "electorate": 74240,
+      "rejected": 293,
+      "mp": {"first": "John", "last": "Finucane", "gender": "male"},
+      "candidates": [["sf", 17674], ["dup", 12062], ["alliance", 4274], ["tuv", 2877], ["sdlp", 1413], ["green", 1206], ["pbp", 946]],
+      "source": "https://electionresults.parliament.uk/elections/3287"
+    },
+    "N05000003": {
+      "electorate": 74749,
+      "rejected": 266,
+      "mp": {"first": "Claire", "last": "Hanna", "gender": "female"},
+      "candidates": [["sdlp", 21345], ["alliance", 8839], ["dup", 6859], ["uup", 2653], ["tuv", 2218], ["green", 1577]],
+      "source": "https://electionresults.parliament.uk/elections/3288"
+    },
+    "N05000004": {
+      "electorate": 75346,
+      "rejected": 256,
+      "mp": {"first": "Paul", "last": "Maskey", "gender": "male"},
+      "candidates": [["sf", 21009], ["pbp", 5048], ["sdlp", 4318], ["dup", 4304], ["tuv", 2010], ["alliance", 1077], ["aontu", 904], ["uup", 461], ["green", 451], ["ind", 161]],
+      "source": "https://electionresults.parliament.uk/elections/3289"
+    },
+    "N05000005": {
+      "electorate": 73302,
+      "rejected": 142,
+      "mp": {"first": "Sammy", "last": "Wilson", "gender": "male"},
+      "candidates": [["dup", 11462], ["alliance", 10156], ["uup", 9476], ["tuv", 4135], ["sf", 2986], ["sdlp", 892], ["green", 568]],
+      "source": "https://electionresults.parliament.uk/elections/3440"
+    },
+    "N05000006": {
+      "electorate": 75707,
+      "rejected": 153,
+      "mp": {"first": "Gregory", "last": "Campbell", "gender": "male"},
+      "candidates": [["dup", 11506], ["sf", 11327], ["sdlp", 5260], ["tuv", 4363], ["alliance", 3734], ["uup", 3412], ["aontu", 1043], ["green", 445], ["con", 187]],
+      "source": "https://members.parliament.uk/constituency/4426/election/422"
+    },
+    "N05000007": {
+      "electorate": 77828,
+      "rejected": 264,
+      "mp": {"first": "Pat", "last": "Cullen", "gender": "female"},
+      "candidates": [["sf", 24844], ["uup", 20273], ["alliance", 2420], ["sdlp", 2386], ["ccla", 624], ["aontu", 529]],
+      "source": "https://members.parliament.uk/constituency/4427/election-history"
+    },
+    "N05000008": {
+      "electorate": 73496,
+      "rejected": 407,
+      "mp": {"first": "Colum", "last": "Eastwood", "gender": "male"},
+      "candidates": [["sdlp", 15647], ["sf", 11481], ["dup", 3915], ["pbp", 2444], ["ind", 1519], ["uup", 1422], ["alliance", 1268], ["aontu", 662]],
+      "source": "https://members.parliament.uk/constituency/4428/election/422"
+    },
+    "N05000009": {
+      "electorate": 82201,
+      "rejected": 162,
+      "mp": {"first": "Sorcha", "last": "Eastwood", "gender": "female"},
+      "candidates": [["alliance", 18618], ["dup", 15659], ["uup", 11157], ["tuv", 2186], ["sdlp", 1028], ["green", 433]],
+      "source": "https://electionresults.parliament.uk/elections/3571"
+    },
+    "N05000010": {
+      "electorate": 74000,
+      "rejected": 246,
+      "mp": {"first": "Cathal", "last": "Mallaghan", "gender": "male"},
+      "candidates": [["sf", 24085], ["dup", 9162], ["sdlp", 3722], ["tuv", 2978], ["uup", 2269], ["alliance", 2001], ["aontu", 1047], ["ind", 181]],
+      "source": "https://electionresults.parliament.uk/elections/3627"
+    },
+    "N05000011": {
+      "electorate": 78244,
+      "rejected": 294,
+      "mp": {"first": "Dáire", "last": "Hughes", "gender": "male"},
+      "candidates": [["sf", 22299], ["sdlp", 6806], ["dup", 5900], ["tuv", 4099], ["uup", 3175], ["alliance", 2692], ["aontu", 888], ["con", 83]],
+      "source": "https://electionresults.parliament.uk/elections/3651"
+    },
+    "N05000012": {
+      "electorate": 74697,
+      "rejected": 176,
+      "mp": {"first": "Jim", "last": "Allister", "gender": "male"},
+      "candidates": [["tuv", 11642], ["dup", 11192], ["sf", 7714], ["alliance", 4488], ["uup", 3901], ["sdlp", 1661], ["aontu", 451], ["ind", 136]],
+      "source": "https://electionresults.parliament.uk/elections/3655"
+    },
+    "N05000013": {
+      "electorate": 73885,
+      "rejected": 168,
+      "mp": {"first": "Alex", "last": "Easton", "gender": "male"},
+      "candidates": [["ind", 20913], ["alliance", 13608], ["uup", 6754], ["green", 1247], ["sdlp", 657], ["ind", 117]],
+      "source": "https://electionresults.parliament.uk/elections/3662"
+    },
+    "N05000014": {
+      "electorate": 77058,
+      "rejected": 181,
+      "mp": {"first": "Robin", "last": "Swann", "gender": "male"},
+      "candidates": [["uup", 16311], ["dup", 8799], ["sf", 8034], ["alliance", 4574], ["tuv", 2693], ["sdlp", 1589], ["green", 541], ["aontu", 367]],
+      "source": "https://electionresults.parliament.uk/elections/3762"
+    },
+    "N05000015": {
+      "electorate": 76248,
+      "rejected": 228,
+      "mp": {"first": "Chris", "last": "Hazzard", "gender": "male"},
+      "candidates": [["sf", 19698], ["sdlp", 10418], ["dup", 7349], ["alliance", 3187], ["tuv", 1893], ["uup", 1411], ["aontu", 797], ["green", 444], ["con", 46]],
+      "source": "https://electionresults.parliament.uk/elections/3769"
+    },
+    "N05000016": {
+      "electorate": 74525,
+      "rejected": 137,
+      "mp": {"first": "Jim", "last": "Shannon", "gender": "male"},
+      "candidates": [["dup", 15559], ["alliance", 10428], ["uup", 3941], ["tuv", 3143], ["sf", 2793], ["sdlp", 1783], ["green", 703], ["ind", 256], ["ind", 157], ["con", 146]],
+      "source": "https://members.parliament.uk/constituency/4436/election/422"
+    },
+    "N05000017": {
+      "electorate": 81249,
+      "rejected": 241,
+      "mp": {"first": "Carla", "last": "Lockhart", "gender": "female"},
+      "candidates": [["dup", 21642], ["sf", 14236], ["alliance", 6322], ["uup", 3662], ["sdlp", 1496]],
+      "source": "https://electionresults.parliament.uk/elections/3846"
+    },
+    "N05000018": {
+      "electorate": 74269,
+      "rejected": 262,
+      "mp": {"first": "Órfhlaith", "last": "Begley", "gender": "female"},
+      "candidates": [["sf", 22711], ["dup", 6794], ["sdlp", 5821], ["uup", 2683], ["tuv", 2530], ["alliance", 2287], ["aontu", 778], ["con", 91]],
+      "source": "https://electionresults.parliament.uk/elections/3871"
+    }
+  }
+}

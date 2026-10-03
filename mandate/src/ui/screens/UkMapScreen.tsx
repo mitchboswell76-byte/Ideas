@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import type { CensusField, Ge2024Party, SeatType } from '../../data/types.ts'
 import {
   ChartLineIcon,
@@ -23,6 +23,7 @@ import {
   type TabItem,
 } from '../kit/index.ts'
 import '../map/map-screen.css'
+import { MapKey, type KeyHighlight } from '../map/MapKey.tsx'
 import { PlaceList } from '../map/PlaceList.tsx'
 import {
   CENSUS_FIELDS,
@@ -37,8 +38,10 @@ import {
 } from '../map/uk/data.ts'
 import {
   breaksFor,
+  coverageOf,
   formatField,
   majorityShare,
+  mapKeyFor,
   turnoutShare,
   UK_LATER_MODES,
   UK_MODE_LABELS,
@@ -78,6 +81,16 @@ const TABS: TabItem<ModeKey>[] = [...UK_MODES, ...UK_LATER_MODES].map((key) => {
 
 const FIELDS = Object.entries(CENSUS_FIELDS) as [CensusField, string][]
 const isField = (v: string): v is CensusField => v in CENSUS_FIELDS
+
+/** Census measures grouped by where they have figures, widest coverage first. */
+const FIELD_GROUPS = (() => {
+  const groups = new Map<string, [CensusField, string][]>()
+  for (const entry of FIELDS) {
+    const where = coverageOf(SEAT_LIST, entry[0])
+    groups.set(where, [...(groups.get(where) ?? []), entry])
+  }
+  return [...groups].sort((a, b) => b[1].length - a[1].length)
+})()
 
 const PLACES = [...SEATS]
   .sort((a, b) => a.name.localeCompare(b.name, 'en'))
@@ -132,6 +145,19 @@ export function UkMapScreen() {
     () => ({ mode, field, breaks: breaksFor(SEAT_LIST, mode, field), colours: PARTY_COLOURS }),
     [mode, field],
   )
+  const keyData = useMemo(
+    () => mapKeyFor(SEAT_LIST, spec, partyName, CENSUS_FIELDS[field]),
+    [spec, field],
+  )
+  // A picked-out key entry belongs to the mode it was picked in.
+  const context = `${mode}:${field}`
+  const [pick, setPick] = useState<KeyHighlight & { context: string }>({
+    context,
+    preview: null,
+    pinned: null,
+  })
+  const highlight: KeyHighlight = pick.context === context ? pick : { preview: null, pinned: null }
+  const lit = highlight.preview ?? highlight.pinned
 
   return (
     <div className="map-screen map-screen--tall">
@@ -142,18 +168,6 @@ export function UkMapScreen() {
           value={mode}
           onChange={(key) => ukMapStore.getState().setMode(key as UkMode)}
         />
-        {mode === 'demographics' && (
-          <label className="map-screen__option">
-            Measure
-            <select value={field} onChange={(e) => ukMapStore.getState().setOption(e.target.value)}>
-              {FIELDS.map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
         <div className="map-screen__tools">
           {layout === 'map' && <CityZoom />}
           <Segmented
@@ -164,7 +178,35 @@ export function UkMapScreen() {
           />
         </div>
       </div>
-      <UkMap layout={layout} spec={spec} fieldLabel={CENSUS_FIELDS[field]} />
+      <div className="map-screen__key">
+        <MapKey
+          data={keyData}
+          heading={
+            mode === 'demographics' ? (
+              <label className="map-key__measure">
+                <span className="visually-hidden">Measure</span>
+                <select
+                  value={field}
+                  onChange={(e) => ukMapStore.getState().setOption(e.target.value)}
+                >
+                  {FIELD_GROUPS.map(([where, fields]) => (
+                    <optgroup key={where} label={where}>
+                      {fields.map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+            ) : undefined
+          }
+          highlight={highlight}
+          onHighlight={(next) => setPick({ ...next, context })}
+        />
+      </div>
+      <UkMap layout={layout} spec={spec} lit={lit} />
       <aside className="map-screen__side">
         {selected && SEAT_BY_ID.has(selected) ? (
           <SeatCard id={selected} />
@@ -298,11 +340,7 @@ function SeatCard({ id }: { id: string }) {
         <dt>Electorate</dt>
         <dd>{result.electorate === null ? 'Not known' : formatCount(result.electorate)}</dd>
       </dl>
-      {!result.verified && (
-        <p className="seat-card__note">
-          Winner only: entered by hand and not yet checked against the official results.
-        </p>
-      )}
+
       {rows.length > 0 && (
         <Table
           className="seat-card__votes"
@@ -326,8 +364,14 @@ function SeatCard({ id }: { id: string }) {
           </dl>
         </>
       )}
+      {!hasCensus && seat.nation === 'northern-ireland' && (
+        <p className="muted place-card__later">
+          Census: Northern Ireland&rsquo;s (NISRA) is not in the game&rsquo;s data yet.
+        </p>
+      )}
       <p className="muted place-card__later">
         MP and result as of 4 July 2024; later by-elections and defections are not shown.
+        {result.source === 'manual' && ' Copied from the UK Parliament results pages.'}
         {hasCensus && ' Census 2021 (Scotland 2022).'}
       </p>
     </Card>

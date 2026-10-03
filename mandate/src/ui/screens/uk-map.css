@@ -6,12 +6,6 @@
   align-items: center;
 }
 
-.seat-card__note {
-  margin-top: 10px;
-  color: var(--warn);
-  font-size: var(--fs-s);
-}
-
 .seat-card__votes {
   margin-top: 14px;
 }

@@ -6,13 +6,17 @@ import {
   binOf,
   breaksFor,
   fillOf,
+  coverageOf,
   formatField,
-  legendFor,
+  keyOf,
+  listOf,
   MAJORITY_BREAKS,
+  mapKeyFor,
   majorityShare,
   modeLine,
   NO_DATA,
   quantileBreaks,
+  tickLabels,
   turnoutShare,
   type ModeSpec,
   type SeatData,
@@ -37,7 +41,11 @@ const result = (over: Partial<Ge2024Result> = {}): Ge2024Result => ({
 })
 
 const census = { id: 'E1', age65plus: 20, population: 110_000 } as unknown as CensusSeat
-const seat = (over: Partial<Ge2024Result> = {}): SeatData => ({ result: result(over), census })
+const seat = (over: Partial<Ge2024Result> = {}): SeatData => ({
+  nation: 'england',
+  result: result(over),
+  census,
+})
 
 const spec = (mode: ModeSpec['mode'], breaks: number[] = []): ModeSpec => ({
   mode,
@@ -95,32 +103,118 @@ describe('UK map modes', () => {
   })
 
   const results = new Map(GE2024.results.map((r) => [r.id, r]))
-  const seats: SeatData[] = CENSUS.seats.map((c) => ({ result: results.get(c.id)!, census: c }))
+  const nationOf = (id: string): SeatData['nation'] =>
+    id.startsWith('E')
+      ? 'england'
+      : id.startsWith('W')
+        ? 'wales'
+        : id.startsWith('S')
+          ? 'scotland'
+          : 'northern-ireland'
+  const seats: SeatData[] = CENSUS.seats.map((c) => ({
+    nation: nationOf(c.id),
+    result: results.get(c.id)!,
+    census: c,
+  }))
 
   it('lists parties by seats won in the Party key', () => {
-    const rows = legendFor(seats, spec('party'), partyName)
-    expect(rows.slice(0, 4).map((r) => r.label)).toEqual([
-      'Labour 411',
-      'Conservative 121',
-      'Liberal Democrats 72',
-      'SNP 9',
+    const key = mapKeyFor(seats, spec('party'), partyName, '')
+    expect(key.scale).toBeNull()
+    expect(key.items.slice(0, 4).map((r) => [r.label, r.count])).toEqual([
+      ['Labour', 411],
+      ['Conservative', 121],
+      ['Liberal Democrats', 72],
+      ['SNP', 9],
     ])
-    expect(rows[0]!.swatch).toBe(GE2024.colours.lab)
+    expect(key.items[0]).toMatchObject({ id: 'lab', swatch: GE2024.colours.lab })
   })
 
-  it('labels value ramps, with a no-data row where some seats lack data', () => {
-    const majority = legendFor(seats, spec('majority', [...MAJORITY_BREAKS]), partyName)
-    expect(majority.map((r) => r.label)).toEqual([
-      'Under 5% (marginal)',
-      '5% to 10%',
-      '10% to 20%',
-      '20% to 30%',
-      '30% or more (safe)',
-      'No data', // Northern Ireland: winners only
+  it('draws value modes as a stepped scale, with no gaps now Northern Ireland has results', () => {
+    const majority = mapKeyFor(seats, spec('majority', [...MAJORITY_BREAKS]), partyName, '')
+    expect(majority.scale).toMatchObject({
+      ticks: ['5%', '10%', '20%', '30%'],
+      low: 'Marginal',
+      high: 'Safe',
+    })
+    expect(majority.scale!.steps.map((s) => s.id)).toEqual([
+      'step0',
+      'step1',
+      'step2',
+      'step3',
+      'step4',
     ])
+    expect(majority.items).toEqual([])
     const turnout = breaksFor(seats, 'turnout', 'age65plus')
     expect(turnout).toHaveLength(4)
     expect(turnout[0]).toBeGreaterThan(40)
     expect(turnout[3]).toBeLessThan(75)
+  })
+
+  it('hatches census gaps and says why', () => {
+    const degree = mapKeyFor(
+      seats,
+      { ...spec('demographics', [20, 25, 30, 35]), field: 'degree' },
+      partyName,
+      'Degree-level qualification',
+    )
+    expect(degree.title).toBe('Degree-level qualification')
+    expect(degree.items).toEqual([
+      { id: 'none', swatch: 'var(--map-nodata)', label: 'No figure', hatch: true },
+    ])
+    expect(degree.note).toContain("Scotland's census source has no figure")
+    expect(degree.note).toContain('Northern Ireland')
+    const welsh = mapKeyFor(
+      seats,
+      { ...spec('demographics', [5, 10, 15, 20]), field: 'welshSpeakers' },
+      partyName,
+      'Can speak Welsh',
+    )
+    expect(welsh.note).toContain('asked in Wales only')
+  })
+
+  it('says where each census measure has figures', () => {
+    expect(coverageOf(seats, 'age65plus')).toBe('Great Britain')
+    expect(coverageOf(seats, 'density')).toBe('Great Britain')
+    expect(coverageOf(seats, 'degree')).toBe('England and Wales')
+    expect(coverageOf(seats, 'welshSpeakers')).toBe('Wales')
+    expect(listOf(['A', 'B', 'C'])).toBe('A, B and C')
+  })
+
+  it('files each seat under its key entry, for picking out from the key', () => {
+    expect(keyOf(seat(), spec('party'))).toBe('lab')
+    expect(keyOf(seat(), spec('majority', [...MAJORITY_BREAKS]))).toBe('step0')
+    expect(keyOf(seat({ majority: null }), spec('majority', [...MAJORITY_BREAKS]))).toBe('none')
+  })
+})
+
+describe('key ticks', () => {
+  it('keeps tick labels short and distinct', () => {
+    expect(tickLabels('majority', 'age65plus', [5, 10, 20, 30])).toEqual([
+      '5%',
+      '10%',
+      '20%',
+      '30%',
+    ])
+    expect(tickLabels('demographics', 'degree', [26.3, 29.9, 34.2, 39.9])).toEqual([
+      '26%',
+      '30%',
+      '34%',
+      '40%',
+    ])
+    expect(tickLabels('demographics', 'muslim', [0.4, 1.1, 2.5, 6.8])).toEqual([
+      '0.4%',
+      '1.1%',
+      '2.5%',
+      '6.8%',
+    ])
+    expect(tickLabels('demographics', 'density', [2.2, 5.7, 17.3, 37.1])).toEqual([
+      '2.2',
+      '5.7',
+      '17',
+      '37',
+    ])
+    expect(tickLabels('demographics', 'population', [93_215, 99_870])).toEqual(['93k', '100k'])
+    // 26.3 and 26.4 would both round to 26%: fall back to one decimal place.
+    expect(tickLabels('demographics', 'degree', [26.3, 26.4])).toEqual(['26.3%', '26.4%'])
   })
 })

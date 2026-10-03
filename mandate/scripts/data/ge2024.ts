@@ -2,7 +2,7 @@
  * GE2024 constituency results → `Ge2024Result`, from three inputs (best first):
  *  - the Commons Library's `HoC-GE2024-results-by-constituency.csv` (all 650 seats, if supplied),
  *  - the University of Bristol GB summaries file (632 seats, results copied from the Commons Library),
- *  - hand-entered winners (`data-raw/manual/ni-ge2024-winners.json`) for seats with no results.
+ *  - hand-transcribed Northern Ireland results (`data-raw/manual/ni-ge2024-results.json`).
  */
 import {
   GE2024_PARTIES,
@@ -246,27 +246,60 @@ export function fromHocCsv(rawRows: CsvRow[]): ResultsInput {
   return { results, meta }
 }
 
-export interface ManualWinners {
+export interface ManualResults {
   note: string
-  winners: Record<string, string>
+  asOf: string
+  seats: Record<
+    string,
+    {
+      electorate: number
+      rejected: number
+      mp: { first: string; last: string; gender: string }
+      /** Every candidate, best first, by party code (`ind` for independents). */
+      candidates: [string, number][]
+      /** The results page the figures were copied from. */
+      source: string
+    }
+  >
 }
 
-/** Winner-only results for seats no reachable file covers. */
-export function fromManual(file: ManualWinners): Ge2024Result[] {
-  return Object.entries(file.winners).map(([id, party]) => {
-    if (!(party in GE2024_PARTIES)) throw new Error(`${id}: unknown party ${party}`)
+/**
+ * Hand-transcribed results for seats no reachable file covers (Northern Ireland), folded the way
+ * the Commons Library files are: parties outside the game's list count as `other`, and so does
+ * every independent except one who came first or second.
+ */
+export function fromManual(file: ManualResults): Ge2024Result[] {
+  return Object.entries(file.seats).map(([id, seat]) => {
+    const ranked = [...seat.candidates].sort((a, b) => b[1] - a[1])
+    if (ranked.length < 2) throw new Error(`${id}: needs at least two candidates`)
+    for (const [code, n] of ranked) {
+      if (!Number.isInteger(n) || n < 0) throw new Error(`${id}: ${n} votes for ${code}`)
+    }
+    const partyOf = (code: string): Ge2024Party =>
+      code in GE2024_PARTIES && code !== 'other' ? (code as Ge2024Party) : 'other'
+    const [first, second] = ranked.map(([code]) => partyOf(code))
+    const votes: Partial<Record<Ge2024Party, number>> = {}
+    ranked.forEach(([code, n], place) => {
+      let party = partyOf(code)
+      if (party === 'ind' && place > 1) party = 'other'
+      if (party !== 'other' && party !== 'ind' && votes[party] !== undefined) {
+        throw new Error(`${id}: ${party} stands twice`)
+      }
+      votes[party] = (votes[party] ?? 0) + n
+    })
+    const valid = ranked.reduce((a, [, n]) => a + n, 0)
     return {
       id,
-      winner: party as Ge2024Party,
-      second: null,
-      electorate: null,
-      valid: null,
-      rejected: null,
-      majority: null,
-      votes: null,
-      mp: null,
+      winner: first!,
+      second: second!,
+      electorate: seat.electorate,
+      valid,
+      rejected: seat.rejected,
+      majority: ranked[0]![1] - ranked[1]![1],
+      votes: dropZeros(votes),
+      mp: { first: seat.mp.first, last: seat.mp.last, gender: gender(seat.mp.gender) },
       declared: null,
-      verified: false,
+      verified: true,
       source: 'manual',
     }
   })

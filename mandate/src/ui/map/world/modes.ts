@@ -4,7 +4,7 @@
  */
 import type { Bloc, CountryInfo, WorldRegion, WorldShape } from '../../../data/types.ts'
 import { WORLD_REGIONS } from '../../../data/types.ts'
-import type { LegendRow } from '../legend.ts'
+import type { KeyItem, MapKeyData } from '../legend.ts'
 
 export const WORLD_MODES = ['political', 'region', 'blocs'] as const
 export type WorldMode = (typeof WORLD_MODES)[number]
@@ -54,20 +54,36 @@ export function modeLine(country: CountryInfo, mode: WorldMode, bloc: Bloc | nul
   }
 }
 
-export function legendFor(mode: WorldMode, bloc: Bloc | null): LegendRow[] {
-  const home: LegendRow = { swatch: 'var(--map-home)', label: 'Your country', outline: true }
+export function legendFor(mode: WorldMode, bloc: Bloc | null): KeyItem[] {
+  const home: KeyItem = {
+    id: 'home',
+    swatch: 'var(--map-home)',
+    label: 'Your country',
+    outline: true,
+  }
   switch (mode) {
     case 'political':
       return [home]
     case 'region':
-      return [...WORLD_REGIONS.map((r) => ({ swatch: regionToken(r), label: r })), home]
+      return [...WORLD_REGIONS.map((r) => ({ id: r, swatch: regionToken(r), label: r })), home]
     case 'blocs':
       return [
-        { swatch: 'var(--map-member)', label: bloc ? `${bloc.name} member` : 'Member' },
-        { swatch: 'var(--map-other)', label: 'Not a member' },
+        {
+          id: 'member',
+          swatch: 'var(--map-member)',
+          label: bloc ? `${bloc.name} member` : 'Member',
+        },
+        { id: 'other', swatch: 'var(--map-other)', label: 'Not a member' },
         home,
       ]
   }
+}
+
+/** The docked map key for a mode. */
+export function mapKeyFor(mode: WorldMode, bloc: Bloc | null): MapKeyData {
+  const title =
+    mode === 'political' ? 'Countries' : mode === 'region' ? 'UN regions' : (bloc?.full ?? 'Blocs')
+  return { title, scale: null, items: legendFor(mode, bloc), note: legendNote(mode, bloc) }
 }
 
 /** A note under the legend, e.g. members too small for the map. */

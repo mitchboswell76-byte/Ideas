@@ -2,20 +2,10 @@ import { useMemo, useState } from 'react'
 import type { Bloc, CountryInfo } from '../../../data/types.ts'
 import { WORLD_MAP } from '../../../data/worldMap.ts'
 import { useMapState, worldMapStore } from '../../store/map.ts'
-import { Legend } from '../Legend.tsx'
 import { MapTip } from '../MapTip.tsx'
 import { StoreMapView } from '../StoreMapView.tsx'
 import type { Point } from '../viewport.ts'
-import {
-  fillOf,
-  HOME_COUNTRY,
-  LABEL_PX,
-  labelsThatFit,
-  legendFor,
-  legendNote,
-  modeLine,
-  type WorldMode,
-} from './modes.ts'
+import { fillOf, HOME_COUNTRY, LABEL_PX, labelsThatFit, modeLine, type WorldMode } from './modes.ts'
 
 const SHAPES = WORLD_MAP.shapes
 const SHAPE_BY_ID = new Map(SHAPES.map((s) => [s.id, s]))
@@ -77,7 +67,6 @@ export function WorldMap({ countries, mode, bloc }: WorldMapProps) {
       onHover={(id, at) => setHover(id && at ? { id, at } : null)}
       overlay={
         <>
-          <Legend rows={legendFor(mode, bloc)} note={legendNote(mode, bloc)} />
           {hover && hovered && (
             <MapTip at={hover.at} title={hovered.name} line={modeLine(hovered, mode, bloc)} />
           )}

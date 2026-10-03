@@ -186,13 +186,70 @@ describe('parseDeclared', () => {
 })
 
 describe('fromManual', () => {
-  it('makes unverified winner-only results and rejects unknown parties', () => {
-    expect(fromManual({ note: '', winners: { N05000001: 'dup' } })[0]).toMatchObject({
+  const seat = (candidates: [string, number][]) => ({
+    note: '',
+    asOf: '2024-07-04',
+    seats: {
+      N05000013: {
+        electorate: 70000,
+        rejected: 100,
+        mp: { first: 'A', last: 'B', gender: 'male' },
+        candidates,
+        source: 'https://example.org',
+      },
+    },
+  })
+
+  it('builds full results: valid votes, majority, winner and runner-up', () => {
+    const [r] = fromManual(
+      seat([
+        ['alliance', 300],
+        ['dup', 500],
+        ['pbp', 50],
+      ]),
+    )
+    expect(r).toMatchObject({
       winner: 'dup',
-      votes: null,
-      verified: false,
+      second: 'alliance',
+      valid: 850,
+      majority: 200,
+      electorate: 70000,
+      rejected: 100,
+      votes: { dup: 500, alliance: 300, other: 50 },
+      verified: true,
       source: 'manual',
     })
-    expect(() => fromManual({ note: '', winners: { N05000001: 'whig' } })).toThrow(/unknown party/)
+  })
+
+  it('keeps an independent who came first or second; later independents count as other', () => {
+    const [r] = fromManual(
+      seat([
+        ['ind', 900],
+        ['alliance', 600],
+        ['ind', 40],
+        ['aontu', 10],
+      ]),
+    )
+    expect(r!.votes).toEqual({ ind: 900, alliance: 600, other: 50 })
+    expect(r).toMatchObject({ winner: 'ind', second: 'alliance', majority: 300 })
+  })
+
+  it('rejects a party standing twice and bad counts', () => {
+    expect(() =>
+      fromManual(
+        seat([
+          ['sf', 10],
+          ['sf', 5],
+        ]),
+      ),
+    ).toThrow(/stands twice/)
+    expect(() =>
+      fromManual(
+        seat([
+          ['sf', 10],
+          ['dup', -1],
+        ]),
+      ),
+    ).toThrow(/votes/)
   })
 })

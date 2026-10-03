@@ -69,6 +69,18 @@ export function rewind(ring: GeoJSON.Position[], outer: boolean): void {
 
 const round1 = (v: number) => Math.round(v * 10) / 10
 
+/** Mean Earth radius in km (IUGG), for areas from d3's steradians. */
+const EARTH_RADIUS_KM = 6371.0088
+
+/**
+ * A seat's area in hectares, from its full-resolution boundary. Population ÷ this is within ±3% of
+ * the ONS density for 90% of English and Welsh seats (median ratio 1.003), so it stands in where
+ * the census source has no density (Scotland).
+ */
+export function hectaresOf(f: SeatFeature): number {
+  return geoArea(f) * EARTH_RADIUS_KM ** 2 * 100
+}
+
 /** Signed area of a ring (shoelace); the sign gives its winding. */
 function ringArea(ring: readonly [number, number][]): number {
   let a = 0

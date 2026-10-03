@@ -11,9 +11,16 @@ import {
 } from '../kit/icons.ts'
 import { Button, Card, Chip, Tabs, Tooltip, type TabItem } from '../kit/index.ts'
 import '../map/map-screen.css'
+import { MapKey } from '../map/MapKey.tsx'
 import { PlaceList } from '../map/PlaceList.tsx'
 import { useEscapeDeselect } from '../map/useEscapeDeselect.ts'
-import { LATER_MODES, MODE_LABELS, WORLD_MODES, type WorldMode } from '../map/world/modes.ts'
+import {
+  LATER_MODES,
+  mapKeyFor,
+  MODE_LABELS,
+  WORLD_MODES,
+  type WorldMode,
+} from '../map/world/modes.ts'
 import { WorldMap } from '../map/world/WorldMap.tsx'
 import { useMapState, worldMapStore } from '../store/map.ts'
 import './screens.css'
@@ -87,6 +94,9 @@ export function World() {
             ))}
           </div>
         )}
+      </div>
+      <div className="map-screen__key">
+        <MapKey data={mapKeyFor(mode, mode === 'blocs' ? bloc : null)} />
       </div>
       <WorldMap countries={BY_ID} mode={mode} bloc={mode === 'blocs' ? bloc : null} />
       <aside className="map-screen__side">

@@ -36,7 +36,8 @@
   --map-seq-2: #a08cc5;
   --map-seq-3: #bbaade;
   --map-seq-4: #d7c9f3;
-  --map-nodata: #3a424b;
+  --map-nodata: #262d34;
+  --map-nodata-line: #48525d;
   --map-seat-line: rgb(14 19 24 / 0.8);
   --map-region-line: rgb(233 235 238 / 0.5);
   --map-nation-line: #e9ebee;
@@ -69,7 +70,8 @@
   --map-seq-2: #6d5398;
   --map-seq-3: #543a7c;
   --map-seq-4: #3b235d;
-  --map-nodata: #b9c0c7;
+  --map-nodata: #e4e8ec;
+  --map-nodata-line: #aab3bc;
   --map-seat-line: rgb(255 255 255 / 0.7);
   --map-region-line: rgb(21 24 28 / 0.45);
   --map-nation-line: #15181c;
@@ -172,68 +174,6 @@
   color: var(--text-muted);
 }
 
-.map-legend {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  max-width: min(320px, calc(100% - 20px));
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--surface-2) 94%, transparent);
-  font-size: var(--fs-s);
-}
-
-.map-legend--column {
-  max-width: 168px;
-}
-
-.map-legend--column .map-legend__rows {
-  flex-direction: column;
-  flex-wrap: nowrap;
-}
-
-.map-legend__title {
-  cursor: pointer;
-  font-size: var(--fs-s);
-  font-weight: 600;
-}
-
-.map-legend[open] .map-legend__title {
-  margin-bottom: 6px;
-}
-
-.map-legend__rows {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-}
-
-.map-legend__row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.map-legend__swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  background: var(--swatch);
-  /* A hairline keeps very light swatches (the Speaker's white) visible on a light panel. */
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
-}
-
-.map-legend__swatch--outline {
-  border: 2px solid var(--swatch);
-  background: none;
-}
-
-.map-legend__note {
-  margin-top: 6px;
-  color: var(--text-muted);
-}
-
 /* UK map: real boundaries (seat borders are one mesh) or hexes (each hex is outlined). */
 .ukmap__fills path {
   cursor: pointer;
@@ -316,9 +256,11 @@
   pointer-events: none;
 }
 
-@media (max-width: 599px) {
-  /* The map is small on a phone: the key starts folded and drops its long notes. */
-  .map-legend__note {
-    display: none;
-  }
+/* Hatching for seats with no figure (the pattern is in `UkMap`). */
+.ukmap__nodata {
+  fill: var(--map-nodata);
+}
+
+.ukmap__nodata-line {
+  stroke: var(--map-nodata-line);
 }

@@ -81,17 +81,25 @@ describe('GE2024 results', () => {
     }
   })
 
-  it('has votes for all of GB; only hand-entered Northern Ireland winners lack them', () => {
+  it('has full results for all 650 seats (Northern Ireland transcribed by hand)', () => {
     for (const r of results) {
-      if (r.source === 'manual') {
-        expect(r.id.startsWith('N'), r.id).toBe(true)
-        expect(r).toMatchObject({ verified: false, votes: null })
-      } else {
-        expect(r).toMatchObject({ verified: true })
-        expect(r.votes, r.id).not.toBeNull()
-        expect(r.mp, r.id).not.toBeNull()
-      }
+      if (r.source === 'manual') expect(r.id.startsWith('N'), r.id).toBe(true)
+      expect(r).toMatchObject({ verified: true })
+      expect(r.votes, r.id).not.toBeNull()
+      expect(r.mp, r.id).not.toBeNull()
+      expect(r.majority, r.id).not.toBeNull()
     }
+  })
+
+  it('matches the published Northern Ireland party totals', () => {
+    const total = (p: Ge2024Party) =>
+      results.filter((r) => r.id.startsWith('N')).reduce((a, r) => a + (r.votes?.[p] ?? 0), 0)
+    expect(total('sf')).toBe(210891)
+    expect(total('dup')).toBe(172058)
+    expect(total('alliance')).toBe(117191)
+    expect(total('uup')).toBe(94779)
+    expect(total('sdlp')).toBe(86861)
+    expect(total('tuv')).toBe(48685)
   })
 })
 
@@ -122,6 +130,13 @@ describe('Census', () => {
       if (seat.id.startsWith('N')) expect(seat.population).toBeNull()
       // Smallest is Na h-Eileanan an Iar, a protected island seat.
       else expect(seat.population, seat.id).toBeGreaterThan(20_000)
+    }
+  })
+
+  it('has a density for every GB seat (Scotland worked out from boundary areas)', () => {
+    for (const seat of CENSUS.seats) {
+      if (seat.id.startsWith('N')) continue
+      expect(seat.density, seat.id).toBeGreaterThan(0)
     }
   })
 })

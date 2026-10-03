@@ -3,8 +3,9 @@
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M1 — Nobody to Prime Minister (M0 follow-ups T8b, T8c done). M0 was merged into
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
-**Next session:** start at **T11**
-**Last playable link (T10):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Next session:** start at **T10c** (then T10d … T10i, then T11). T10b–T10i come from the user's 2026-10-03
+  feedback on the character system, UI and UK map; the research behind them is in the decisions log (2026-10-03 T10b).
+**Last playable link (T10b):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
 **UI kit (T10):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
@@ -99,6 +100,69 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
   3–5 traits, 14-statement beliefs quiz, 8 personal colours (applied as `--you`); the sim validates the
   `CharacterSpec` and builds the family around it. Life mode is shown but disabled until T11. 258 unit tests,
   22 e2e (creator flow + turntable perf).
+- [x] T10b UK map key + data gaps (user, 2026-10-03: "the side tab with Party/Majority is too wide or wrongly
+      positioned, it covers the map even when out"; "try your best to not have gaps")
+
+  Done: the key is docked between the mode bar and the map on both maps (never over it): swatches with seat
+  counts, or a stepped threshold scale; hover/focus picks a party or band out on the map, click pins it. The
+  Demographics measure picker sits in the key, grouped by coverage. Northern Ireland now has full 2024 results
+  (hand-transcribed, checked against published NI party totals), so Majority and Turnout have no gaps; Scotland's
+  density comes from boundary areas. Remaining census gaps (NI all, Scotland 10 measures) are hatched and the key
+  says why. 268 unit tests; e2e 21 of 22 in the full run (the creator turntable perf test, untouched code, then
+  passed twice on rerun: see decisions).
+- [ ] T10c Look & feel v2: "must not look AI-made" (user: "the font and boxes give me that vibe"). Research first
+      (keep it short): what reads as template/AI UI (inference, not academic: shadcn/Tailwind defaults: Inter/Geist,
+      8–12px rounded cards with 1px borders on everything, grey-on-grey, violet accents, equal-weight card grids,
+      an icon on every heading) against award-winning references: NYT/FT/Guardian election pages (Malofiej/SND),
+      Suzerain, Disco Elysium, CK3, Football Manager. Then: boxes → rules (panels lose borders and fills; hairline
+      rules + whitespace on a newspaper grid; radius 2–4px on controls only; no card-in-card); stronger type
+      contrast (Newsreader display heads 28–40px and big tabular numbers; try Libre Franklin, OFL, NYT's Franklin
+      lineage, against Schibsted Grotesk for UI text, pick by screenshots); fewer icons; default personal colour
+      not violet. Apply to shell, Home, Inbox, Calendar, Saves, Settings, maps chrome, kit gallery. Creator and
+      Profile get it in T10d–T10i. Update DESIGN §17 (one named reference per surface).
+- [ ] T10d Identity & background: ethnicity = the ONS 2021 England and Wales list, official wording, 19 boxes in
+      5 groups (incl. "Gypsy or Irish Traveller", "Roma", the four Mixed boxes, "Arab", "Any other …" boxes);
+      ethnicity is self-identification, not appearance: it seeds names, family and the Look's *defaults* (skin tone
+      range, hair colour and texture, eyes, face-shape tendencies, all overlapping); changing it re-rolls those
+      defaults unless the player has edited Look (then offer "Match look to background"). Mixed boxes give parents
+      the component backgrounds. Education as RQF levels (none … doctorate; apprenticeships L2–L7; Scottish names
+      for Scots: National 5, Highers) + degree subject. Occupations: ~80 jobs grounded in SOC 2020 major groups,
+      each with entry route (min level, subject, apprenticeship route), min age, class; the job list filters by
+      education and age, and `specProblems` rejects impossible pairs (no GCSE-only doctors). Family panel replaces
+      the siblings stepper: parents (name, age, job, politics, closeness), siblings as people you add/edit
+      (name, age gap, closeness), household type (two parents, single parent, kinship/foster care, blended).
+      Siblings are relationships, not stat modifiers (birth order has no real personality effect).
+- [ ] T10e Personality v2 (Stellaris customisation, real psychology underneath): HEXACO core (Honesty–Humility,
+      Emotionality, eXtraversion, Agreeableness, Conscientiousness, Openness; 1–5 each, 24 facets shown), each with
+      trade-offs on attributes, skills and check odds (no "best" setting); ~60 traits in 6 groups (Temperament,
+      Upbringing, Lifestyle, Talents, Flaws, Quirks) bought with Stellaris trait points (budget 2; good traits cost
+      1–2, flaws give 1–2; max 5); exclusions both between opposite traits and against the sliders (e.g. Shy needs
+      eXtraversion ≤ 2). UI: Stellaris species-traits layout (available | picked | points) with CK3 effect
+      tooltips. Replaces the free 3–5 traits (closes the T10 "traits are free" issue).
+- [ ] T10f Beliefs v2: optional values test built on the British Social Attitudes / BES scales (Evans, Heath &
+      Lalljee 1996: left–right 5 items, libertarian–authoritarian 6 items) plus game items for the other axes; the
+      chart is a compass with "Left/Right" and "Libertarian/Authoritarian" axes, four tinted quadrants (colour-blind
+      safe, never party colours), your dot and your parents'; CHES party positions join at T12. No-test path:
+      Stellaris-style ethics on 6 axes (Economy: socialist ↔ free-market; Authority: libertarian ↔ authoritarian;
+      Society: progressive ↔ traditional; World: internationalist ↔ nationalist; Environment: green ↔ growth;
+      Union: unionist ↔ independence, nation-aware), 3 points, "committed" costs 2 (Stellaris fanatic), plus 2
+      Causes (Stellaris civics) from ~30, and the 10 issue stances derived and editable as diverging bars (no radar
+      charts). The test result can be refined on the same screen.
+- [ ] T10g Avatar v2a, the body: MakeHuman CC0 base mesh + targets (build-time download from
+      raw.githubusercontent.com/makehumancommunity/makehuman at a pinned commit, hashed), macros (sex, age, weight,
+      muscle, height, proportions, ancestry blend) + ~60 face and body targets grouped like Sims 4 Create-a-Sim /
+      Skyrim RaceMenu (head, brow, eyes, nose, cheeks, mouth, jaw and chin, ears, neck, torso, limbs). Morphs as
+      three.js morph targets, so slider drags change weights on the GPU instead of rebuilding the mesh (fixes the
+      turntable rebuild fps). Smooth normals, skin shader (wrap lighting, melanin-based tone ramp), proper eyes.
+      Budget: lazy chunk ≤ 1.5 MB gzip (measure), portraits stay cached, Low preset = fewer vertices. Target is
+      stylised realism (Sims 4), not photoreal: see the uncanny-valley note in the decisions log.
+- [ ] T10h Avatar v2b, the look: hair as layered card meshes (self-made; straight, wavy, curly and afro-textured:
+      coils, locs, braids, cornrows; 24+ styles), brows, beards, clothes fitted to the new body (~12 outfits by
+      role), ageing (age macro + procedural wrinkle normal maps), Look tab rebuilt as region tabs with presets and
+      per-region randomise; 2D fallback redrawn from the new rig.
+- [ ] T10i Profile v2 + creator layout pass (CK3 character window depth, not BitLife): large portrait, tabs
+      Overview / Personality / Beliefs / Family (tree) / Career (education and jobs timeline) / Relations (opinion
+      breakdowns), nested CK3 tooltips with every modifier; editorial layout from T10c.
 - [ ] T11 Event engine (data-driven) + life mode as a BitLife age log (Age + button) with CK3 event windows,
       ~60 childhood/youth cards
 - [ ] T12 Seed data: parties, leaders & key figures (web-verify, `asOf`), outlets, polling baseline, donor archetypes
@@ -495,19 +559,73 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   not the cost. Unthrottled: full-body build ~5.3 ms, 21.7k triangles. Creator chunk 19.5 KB gzip, lazy; initial
   JS ~133 KB gzip.
 
+- 2026-10-03 T10b user feedback (after creating a character): wants a smoother, far more realistic and
+  customisable character model ("Elder Scrolls and Sims or more"); census-style ethnicity options ("gypsy,
+  mixed etc") that change the model; jobs gated by education; siblings refurbished or removed; more and logical
+  personality options (likes Stellaris); an optional political compass test (colourful, "libertarian" not
+  "liberal") or a far deeper Stellaris-like belief system; a Profile with real depth (too BitLife); the UK map key
+  not covering the map and no data gaps; nothing that looks AI-made; and pushback where research disagrees.
+  Planned as T10b–T10i before T11.
+- 2026-10-03 Research behind the plan (and the pushback given to the user):
+  - Avatars: photoreal is the wrong target in a browser on an Intel iGPU, and risky: eeriness comes mostly from
+    mismatched realism between features (Seyama & Nagayama 2007, Presence 16(4); MacDorman et al. 2009, Computers
+    in Human Behavior 25(3); review: Kätsyri et al. 2015, Frontiers in Psychology 6:390). Skyrim is semi-realistic
+    and Sims 4 stylised; aim for Sims 4-style consistent stylised realism with Skyrim-level slider counts.
+    MakeHuman's base mesh and targets are CC0 and reachable; its skins and hair are not, so those are self-made.
+  - Ethnicity: the ONS 2021 England and Wales question (19 boxes) is the standard UK list; NHS records still use
+    the 2001 16-category codes, and Scotland's 2022 and NI's 2021 lists differ (e.g. Polish, Irish Traveller).
+    "Gypsy or Irish Traveller" is the official wording. Ethnicity is identity, not a face: it may only nudge
+    appearance defaults, with wide overlap, and the player always overrides.
+  - Siblings: birth order has no meaningful effect on Big Five traits (Rohrer, Egloff & Schmukle 2015, PNAS
+    112(46); Damian & Roberts 2015, J. Research in Personality 58), so siblings become people and relationships,
+    not modifiers. Parents' politics do carry over to children (Jennings & Niemi 1968, APSR 62(1); Jennings,
+    Stoker & Bowers 2009, J. Politics 71(3)), which the T10 family model already uses.
+  - Personality: HEXACO (Ashton & Lee 2007, PSPR 11(2)) over the Big Five because Honesty–Humility matters for a
+    politics game (corruption, scheming); MBTI rejected (Pittenger 2005, Consulting Psychology J. 57(3): poor
+    reliability, no bimodal types). Politicians differ from voters (higher energy/extraversion: Caprara et al.
+    2003, JPSP 84(4)); agreeableness can hurt careers (Joly, Soroka & Loewen 2018, Acta Politica 53); candidates'
+    Dark Triad scores are measurable (Nai 2019, European Political Science 18). Stellaris supplies the buying
+    mechanics (trait points, opposed ethics, fanatic = 2 points), not the psychology.
+  - Beliefs: the user is right: the academic axis is "libertarian–authoritarian" (British Social Attitudes and
+    BES, Evans, Heath & Lalljee 1996, British J. Sociology 47(1)). The Political Compass website's scoring is
+    unpublished and unvalidated, so the game builds its own test on the BSA/BES items instead of copying it.
+  - "Not AI-looking" has no academic literature; the T10c list of template tells is a design judgement, checked
+    against named award-winning references.
+- 2026-10-03 T10b map key: `MapKey` (`ui/map/MapKey.tsx`, data in `ui/map/legend.ts`: `MapKeyData` = title,
+  optional `KeyScale` {steps, ticks, low, high}, `KeyItem[]`, note) replaces the overlay `Legend`; screens place
+  it in a `key` grid area (desktop: under the bar beside the side panel; phones: between bar and map). UK:
+  `mapKeyFor`, `keyOf` (each seat path carries `data-key`: party, `stepN` or `none`), `tickLabels` (short break
+  labels: whole % where distinct, people in thousands, density without units), `coverageOf` (measure picker
+  optgroups: Great Britain / England and Wales / Wales), `gapsOf`. Picking out = one injected `<style>` rule
+  (`fill-opacity: 0.18` on other seats), so the 650 paths never re-render. No-data seats use an SVG hatch pattern
+  sized by 1/scale (constant on screen); key swatch hatched in CSS. World: `mapKeyFor(mode, bloc)`, not
+  interactive.
+- 2026-10-03 T10b data: `ni-ge2024-results.json` replaces the winners-only file (see DATA_SOURCES); `fromManual`
+  folds candidates like the Commons Library files (PBP, Aontú, CCLA and third-place-or-lower independents →
+  `other`) and marks them `verified: true`. `hectaresOf` (scripts/data/ukmap.ts) + `withDensity`
+  (scripts/data/census.ts) fill Scotland's density; method checked on 575 English and Welsh seats (median ratio
+  1.003, 90% within ±3%). The seat card notes NI results were copied from the Parliament pages and that NI's
+  census is not in the data yet.
+- 2026-10-03 T10b measured: 268 unit tests; full e2e run 21/22: the creator turntable rebuild check measured
+  23.8 fps against its 30 floor, then 31.0 and 31.5 on two reruns of that test. Pre-existing thin margin in T10
+  code this task doesn't touch; T10g's GPU morph targets remove the rebuilds. 2D maps 58–60 fps under the 4x
+  throttle (UK map 59.4, world 58.3).
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
-- GE2024 Northern Ireland: winners only, hand-entered and unverified (no votes, turnout or MPs). User can add
+- GE2024 Northern Ireland: full results transcribed by hand from the Parliament results pages (checked against
+  the published NI party totals; Mid Ulster's electorate reads exactly 74,000, worth a check). The user can add
   `mandate/data-raw/HoC-GE2024-results-by-constituency.csv` (Commons Library CBP-10009) and run `npm run data` to
-  get official results for all 650 seats plus declaration times; `fromHocCsv` is fixture-tested only.
+  get the official file for all 650 seats plus declaration times; `fromHocCsv` is fixture-tested only.
 - UK boundaries (T8b) are pinned by a content hash, not a commit (geography-bits has no releases): if Open Innovations
   edits a file, `npm run data -- --refresh` fails until the new hash is checked and pinned in `scripts/data/sources.ts`.
 - The `ukMap` chunk (boundaries + 2024 results) is ~175 KB gzip and also loads behind the main menu (backdrop), after
   first paint. If menu load time matters, give the backdrop a coarser copy of the shapes.
 - No 2019 notional results (dropped for licence reasons): the UK map's Swing mode is disabled until T13, where swing
   will be measured from 2024 in the running game.
-- Census gaps: Scotland lacks ~10 measures in the source; Northern Ireland has none.
+- Census gaps: Scotland lacks 10 measures in the source (density is now computed); Northern Ireland has none
+  (NISRA and the UK Data Service are blocked here). Both are hatched on the map with the reason in the key.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).
 - Characters never die yet: health bottoms out at 1 (death and heirs are DESIGN §4, not yet scheduled). Fame,
   credibility and heat sit at their defaults until media and money (T16–T17).
@@ -516,8 +634,8 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   the full body large, which exposes more: ball hands, a hard jumper hem, plain legs. Worth a pass on the body
   meshes before M1 ships. The 2D creator view is the bust only (no full-body illustration, no turning).
 - Creator slider drags rebuild the whole figure (~5 ms; ~13 ms with upload and GC). Paced, they hold 31–38 fps
-  under the 4x throttle; if the Dell hitches, build a lower-detail figure while dragging, or move builds to a
-  worker (OffscreenCanvas).
+  under the 4x throttle, just above the 30 floor (one full e2e run on 2026-10-03 measured 23.8). T10g replaces
+  rebuilds with GPU morph targets.
 - Traits are free at creation (CK3 charges for good ones): players will skip Lazy and Scandal-prone. Balance at T22
   (trait costs against the attribute budget).
 - The Profile shows the birth nation only: not the birth country (born abroad) or the home seat, because seat and

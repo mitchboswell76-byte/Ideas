@@ -329,7 +329,7 @@ branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport fo
 | Conversations | Suzerain | Portrait left, dialogue in the serif, numbered choices, scrollable log |
 | Policy (M3) | Democracy 4 | Policy web: category clusters of round nodes, lines to affected voter groups and stats, green/red effect lines |
 | Votes (T19–T20) | Frostpunk 2 council | Horizontal For / Against / Undecided bar with the majority line; hemicycle seat chart |
-| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7, T8b): the 650 seats on their real 2024 boundaries by default (BBC/FT election-map style: thin borders, seat names appear as you zoom, "Zoom to" a city), with a Map / Hexes switch to an equal-size hex cartogram for counting seats; modes Party, Majority (marginal → safe), Turnout, Demographics (21 census measures); Swing disabled until polling (T13); 3D seat columns at election night (T18). Value modes use one party-neutral ramp (violet, T8c; was sand → umber), never party colours |
+| Maps (T6–T7) | Paradox map modes + Plague Inc | Flat, clean map with a map-mode switcher; news ticker along the bottom. World (T6): Political, Region, Blocs now; Relations, Economy shown disabled until M4. UK (T7, T8b): the 650 seats on their real 2024 boundaries by default (BBC/FT election-map style: thin borders, seat names appear as you zoom, "Zoom to" a city), with a Map / Hexes switch to an equal-size hex cartogram for counting seats; modes Party, Majority (marginal → safe), Turnout, Demographics (21 census measures); Swing disabled until polling (T13); 3D seat columns at election night (T18). Value modes use one party-neutral ramp (violet, T8c; was sand → umber), never party colours. The key (T10b) is docked between the mode bar and the map, never over it: a line of swatches with counts, or a stepped threshold scale (breaks between the cells, words at the ends; FT/Guardian style); hovering or focusing an entry picks out its places, a click pins it. Places with no figure are hatched and the key says why |
 | Election night (T18) | Broadcast convention, unbranded | Seat totals bar with the majority line, swing gauge, declared-seats feed, the map filling in |
 | Tables + charts | Football Manager density, Linear rows | Dense sortable tables, hairline rows (no zebra), 13 px, tabular numbers; thin line charts with endpoint dots |
 | Main menu | Paradox / FM main menus, broadsheet masthead | Left-column menu (New career, Continue, Load, Settings) under a serif masthead, over a full-bleed backdrop: the 650 seats as a tonal grey map (lightness follows each 2024 winner), drifting slowly (static with reduced motion; hidden on narrow screens) |
@@ -386,7 +386,8 @@ changes gain only.
   1. `data-raw/HoC-GE2024-results-by-constituency.csv` if the user adds it: official, all 650 seats.
   2. Otherwise the University of Bristol GB file on GitHub (632 seats; results copied from the Commons Library,
      plus Census 2021/2022 measures).
-  3. Northern Ireland: hand-entered winners only, marked unverified, until the official file is added.
+  3. Northern Ireland: full results transcribed by hand from the UK Parliament results pages (T10b), checked
+     against the published NI party totals, until the official file is added.
   Seat totals reproduce the published result (Lab 411, Con 121, LD 72, SNP 9, SF 7, Ind 6, Reform 5, DUP 5,
   Green 4, PC 4, SDLP 2, Alliance 1, UUP 1, TUV 1, Speaker 1).
 - **Census by constituency:** from the same GB file (ONS Census 2021; Scotland's Census 2022), 21 measures.

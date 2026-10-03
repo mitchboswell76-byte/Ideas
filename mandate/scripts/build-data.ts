@@ -26,12 +26,12 @@ import type {
 } from '../src/data/types.ts'
 import { GE2024_PARTIES } from '../src/data/types.ts'
 import type { Nation } from '../src/sim/world.ts'
-import { CENSUS_FIELDS, censusFromSummaries, emptyCensus } from './data/census.ts'
+import { CENSUS_FIELDS, censusFromSummaries, emptyCensus, withDensity } from './data/census.ts'
 import { parseCsv } from './data/csv.ts'
-import { fromHocCsv, fromManual, fromSummaries, type ManualWinners } from './data/ge2024.ts'
+import { fromHocCsv, fromManual, fromSummaries, type ManualResults } from './data/ge2024.ts'
 import { parseHexjson } from './data/hexjson.ts'
 import { BOUNDARIES, fetchCached, fetchSetCached, SOURCES } from './data/sources.ts'
-import { parseBoundary, projectUk, type PlaceBox } from './data/ukmap.ts'
+import { hectaresOf, parseBoundary, projectUk, type PlaceBox } from './data/ukmap.ts'
 import {
   countryFacts,
   prepareWorld,
@@ -100,8 +100,8 @@ async function main() {
   const gb = fromSummaries(summaryRows)
   const hoc = existsSync(HOC_CSV) ? fromHocCsv(parseCsv(await readFile(HOC_CSV, 'utf8'))) : null
   const manualFile = JSON.parse(
-    await readFile(`${RAW}manual/ni-ge2024-winners.json`, 'utf8'),
-  ) as ManualWinners
+    await readFile(`${RAW}manual/ni-ge2024-results.json`, 'utf8'),
+  ) as ManualResults
   const manual = fromManual(manualFile)
 
   const byId = (list: Ge2024Result[]) => new Map(list.map((r) => [r.id, r]))
@@ -111,7 +111,7 @@ async function main() {
   for (const [label, map] of [
     ['HoC CSV', hocResults],
     ['GB summaries', gbResults],
-    ['NI winners', manualResults],
+    ['NI results', manualResults],
   ] as const) {
     for (const id of map.keys()) {
       if (!hex.hexes[id]) throw new Error(`${label}: ${id} is not a seat in the hexjson`)
@@ -164,7 +164,11 @@ async function main() {
   const ukMap = projectUk(boundaries, seats, regions, placesFile.places)
 
   const census = new Map(summaryRows.map((row) => [row.ONSConstID, censusFromSummaries(row)]))
-  const censusSeats = ids.map((id) => census.get(id) ?? emptyCensus(id))
+  const hectares = new Map(boundaries.map((f) => [f.properties.PCON24CD, hectaresOf(f)]))
+  const censusSeats = withDensity(
+    ids.map((id) => census.get(id) ?? emptyCensus(id)),
+    hectares,
+  )
 
   const atlas = JSON.parse(
     await readFile(`${ROOT}node_modules/world-atlas/countries-110m.json`, 'utf8'),
@@ -238,7 +242,8 @@ async function main() {
       .join(', '),
   )
   console.log('Results from:', [...sources].map(([s, n]) => `${s} ${n}`).join(', '))
-  if (!hoc) console.log('No HoC CSV in data-raw/: Northern Ireland has winners only (unverified).')
+  if (!hoc)
+    console.log('No HoC CSV in data-raw/: Northern Ireland uses the hand-transcribed results.')
 }
 
 main().catch((err: unknown) => {

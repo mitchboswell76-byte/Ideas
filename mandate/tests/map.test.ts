@@ -17,6 +17,7 @@ import {
   labelsThatFit,
   legendFor,
   legendNote,
+  mapKeyFor,
   modeLine,
 } from '../src/ui/map/world/modes.ts'
 import { matchesSearch } from '../src/ui/map/search.ts'
@@ -124,6 +125,8 @@ describe('world map modes', () => {
     const eu = { ...nato, members: ['1', '2', '3'], offMap: ['Malta'] }
     expect(legendNote('blocs', eu)).toBe('2 of 3 members shown; too small for this map: Malta.')
     expect(legendNote('region', null)).toBeNull()
+    expect(mapKeyFor('blocs', eu)).toMatchObject({ title: nato.full, scale: null })
+    expect(mapKeyFor('region', null).title).toBe('UN regions')
   })
 
   it('shows names only where they fit, largest first', () => {

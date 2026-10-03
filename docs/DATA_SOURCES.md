@@ -10,7 +10,7 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 | `uk-seats.json` | 650 Westminster seats (2024 boundaries): ONS code, name, nation, region, county/borough/burgh, hex cell | 2024-07-04 |
 | `uk-map.json` | The same seats' real boundaries projected to SVG paths (transverse Mercator on 2°W, 2000 units tall): per-seat path, focus box, label point and room; seat, region and nation border meshes and the coast; region label points; city zoom boxes | 2024-07-04 |
 | `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected; map colour per party | 2024-07-04 |
-| `census2021.json` | 21 census measures per seat (GB only) | E&W 2021-03-21, Scotland 2022-03-20 |
+| `census2021.json` | 21 census measures per seat (GB only; Scotland's density from boundary areas) | E&W 2021-03-21, Scotland 2022-03-20 |
 | `world-110m.json` | 176 countries and territories as TopoJSON (Antarctica dropped) | Natural Earth via world-atlas 2.0.2 |
 | `world-map.json` | The same projected to SVG paths (Natural Earth I, 1000 units wide): focus box, label point, political colour per country; border and coast meshes | derived |
 | `countries.json` | Country index: ISO alpha-3, UN M49 region and sub-region, capital, status, land neighbours, blocs; the 8 blocs | 2026-09-30 (blocs, corrections) |
@@ -58,19 +58,30 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 - **Processing:** votes for parties without a column (independents, the Speaker, Workers Party) sit in "other";
   the winner's or runner-up's votes are recovered from the majority. Checked: every majority is a whole number of
   votes and every seat's votes sum to its valid votes. Census measures are percentages to 1 dp. Several
-  (qualifications, tenure, NS-SEC, health, cars, deprivation, density) are not published for Scotland in this file
-  and are `null`.
+  (qualifications, tenure, NS-SEC, health, cars, deprivation) are not published for Scotland in this file and are
+  `null`; the map hatches them and says why.
+- **Density for Scotland** (not in the file) is worked out as population ÷ the seat's area from the boundary file
+  (d3 `geoArea`, mean Earth radius 6,371.0088 km). Checked against the 575 English and Welsh seats that have an
+  official density: median ratio 1.003, 90% within ±3%, worst 0.88 / 1.11 (coastal seats).
 
 ### Northern Ireland (18 seats)
-- **File:** `mandate/data-raw/manual/ni-ge2024-winners.json`: winning party only, entered by hand on 2026-09-30.
-- **Status:** unverified (`verified: false`, `source: "manual"`, no votes, no MP). The Commons Library,
-  Wikipedia and the Electoral Office for NI are blocked from the build environment, and no GitHub copy of the NI
-  results was found. Totals match the published result: SF 7, DUP 5, SDLP 2, Alliance 1, UUP 1, TUV 1, Ind 1.
+- **File:** `mandate/data-raw/manual/ni-ge2024-results.json`: every candidate's votes, electorate, rejected
+  ballots and MP per seat, transcribed by hand on 2026-10-03 from the UK Parliament results pages
+  (`electionresults.parliament.uk/elections/<id>` or `members.parliament.uk/constituency/<id>/election/422`; each
+  seat lists its page). The Commons Library CSV, the Electoral Office for NI and Wikipedia are blocked from the
+  build environment, so the pages were read through web search results. Replaces the 2026-09-30 winners-only file.
+- **Checks:** each seat's candidates sum to its valid vote; majority (first − second) and turnout (valid ÷
+  electorate) match the pages; party totals across the 18 seats match the published NI totals (SF 210,891; DUP
+  172,058; Alliance 117,191; UUP 94,779; SDLP 86,861; TUV 48,685), which `tests/data.test.ts` asserts. One
+  figure is worth a second look against the official file: Mid Ulster's electorate is listed as exactly 74,000.
+- **Folding:** as in the Commons Library files: People Before Profit, Aontú and Cross-Community Labour
+  Alternative count as `other`; so does an independent who came neither first nor second (`source: "manual"`,
+  `verified: true`).
 - **To replace:** download `HoC-GE2024-results-by-constituency.csv` from
   [CBP-10009](https://commonslibrary.parliament.uk/research-briefings/cbp-10009/), put it in `mandate/data-raw/`
-  and run `npm run data`. The official file then supplies all 650 seats (`source: "hoc"`), including NI votes and
-  declaration times for election night. Its column mapping (`fromHocCsv` in `scripts/data/ge2024.ts`) is written
-  from the published column list and tested on a fixture, not on the real file; the script names any missing column.
+  and run `npm run data`. The official file then supplies all 650 seats (`source: "hoc"`), including declaration
+  times for election night. Its column mapping (`fromHocCsv` in `scripts/data/ge2024.ts`) is written from the
+  published column list and tested on a fixture, not on the real file; the script names any missing column.
 
 ### World borders
 - **Package:** `world-atlas` 2.0.2 (npm, ISC; © Michael Bostock): Natural Earth 1:110m admin-0 countries, public
@@ -145,4 +156,5 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 - MPs are as elected on 4 July 2024. By-elections, defections and suspensions since then are not applied
   (T12 web-verifies current office-holders).
 - No 2019 notional results, so a "swing since 2019" map mode needs another source.
-- Northern Ireland has no census measures (NISRA data is not in the GB file).
+- Northern Ireland has no census measures (NISRA publishes Census 2021 for the 2024 constituencies, but its site and
+  the UK Data Service copy are blocked from the build environment). The map hatches NI in Demographics mode.

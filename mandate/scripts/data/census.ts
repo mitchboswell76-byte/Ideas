@@ -1,6 +1,7 @@
 /**
  * Census subset per seat, from the Bristol summaries file: England and Wales from ONS (Census 2021),
- * Scotland from Scotland's Census 2022 (fewer measures, so gaps are null). Percentages, 1 dp.
+ * Scotland from Scotland's Census 2022 (fewer measures, so gaps are null; density is worked out from
+ * boundary areas). Percentages, 1 dp.
  */
 import type { CensusField, CensusSeat } from '../../src/data/types.ts'
 import type { CsvRow } from './csv.ts'
@@ -52,6 +53,22 @@ function sum(row: CsvRow, cols: string[]): number | null {
 }
 
 const minus100 = (n: number | null) => (n === null ? null : round1(100 - n))
+
+/**
+ * Fills a missing density (Scotland's source has none) as population ÷ boundary area. Seats with
+ * a published density keep it.
+ */
+export function withDensity(
+  seats: readonly CensusSeat[],
+  hectares: ReadonlyMap<string, number>,
+): CensusSeat[] {
+  return seats.map((s) => {
+    if (s.density !== null || s.population === null) return s
+    const ha = hectares.get(s.id)
+    if (!ha) throw new Error(`${s.id}: no boundary area for its density`)
+    return { ...s, density: round1(s.population / ha) }
+  })
+}
 
 export function censusFromSummaries(row: CsvRow): CensusSeat {
   const one = (col: string) => sum(row, [col])

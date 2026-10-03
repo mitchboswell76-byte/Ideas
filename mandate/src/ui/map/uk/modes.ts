@@ -4,8 +4,9 @@
  * from the data and are used only to mean parties.
  */
 import type { CensusField, CensusSeat, Ge2024Party, Ge2024Result } from '../../../data/types.ts'
+import type { Nation } from '../../../sim/world.ts'
 import { formatCount, formatPercent } from '../../kit/numbers.ts'
-import type { LegendRow } from '../legend.ts'
+import type { KeyItem, MapKeyData } from '../legend.ts'
 
 export const UK_MODES = ['party', 'majority', 'turnout', 'demographics'] as const
 export type UkMode = (typeof UK_MODES)[number]
@@ -25,7 +26,10 @@ export const RAMP_STEPS = 5
 /** Majority as a share of valid votes: under 5% is marginal, 30% or more is safe. */
 export const MAJORITY_BREAKS = [5, 10, 20, 30] as const
 
-export const NO_DATA = 'var(--map-nodata)'
+/** Seats with no figure are hatched (an SVG pattern `UkMap` defines), not a flat grey. */
+export const NO_DATA = 'url(#ukmap-nodata)'
+/** The key's swatch for it (CSS hatching in `.map-key__swatch--hatch`). */
+export const NO_DATA_SWATCH = 'var(--map-nodata)'
 export const rampToken = (step: number) => `var(--map-seq-${step})`
 
 /** Majority as % of valid votes, or null where only the winner is known. */
@@ -69,6 +73,7 @@ export function formatField(field: CensusField, value: number): string {
 }
 
 export interface SeatData {
+  nation: Nation
   result: Ge2024Result
   census: CensusSeat
 }
@@ -113,6 +118,13 @@ export function fillOf(seat: SeatData, spec: ModeSpec): string {
   return value === null ? NO_DATA : rampToken(binOf(value, spec.breaks))
 }
 
+/** Which key entry a seat belongs to: its party, its step on the scale, or `none`. */
+export function keyOf(seat: SeatData, spec: ModeSpec): string {
+  if (spec.mode === 'party') return seat.result.winner
+  const value = valueOf(seat, spec.mode, spec.field)
+  return value === null ? 'none' : `step${binOf(value, spec.breaks)}`
+}
+
 /** The tooltip line under the seat name. */
 export function modeLine(
   seat: SeatData,
@@ -140,54 +152,118 @@ export function modeLine(
   }
 }
 
-function rangeLabels(breaks: readonly number[], format: (v: number) => string): string[] {
-  if (!breaks.length) return []
-  const labels = [`Under ${format(breaks[0]!)}`]
-  for (let i = 1; i < breaks.length; i++) {
-    labels.push(`${format(breaks[i - 1]!)} to ${format(breaks[i]!)}`)
-  }
-  labels.push(`${format(breaks[breaks.length - 1]!)} or more`)
-  return labels
+const NATION_NAMES: Record<Nation, string> = {
+  england: 'England',
+  wales: 'Wales',
+  scotland: 'Scotland',
+  'northern-ireland': 'Northern Ireland',
+}
+const NATION_ORDER: Nation[] = ['england', 'wales', 'scotland', 'northern-ireland']
+
+/** "A", "A and B", "A, B and C". */
+export function listOf(names: readonly string[]): string {
+  if (names.length <= 1) return names.join('')
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
 }
 
-/** The map key. Party mode lists parties by seats won; value modes list their ramp. */
-export function legendFor(
+/** Nations where some seat has no figure in this mode. */
+export function gapsOf(seats: readonly SeatData[], mode: UkMode, field: CensusField): Nation[] {
+  const gaps = new Set<Nation>()
+  for (const s of seats) if (valueOf(s, mode, field) === null) gaps.add(s.nation)
+  return NATION_ORDER.filter((n) => gaps.has(n))
+}
+
+/** Where a census measure has figures: the nations with no gaps, e.g. "Great Britain". */
+export function coverageOf(seats: readonly SeatData[], field: CensusField): string {
+  const gaps = gapsOf(seats, 'demographics', field)
+  const covered = NATION_ORDER.filter((n) => !gaps.includes(n))
+  if (gaps.length === 0) return 'United Kingdom'
+  if (gaps.length === 1 && gaps[0] === 'northern-ireland') return 'Great Britain'
+  return listOf(covered.map((n) => NATION_NAMES[n]))
+}
+
+/**
+ * Break values for the key's ticks, short enough to sit between 40px cells: whole percentages
+ * where that keeps them apart, people in thousands, density without its unit (the title has it).
+ */
+export function tickLabels(mode: UkMode, field: CensusField, breaks: readonly number[]): string[] {
+  const percent = (dp: number) => breaks.map((v) => formatPercent(v, dp))
+  if (mode === 'majority' || mode === 'turnout') return percent(0)
+  if (field === 'population') return breaks.map((v) => `${Math.round(v / 1000)}k`)
+  const short = (v: number) => (v < 10 ? v.toFixed(1) : String(Math.round(v)))
+  const labels = field === 'density' ? breaks.map(short) : breaks.map((v) => `${short(v)}%`)
+  // Rounding must not make two breaks look the same.
+  if (new Set(labels).size === labels.length) return labels
+  return field === 'density' ? breaks.map((v) => v.toFixed(1)) : percent(1)
+}
+
+const SCALE_ENDS: Record<Exclude<UkMode, 'party'>, [string, string]> = {
+  majority: ['Marginal', 'Safe'],
+  turnout: ['Lower', 'Higher'],
+  demographics: ['Lower', 'Higher'],
+}
+
+/** Why some seats are hatched, in words a player can use. */
+function gapNote(gaps: readonly Nation[], field: CensusField, mode: UkMode): string | null {
+  if (!gaps.length) return null
+  if (mode === 'demographics' && field === 'welshSpeakers') {
+    return 'Hatched: the Welsh-language question is asked in Wales only.'
+  }
+  const ni = gaps.includes('northern-ireland')
+  const others = gaps.filter((n) => n !== 'northern-ireland').map((n) => NATION_NAMES[n])
+  const parts: string[] = []
+  if (others.length) parts.push(`${listOf(others)}'s census source has no figure for this`)
+  if (ni) parts.push("Northern Ireland's census (NISRA) is not in the game's data yet")
+  return `Hatched: ${parts.join('; ')}.`
+}
+
+/** The map key: parties by seats won, or the mode's stepped scale. */
+export function mapKeyFor(
   seats: readonly SeatData[],
   spec: ModeSpec,
   partyName: (p: Ge2024Party) => string,
-): LegendRow[] {
+  fieldLabel: string,
+): MapKeyData {
   if (spec.mode === 'party') {
     const won = new Map<Ge2024Party, number>()
     for (const s of seats) won.set(s.result.winner, (won.get(s.result.winner) ?? 0) + 1)
-    return [...won]
+    const items: KeyItem[] = [...won]
       .sort((a, b) => b[1] - a[1] || partyName(a[0]).localeCompare(partyName(b[0]), 'en'))
-      .map(([party, n]) => ({ swatch: spec.colours[party], label: `${partyName(party)} ${n}` }))
+      .map(([party, n]) => ({
+        id: party,
+        swatch: spec.colours[party],
+        label: partyName(party),
+        count: n,
+      }))
+    return { title: 'Seats won, 4 July 2024', scale: null, items, note: null }
   }
-  const format =
-    spec.mode === 'demographics'
-      ? (v: number) => formatField(spec.field, v)
-      : (v: number) => formatPercent(v, 0)
-  const labels = rangeLabels(spec.breaks, format)
-  if (spec.mode === 'majority') {
-    labels[0] += ' (marginal)'
-    labels[labels.length - 1] += ' (safe)'
+  const [low, high] = SCALE_ENDS[spec.mode]
+  const gaps = gapsOf(seats, spec.mode, spec.field)
+  const items: KeyItem[] = gaps.length
+    ? [{ id: 'none', swatch: NO_DATA_SWATCH, label: 'No figure', hatch: true }]
+    : []
+  const notes: string[] = []
+  if (spec.mode === 'demographics') {
+    notes.push('Census 2021 (Scotland 2022).')
+    if (spec.field === 'density') notes.push("Scotland's from boundary areas.")
+  } else {
+    notes.push('Share of valid votes, 4 July 2024.')
   }
-  const rows: LegendRow[] = labels.map((label, i) => ({ swatch: rampToken(i), label }))
-  if (seats.some((s) => valueOf(s, spec.mode, spec.field) === null)) {
-    rows.push({ swatch: NO_DATA, label: 'No data' })
-  }
-  return rows
-}
-
-/** Why some seats have no data in this mode, for the legend note. */
-export function legendNote(spec: ModeSpec): string | null {
-  switch (spec.mode) {
-    case 'party':
-      return 'General election, 4 July 2024.'
-    case 'majority':
-    case 'turnout':
-      return 'No data: Northern Ireland (winners only so far).'
-    case 'demographics':
-      return 'Census 2021 (Scotland 2022). No data: Northern Ireland, some Scottish measures.'
+  const gap = gapNote(gaps, spec.field, spec.mode)
+  if (gap) notes.push(gap)
+  return {
+    title:
+      spec.mode === 'demographics' ? fieldLabel : spec.mode === 'majority' ? 'Majority' : 'Turnout',
+    scale: {
+      steps: Array.from({ length: spec.breaks.length + 1 }, (_, i) => ({
+        id: `step${i}`,
+        swatch: rampToken(i),
+      })),
+      ticks: tickLabels(spec.mode, spec.field, spec.breaks),
+      low,
+      high,
+    },
+    items,
+    note: notes.join(' '),
   }
 }

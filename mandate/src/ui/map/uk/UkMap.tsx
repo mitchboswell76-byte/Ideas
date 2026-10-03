@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { ukMapStore, useMapState, type UkLayout } from '../../store/map.ts'
-import { Legend } from '../Legend.tsx'
 import { MapTip } from '../MapTip.tsx'
 import { StoreMapView } from '../StoreMapView.tsx'
 import type { Point } from '../viewport.ts'
-import { GEOMETRY, partyName, REGION_NAME, SEAT_BY_ID, SEAT_DATA, SEAT_LIST } from './data.ts'
+import { GEOMETRY, partyName, REGION_NAME, SEAT_BY_ID, SEAT_DATA } from './data.ts'
 import { SEAT_LABEL_PX, seatLabelsThatFit } from './labels.ts'
-import { fillOf, legendFor, legendNote, modeLine, UK_MODE_LABELS, type ModeSpec } from './modes.ts'
+import { fillOf, keyOf, modeLine, type ModeSpec } from './modes.ts'
+
+/** Hatching for seats with no figure: lines this far apart on screen, whatever the zoom. */
+const HATCH_PX = 5
 
 /** Region names show while the map is zoomed out; seats take over as you zoom in. */
 const REGION_LABEL_MAX_ZOOM = 2.5
@@ -22,11 +24,12 @@ const seatName = (id: string) => SEAT_BY_ID.get(id)?.name ?? id
 export function UkMap({
   layout,
   spec,
-  fieldLabel,
+  lit,
 }: {
   layout: UkLayout
   spec: ModeSpec
-  fieldLabel: string
+  /** The key entry picked out (a party, a step, `none`): every other seat fades. */
+  lit: string | null
 }) {
   const geo = GEOMETRY[layout]
   const selected = useMapState(ukMapStore, (s) => s.selected)
@@ -36,14 +39,18 @@ export function UkMap({
   const fills = useMemo(
     () => (
       <g className={`ukmap__fills ukmap__fills--${layout}`}>
-        {geo.shapes.map((c) => (
-          <path
-            key={c.id}
-            data-id={c.id}
-            d={c.d}
-            style={{ fill: fillOf(SEAT_DATA.get(c.id)!, spec) }}
-          />
-        ))}
+        {geo.shapes.map((c) => {
+          const seat = SEAT_DATA.get(c.id)!
+          return (
+            <path
+              key={c.id}
+              data-id={c.id}
+              data-key={keyOf(seat, spec)}
+              d={c.d}
+              style={{ fill: fillOf(seat, spec) }}
+            />
+          )
+        })}
       </g>
     ),
     [geo, layout, spec],
@@ -55,7 +62,6 @@ export function UkMap({
   const hoverShape = hover && shapeById.get(hover.id)
   const selectedShape = selected ? shapeById.get(selected) : undefined
   const hovered = hover ? SEAT_DATA.get(hover.id) : undefined
-  const title = spec.mode === 'demographics' ? fieldLabel : UK_MODE_LABELS[spec.mode]
 
   return (
     <StoreMapView
@@ -70,12 +76,9 @@ export function UkMap({
       onHover={(id, at) => setHover(id && at ? { id, at } : null)}
       overlay={
         <>
-          <Legend
-            column
-            title={title}
-            rows={legendFor(SEAT_LIST, spec, partyName)}
-            note={legendNote(spec)}
-          />
+          {lit && (
+            <style>{`.ukmap__fills path:not([data-key="${lit}"]) { fill-opacity: 0.18 }`}</style>
+          )}
           {hover && hovered && (
             <MapTip
               at={hover.at}
@@ -88,6 +91,25 @@ export function UkMap({
     >
       {({ k, s }) => (
         <>
+          <defs>
+            <pattern
+              id="ukmap-nodata"
+              patternUnits="userSpaceOnUse"
+              width={HATCH_PX / s}
+              height={HATCH_PX / s}
+              patternTransform="rotate(45)"
+            >
+              <rect className="ukmap__nodata" width={HATCH_PX / s} height={HATCH_PX / s} />
+              <line
+                className="ukmap__nodata-line"
+                x1={0}
+                y1={0}
+                x2={0}
+                y2={HATCH_PX / s}
+                strokeWidth={1.6 / s}
+              />
+            </pattern>
+          </defs>
           {fills}
           {lines}
           {hoverShape && <path className="ukmap__hover" d={hoverShape.d} />}

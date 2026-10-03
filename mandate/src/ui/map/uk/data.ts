@@ -20,7 +20,10 @@ export const REGION_NAME = new Map(UK_SEATS.regions.map((r) => [r.id, r.name]))
 const results = new Map(GE2024.results.map((r) => [r.id, r]))
 const census = new Map(CENSUS.seats.map((c) => [c.id, c]))
 export const SEAT_DATA = new Map<string, SeatData>(
-  SEATS.map((s) => [s.id, { result: results.get(s.id)!, census: census.get(s.id)! }]),
+  SEATS.map((s) => [
+    s.id,
+    { nation: s.nation, result: results.get(s.id)!, census: census.get(s.id)! },
+  ]),
 )
 export const SEAT_LIST: readonly SeatData[] = [...SEAT_DATA.values()]
 
