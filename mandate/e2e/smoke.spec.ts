@@ -225,17 +225,34 @@ test('UK and world maps: modes, search, card, Esc', async ({ page }) => {
   await expect(page.locator('.ukmap__fills--hex path')).toHaveCount(650)
   await layout.getByRole('button', { name: 'Map' }).click()
   await expect(page.locator('.ukmap__fills--map path')).toHaveCount(650)
-  for (const mode of ['Majority', 'Turnout', 'Demographics', 'Party']) {
+  for (const mode of ['Majority', 'Turnout', 'Demographics', 'Since 2019', 'Party']) {
     await page.getByRole('tab', { name: mode }).click()
     await expect(page.getByRole('tab', { name: mode })).toHaveAttribute('aria-selected', 'true')
   }
-  await expect(page.getByRole('tab', { name: 'Swing' })).toBeDisabled()
+  // Since 2019: seats that changed hands, then the swing; each mode keeps its own choice.
+  const key = page.getByRole('region', { name: 'Map key' })
+  await page.getByRole('tab', { name: 'Since 2019' }).click()
+  await expect(key).toContainText('Labour gain')
+  await key.getByRole('combobox', { name: 'Measure' }).selectOption('swing')
+  await expect(key).toContainText('To Lab')
+  await page.getByRole('tab', { name: 'Demographics' }).click()
+  await page.getByRole('tab', { name: 'Since 2019' }).click()
+  await expect(key.getByRole('combobox', { name: 'Measure' })).toHaveValue('swing')
+  await page.getByRole('tab', { name: 'Party' }).click()
+
   await page.getByRole('searchbox', { name: 'Find a constituency' }).fill('Ynys')
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { name: 'Ynys Môn' })).toBeVisible()
-  await expect(page.getByTestId('seat-facts')).toContainText('Plaid Cymru')
+  await expect(page.getByTestId('seat-facts')).toContainText('Plaid Cymru gain from Conservative')
   await page.keyboard.press('Escape')
   await expect(page.getByTestId('seat-facts')).toHaveCount(0)
+
+  // Map only hides the key and the list; the button brings them back.
+  await page.getByRole('button', { name: 'Map only' }).click()
+  await expect(key).toBeHidden()
+  await expect(page.getByRole('searchbox', { name: 'Find a constituency' })).toBeHidden()
+  await page.getByRole('button', { name: 'Show key' }).click()
+  await expect(key).toBeVisible()
 
   await go(page, 'World')
   await page.getByRole('tab', { name: 'Blocs' }).click()

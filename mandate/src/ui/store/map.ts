@@ -1,6 +1,7 @@
 /**
- * Map screen state (UI only; not saved): mode, the mode's option (a bloc on the world map, a census
- * field on the UK map), the selected place, the view and "frame this place" requests.
+ * Map screen state (UI only; not saved): mode, each mode's option (a bloc on the world map; a census
+ * field or a Since 2019 measure on the UK map), the selected place, the view and "frame this place"
+ * requests; and whether the maps show the map alone (no key or list).
  */
 import { useStore } from 'zustand'
 import { createStore, type StoreApi } from 'zustand/vanilla'
@@ -11,7 +12,10 @@ import { readLocal, writeLocal } from './settings.ts'
 
 export interface MapState<M extends string> {
   mode: M
+  /** The current mode's option ('' when it has none). */
   option: string
+  /** Every mode's last option, so switching modes and back keeps the choice. */
+  options: Partial<Record<M, string>>
   /** Selected place id: its card is open. */
   selected: string | null
   /** Null until the player pans or zooms: the whole map. */
@@ -33,15 +37,19 @@ export interface MapState<M extends string> {
 
 export type MapStore<M extends string = string> = StoreApi<MapState<M>>
 
-export function createMapStore<M extends string>(mode: M, option: string): MapStore<M> {
+export function createMapStore<M extends string>(
+  mode: M,
+  options: Partial<Record<M, string>>,
+): MapStore<M> {
   return createStore<MapState<M>>()((set) => ({
     mode,
-    option,
+    option: options[mode] ?? '',
+    options,
     selected: null,
     view: null,
     focus: null,
-    setMode: (next) => set({ mode: next }),
-    setOption: (next) => set({ option: next }),
+    setMode: (next) => set((s) => ({ mode: next, option: s.options[next] ?? '' })),
+    setOption: (next) => set((s) => ({ option: next, options: { ...s.options, [s.mode]: next } })),
     select: (id) => set({ selected: id }),
     setView: (view) => set({ view }),
     focusOn: (id) => set((s) => ({ selected: id, focus: { id, n: (s.focus?.n ?? 0) + 1 } })),
@@ -49,10 +57,26 @@ export function createMapStore<M extends string>(mode: M, option: string): MapSt
   }))
 }
 
-/** World map: option = the bloc shown in Blocs mode. */
-export const worldMapStore = createMapStore<WorldMode>('political', 'nato')
-/** UK map: option = the census field shown in Demographics mode. */
-export const ukMapStore = createMapStore<UkMode>('party', 'age65plus')
+/** World map: Blocs mode's option is the bloc shown. */
+export const worldMapStore = createMapStore<WorldMode>('political', { blocs: 'nato' })
+/** UK map: Demographics' option is a census field; Since 2019's is what it measures. */
+export const ukMapStore = createMapStore<UkMode>('party', {
+  demographics: 'age65plus',
+  change: 'gains',
+})
+
+interface MapOnlyState {
+  /** Both maps hide their key and place list (a picked place's card still opens). */
+  mapOnly: boolean
+  setMapOnly(next: boolean): void
+}
+
+export const mapOnlyStore = createStore<MapOnlyState>()((set) => ({
+  mapOnly: false,
+  setMapOnly: (mapOnly) => set({ mapOnly }),
+}))
+
+export const useMapOnly = (): MapOnlyState => useStore(mapOnlyStore)
 
 export function useMapState<M extends string, T>(
   store: MapStore<M>,

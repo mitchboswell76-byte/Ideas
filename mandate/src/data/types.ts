@@ -108,6 +108,26 @@ export interface Ge2024Result {
   /** False for hand-entered winners that have not been checked against the official file. */
   verified: boolean
   source: 'hoc' | 'hoc-mirror' | 'manual'
+  /**
+   * Not an MP in the 2019–24 Parliament (CBP-10009's "New MP?"): 350 seats, 15 of them won by
+   * former MPs returning.
+   */
+  newMp: boolean
+  /**
+   * Against the notional 2019 result on the new boundaries, as the Commons Library briefing
+   * CBP-10009 publishes it (the notional votes themselves are not in the data).
+   */
+  since2019: Since2019
+}
+
+export interface Since2019 {
+  /** Who notionally held the seat in 2019: the winner when it was a hold. */
+  held: Ge2024Party
+  /**
+   * Change in vote share, percentage points, for the parties the briefing's table lists in this
+   * seat's nation (`other` = everyone else there). Reform's is measured from the Brexit Party.
+   */
+  change: Partial<Record<Ge2024Party, number>>
 }
 
 export interface Ge2024File {

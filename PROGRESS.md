@@ -5,7 +5,7 @@
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
 **Next session:** start at **T10c** (then T10d … T10i, then T11). T10b–T10i come from the user's 2026-10-03
   feedback on the character system, UI and UK map; the research behind them is in the decisions log (2026-10-03 T10b).
-**Last playable link (T10b):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Last playable link (T10b2):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
 **UI kit (T10):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
@@ -110,6 +110,15 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
   density comes from boundary areas. Remaining census gaps (NI all, Scotland 10 measures) are hatched and the key
   says why. 268 unit tests; e2e 21 of 22 in the full run (the creator turntable perf test, untouched code, then
   passed twice on rerun: see decisions).
+- [x] T10b2 Commons Library briefing + map only (user, 2026-10-03: supplied CBP-10009 as text; "I still want an
+      option to click off that extra info and just look at the map")
+
+  Done: every seat is checked against the briefing at build time (NI's hand-copied results all agree); it
+  supplies 16 corrected electorates, new MPs, holds and gains since 2019 and each party's change in share. New
+  "Since 2019" map mode (replaces the disabled Swing tab): seats that changed hands, Conservative–Labour swing,
+  or one party's change; the seat card shows hold/gain, New MP and a ± 2019 column. "Map only" on both maps hides
+  the key and the list. Each map mode keeps its own option. 279 unit tests, 22/22 e2e (UK map 58.9 fps, world
+  59.4 under the 4x throttle; turntable rebuild 33.0).
 - [ ] T10c Look & feel v2: "must not look AI-made" (user: "the font and boxes give me that vibe"). Research first
       (keep it short): what reads as template/AI UI (inference, not academic: shadcn/Tailwind defaults: Inter/Geist,
       8–12px rounded cards with 1px borders on everything, grey-on-grey, violet accents, equal-weight card grids,
@@ -611,19 +620,33 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   code this task doesn't touch; T10g's GPU morph targets remove the rebuilds. 2D maps 58–60 fps under the 4x
   throttle (UK map 59.4, world 58.3).
 
+- 2026-10-03 T10b2: `scripts/data/briefing.ts` parses CBP-10009 section 5 (`parseBriefing`), `joinBriefing` takes
+  electorates from it and stops the build on any other disagreement (`compareWithBriefing`: winner, runner-up,
+  majority, turnout, listed shares ±0.05), and adds `newMp` + `since2019 {held, change}` (`BaseResult` = result
+  before the join). `ge2024-corrections.json` fixes the GB file's Richmond Park Green vote. Tests reproduce the
+  briefing's gains/losses table (303 changed hands) and its 350 new MPs. `newMp` means "not in the 2019–24
+  Parliament" (15 of the 350 were returning former MPs), not "first ever elected".
+- 2026-10-03 Since 2019 mode: `UkMode` gains `change`; option `gains` (categorical: winner's colour for a gain,
+  `--map-hold` for a hold), `swing` (Butler Con→Lab swing = (ΔLab − ΔCon)/2; breaks −10…+20; Con colour one side,
+  Lab the other) or a party (Δ share; breaks −20…+20; party colour for rises, `--map-loss` grey for falls, both
+  mixed into `--map-zero` by distance from 0 in OKLab). One-nation parties hatch the rest of the UK with a reason.
+  Map store: `options` per mode (switching modes keeps each choice); `mapOnlyStore` (in memory, shared by both
+  maps): `--map-only` hides the key, `--bare` also the side panel when nothing is picked.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
-- GE2024 Northern Ireland: full results transcribed by hand from the Parliament results pages (checked against
-  the published NI party totals; Mid Ulster's electorate reads exactly 74,000, worth a check). The user can add
+- GE2024 Northern Ireland: full results transcribed by hand from the Parliament results pages, checked against
+  the published NI party totals and seat by seat against CBP-10009 (Mid Ulster's 74,000 electorate confirmed). The
+  user can add
   `mandate/data-raw/HoC-GE2024-results-by-constituency.csv` (Commons Library CBP-10009) and run `npm run data` to
   get the official file for all 650 seats plus declaration times; `fromHocCsv` is fixture-tested only.
 - UK boundaries (T8b) are pinned by a content hash, not a commit (geography-bits has no releases): if Open Innovations
   edits a file, `npm run data -- --refresh` fails until the new hash is checked and pinned in `scripts/data/sources.ts`.
 - The `ukMap` chunk (boundaries + 2024 results) is ~175 KB gzip and also loads behind the main menu (backdrop), after
   first paint. If menu load time matters, give the backdrop a coarser copy of the shapes.
-- No 2019 notional results (dropped for licence reasons): the UK map's Swing mode is disabled until T13, where swing
-  will be measured from 2024 in the running game.
+- No 2019 notional vote counts (dropped for licence reasons); the Since 2019 mode uses the Commons Library's holds,
+  gains and changes in share instead. Swing from live polls arrives with T13.
 - Census gaps: Scotland lacks 10 measures in the source (density is now computed); Northern Ireland has none
   (NISRA and the UK Data Service are blocked here). Both are hatched on the map with the reason in the key.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).

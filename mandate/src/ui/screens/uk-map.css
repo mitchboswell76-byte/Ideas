@@ -10,14 +10,31 @@
   margin-top: 14px;
 }
 
-/* The card is narrow: a smaller, tighter table so the share column fits. */
+/* The card is narrow: a smaller, tighter table so all four columns fit without scrolling. */
 .seat-card__votes .table {
   font-size: var(--fs-s);
 }
 
 .seat-card__votes .table th,
 .seat-card__votes .table td {
-  padding: 0 8px;
+  padding: 0 5px;
+  white-space: nowrap;
+}
+
+.seat-card__votes .table th:first-child,
+.seat-card__votes .table td:first-child {
+  padding-left: 0;
+  /* Long party names wrap rather than push the numbers out of the card. */
+  white-space: normal;
+}
+
+.seat-card__votes .table th:last-child,
+.seat-card__votes .table td:last-child {
+  padding-right: 0;
+}
+
+.seat-card__votes .share {
+  min-width: 44px;
 }
 
 .seat-card__heading {
@@ -59,4 +76,26 @@
   height: 2px;
   border-radius: 1px;
   background: var(--party-colour);
+}
+
+/* First elected in 2024: a quiet tag beside the MP's name. */
+.seat-card__new {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Change since 2019: rises and falls in words' colours, not party colours. */
+.change {
+  font-variant-numeric: tabular-nums;
+}
+
+.change--up {
+  color: var(--good);
+}
+
+.change--down {
+  color: var(--bad);
 }

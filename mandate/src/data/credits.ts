@@ -8,8 +8,10 @@ export const DATA_CREDITS: DataCredit[] = [
   {
     what: '2024 general election results',
     credit:
-      'House of Commons Library, via the University of Bristol constituency file. Contains ' +
-      'Parliamentary information licensed under the Open Parliament Licence v3.0.',
+      'House of Commons Library: the University of Bristol constituency file, the UK Parliament ' +
+      "results pages (Northern Ireland) and the briefing 'General election 2024: results and " +
+      "analysis' (CBP-10009: checks, holds and gains, change since 2019). Contains Parliamentary " +
+      'information licensed under the Open Parliament Licence v3.0.',
   },
   {
     what: 'Census measures by constituency',

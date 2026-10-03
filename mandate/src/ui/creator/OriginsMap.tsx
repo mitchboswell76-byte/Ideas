@@ -22,8 +22,8 @@ const worldBox = (id: string) => WORLD_SHAPES.get(id)?.focus
 const CREATOR_FOCUS_ZOOM = 7
 
 /** Kept between visits to the tab, like the game's own maps. */
-const ukStore = createMapStore('pick', '')
-const worldStore = createMapStore('pick', '')
+const ukStore = createMapStore('pick', {})
+const worldStore = createMapStore('pick', {})
 
 /**
  * Call `onPick` when a click selects a place (the sea clears it, which picks nothing). Framing a

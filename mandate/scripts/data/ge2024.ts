@@ -1,5 +1,5 @@
 /**
- * GE2024 constituency results → `Ge2024Result`, from three inputs (best first):
+ * GE2024 constituency results → `BaseResult`, from three inputs (best first):
  *  - the Commons Library's `HoC-GE2024-results-by-constituency.csv` (all 650 seats, if supplied),
  *  - the University of Bristol GB summaries file (632 seats, results copied from the Commons Library),
  *  - hand-transcribed Northern Ireland results (`data-raw/manual/ni-ge2024-results.json`).
@@ -37,6 +37,9 @@ export function partyFromCode(code: string): Ge2024Party {
   return PARTY_CODES[code.trim()] ?? 'other'
 }
 
+/** A result before the briefing's 2019 comparison is joined on (`briefing.ts`). */
+export type BaseResult = Omit<Ge2024Result, 'newMp' | 'since2019'>
+
 export interface SeatMeta {
   name: string
   type: SeatType | null
@@ -44,7 +47,7 @@ export interface SeatMeta {
 }
 
 export interface ResultsInput {
-  results: Ge2024Result[]
+  results: BaseResult[]
   meta: Map<string, SeatMeta>
 }
 
@@ -110,7 +113,7 @@ export function fromSummaries(rows: CsvRow[]): ResultsInput {
     ['other', 'OtherVote24'],
   ]
   const meta = new Map<string, SeatMeta>()
-  const results = rows.map((row): Ge2024Result => {
+  const results = rows.map((row): BaseResult => {
     const id = row.ONSConstID
     const valid = int(row, 'TotalVote24')
     const votes = Object.fromEntries(columns.map(([p, col]) => [p, int(row, col)]))
@@ -208,7 +211,7 @@ export function fromHocCsv(rawRows: CsvRow[]): ResultsInput {
     )
   }
   const meta = new Map<string, SeatMeta>()
-  const results = rows.map((row): Ge2024Result => {
+  const results = rows.map((row): BaseResult => {
     const id = row.onsid.trim()
     const valid = int(row, 'validvotes')
     const votes = Object.fromEntries(HOC_VOTES.map(([p, col]) => [p, int(row, col)]))
@@ -268,7 +271,7 @@ export interface ManualResults {
  * the Commons Library files are: parties outside the game's list count as `other`, and so does
  * every independent except one who came first or second.
  */
-export function fromManual(file: ManualResults): Ge2024Result[] {
+export function fromManual(file: ManualResults): BaseResult[] {
   return Object.entries(file.seats).map(([id, seat]) => {
     const ranked = [...seat.candidates].sort((a, b) => b[1] - a[1])
     if (ranked.length < 2) throw new Error(`${id}: needs at least two candidates`)

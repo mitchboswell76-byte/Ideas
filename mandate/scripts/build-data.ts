@@ -10,6 +10,8 @@
  * Usage: npm run data [-- --refresh]   (--refresh re-downloads instead of using data-raw/.cache)
  * Optional: put the Commons Library's HoC-GE2024-results-by-constituency.csv in data-raw/ to use
  * official results for all 650 seats (and declaration times) instead of the GB mirror + manual NI.
+ * Every seat is checked against the Commons Library briefing (data-raw/manual/cbp-10009-…md),
+ * which also supplies electorates, holds and gains since 2019 and the change in vote shares.
  */
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -19,7 +21,6 @@ import type {
   CountriesFile,
   Ge2024File,
   Ge2024Party,
-  Ge2024Result,
   Region,
   Seat,
   SeatsFile,
@@ -27,10 +28,24 @@ import type {
 import { GE2024_PARTIES } from '../src/data/types.ts'
 import type { Nation } from '../src/sim/world.ts'
 import { CENSUS_FIELDS, censusFromSummaries, emptyCensus, withDensity } from './data/census.ts'
+import { applyCorrections, joinBriefing, parseBriefing, type Corrections } from './data/briefing.ts'
 import { parseCsv } from './data/csv.ts'
-import { fromHocCsv, fromManual, fromSummaries, type ManualResults } from './data/ge2024.ts'
+import {
+  fromHocCsv,
+  fromManual,
+  fromSummaries,
+  type BaseResult,
+  type ManualResults,
+} from './data/ge2024.ts'
 import { parseHexjson } from './data/hexjson.ts'
-import { BOUNDARIES, fetchCached, fetchSetCached, SOURCES } from './data/sources.ts'
+import {
+  BOUNDARIES,
+  BRIEFING,
+  fetchCached,
+  fetchSetCached,
+  sha256,
+  SOURCES,
+} from './data/sources.ts'
 import { hectaresOf, parseBoundary, projectUk, type PlaceBox } from './data/ukmap.ts'
 import {
   countryFacts,
@@ -104,9 +119,19 @@ async function main() {
   ) as ManualResults
   const manual = fromManual(manualFile)
 
-  const byId = (list: Ge2024Result[]) => new Map(list.map((r) => [r.id, r]))
+  const corrections = JSON.parse(
+    await readFile(`${RAW}manual/ge2024-corrections.json`, 'utf8'),
+  ) as Corrections
+  const briefingText = await readFile(`${RAW}${BRIEFING.file}`, 'utf8')
+  if (sha256(briefingText) !== BRIEFING.sha256) {
+    throw new Error(`${BRIEFING.file}: SHA-256 ${sha256(briefingText)} is not the pinned one`)
+  }
+  const briefing = parseBriefing(briefingText)
+
+  const byId = (list: BaseResult[]) => new Map(list.map((r) => [r.id, r]))
   const hocResults = byId(hoc?.results ?? [])
-  const gbResults = byId(gb.results)
+  // The official file needs no corrections; the GB mirror does.
+  const gbResults = byId(applyCorrections(gb.results, corrections))
   const manualResults = byId(manual)
   for (const [label, map] of [
     ['HoC CSV', hocResults],
@@ -127,7 +152,7 @@ async function main() {
   }
 
   const seats: Seat[] = []
-  const results: Ge2024Result[] = []
+  const baseResults: BaseResult[] = []
   for (const id of ids) {
     const h = hex.hexes[id]
     const meta = hoc?.meta.get(id) ?? gb.meta.get(id)
@@ -148,8 +173,10 @@ async function main() {
       q: h.q,
       r: h.r,
     })
-    results.push(result)
+    baseResults.push(result)
   }
+  const joined = joinBriefing(baseResults, new Map(seats.map((s) => [s.id, s.name])), briefing)
+  const results = joined.results
 
   const regions: Region[] = [...new Set(seats.map((s) => s.region))].sort().map((code) => {
     const name = regionNames.get(code)
@@ -242,6 +269,11 @@ async function main() {
       .join(', '),
   )
   console.log('Results from:', [...sources].map(([s, n]) => `${s} ${n}`).join(', '))
+  console.log(
+    `Checked against the Commons Library briefing; electorates taken from it for ${joined.electorates.length} seats:`,
+    joined.electorates.join('; '),
+  )
+  if (joined.mpNames.length) console.log('MP names differ (kept ours):', joined.mpNames.join('; '))
   if (!hoc)
     console.log('No HoC CSV in data-raw/: Northern Ireland uses the hand-transcribed results.')
 }

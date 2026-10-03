@@ -9,9 +9,10 @@ import {
   UsersIcon,
   type Icon,
 } from '../kit/icons.ts'
-import { Button, Card, Chip, Tabs, Tooltip, type TabItem } from '../kit/index.ts'
+import { Button, Card, Chip, cx, Tabs, Tooltip, type TabItem } from '../kit/index.ts'
 import '../map/map-screen.css'
 import { MapKey } from '../map/MapKey.tsx'
+import { MapOnlyToggle } from '../map/MapOnlyToggle.tsx'
 import { PlaceList } from '../map/PlaceList.tsx'
 import { useEscapeDeselect } from '../map/useEscapeDeselect.ts'
 import {
@@ -22,7 +23,7 @@ import {
   type WorldMode,
 } from '../map/world/modes.ts'
 import { WorldMap } from '../map/world/WorldMap.tsx'
-import { useMapState, worldMapStore } from '../store/map.ts'
+import { useMapOnly, useMapState, worldMapStore } from '../store/map.ts'
 import './screens.css'
 import './world.css'
 
@@ -66,10 +67,17 @@ export function World() {
   const selected = useMapState(worldMapStore, (s) => s.selected)
   const bloc = BLOCS.find((b) => b.id === blocId) ?? BLOCS[0]!
   const country = selected ? BY_ID.get(selected) : undefined
+  const { mapOnly } = useMapOnly()
   useEscapeDeselect(worldMapStore)
 
   return (
-    <div className="map-screen">
+    <div
+      className={cx(
+        'map-screen',
+        mapOnly && 'map-screen--map-only',
+        mapOnly && !country && 'map-screen--bare',
+      )}
+    >
       <div className="map-screen__bar">
         <Tabs
           label="Map mode"
@@ -94,6 +102,9 @@ export function World() {
             ))}
           </div>
         )}
+        <div className="map-screen__tools">
+          <MapOnlyToggle />
+        </div>
       </div>
       <div className="map-screen__key">
         <MapKey data={mapKeyFor(mode, mode === 'blocs' ? bloc : null)} />

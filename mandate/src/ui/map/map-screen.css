@@ -126,6 +126,32 @@
   font-size: var(--fs-s);
 }
 
+/*
+ * Map only: no key or list. A picked place's card still opens beside the map (`--map-only`);
+ * with nothing picked the map takes the full width (`--bare`).
+ */
+.map-screen--map-only {
+  grid-template-areas:
+    'bar bar'
+    'map side';
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.map-screen--map-only .map-screen__key {
+  display: none;
+}
+
+.map-screen--bare {
+  grid-template-areas:
+    'bar'
+    'map';
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.map-screen--bare .map-screen__side {
+  display: none;
+}
+
 /* The key: one line of swatches, or a stepped scale, then a short note. */
 .map-key {
   display: flex;
@@ -325,6 +351,27 @@
 
   .map-key__note {
     margin-left: 0;
+  }
+
+  .map-screen--map-only {
+    grid-template-areas:
+      'bar'
+      'map'
+      'side';
+    grid-template-rows: auto clamp(240px, 64vw, 60vh) auto;
+  }
+
+  .map-screen--map-only.map-screen--tall {
+    grid-template-rows: auto clamp(320px, 110vw, 70vh) auto;
+  }
+
+  /* On a phone "map only" gives the map the whole screen height. */
+  .map-screen--bare,
+  .map-screen--bare.map-screen--tall {
+    grid-template-areas:
+      'bar'
+      'map';
+    grid-template-rows: auto calc(100dvh - 160px);
   }
 }
 

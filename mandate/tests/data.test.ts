@@ -91,6 +91,43 @@ describe('GE2024 results', () => {
     }
   })
 
+  it('reproduces the Commons Library table of gains and losses since 2019 (303 seats changed hands)', () => {
+    const gains = new Map<Ge2024Party, number>()
+    const losses = new Map<Ge2024Party, number>()
+    let changed = 0
+    for (const r of results) {
+      const held = r.since2019.held
+      if (held === r.winner) continue
+      changed++
+      gains.set(r.winner, (gains.get(r.winner) ?? 0) + 1)
+      losses.set(held, (losses.get(held) ?? 0) + 1)
+    }
+    expect(changed).toBe(303)
+    // CBP-10009 p. 73: party, gains, losses.
+    const table: [Ge2024Party, number, number][] = [
+      ['lab', 218, 7],
+      ['con', 1, 252],
+      ['ld', 64, 0],
+      ['snp', 1, 40],
+      ['sf', 0, 0],
+      ['ind', 6, 0],
+      ['dup', 0, 3],
+      ['reform', 5, 0],
+      ['green', 3, 0],
+      ['pc', 2, 0],
+      ['sdlp', 0, 0],
+      ['alliance', 1, 1],
+      ['speaker', 0, 0],
+      ['tuv', 1, 0],
+      ['uup', 1, 0],
+    ]
+    for (const [party, won, lost] of table) {
+      expect([party, gains.get(party) ?? 0, losses.get(party) ?? 0]).toEqual([party, won, lost])
+    }
+    // 350 MPs were not in the 2019–24 Parliament (335 new to it, 15 returning): CBP-10009 p. 7.
+    expect(results.filter((r) => r.newMp)).toHaveLength(350)
+  })
+
   it('matches the published Northern Ireland party totals', () => {
     const total = (p: Ge2024Party) =>
       results.filter((r) => r.id.startsWith('N')).reduce((a, r) => a + (r.votes?.[p] ?? 0), 0)

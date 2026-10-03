@@ -5,6 +5,7 @@ import { formatCount, formatPercent } from '../src/ui/kit/numbers.ts'
 import {
   binOf,
   breaksFor,
+  CHANGE_BREAKS,
   fillOf,
   coverageOf,
   formatField,
@@ -16,6 +17,9 @@ import {
   modeLine,
   NO_DATA,
   quantileBreaks,
+  signed,
+  SWING_BREAKS,
+  swingConLab,
   tickLabels,
   turnoutShare,
   type ModeSpec,
@@ -37,6 +41,8 @@ const result = (over: Partial<Ge2024Result> = {}): Ge2024Result => ({
   declared: null,
   verified: true,
   source: 'hoc',
+  newMp: false,
+  since2019: { held: 'con', change: { lab: 8, con: -12, reform: 14 } },
   ...over,
 })
 
@@ -47,9 +53,14 @@ const seat = (over: Partial<Ge2024Result> = {}): SeatData => ({
   census,
 })
 
-const spec = (mode: ModeSpec['mode'], breaks: number[] = []): ModeSpec => ({
+const spec = (
+  mode: ModeSpec['mode'],
+  breaks: number[] = [],
+  measure: ModeSpec['measure'] = 'gains',
+): ModeSpec => ({
   mode,
   field: 'age65plus',
+  measure,
   breaks,
   colours: GE2024.colours,
 })
@@ -144,7 +155,7 @@ describe('UK map modes', () => {
       'step4',
     ])
     expect(majority.items).toEqual([])
-    const turnout = breaksFor(seats, 'turnout', 'age65plus')
+    const turnout = breaksFor(seats, { mode: 'turnout', field: 'age65plus', measure: 'gains' })
     expect(turnout).toHaveLength(4)
     expect(turnout[0]).toBeGreaterThan(40)
     expect(turnout[3]).toBeLessThan(75)
@@ -216,5 +227,58 @@ describe('key ticks', () => {
     expect(tickLabels('demographics', 'population', [93_215, 99_870])).toEqual(['93k', '100k'])
     // 26.3 and 26.4 would both round to 26%: fall back to one decimal place.
     expect(tickLabels('demographics', 'degree', [26.3, 26.4])).toEqual(['26.3%', '26.4%'])
+  })
+})
+
+describe('Since 2019', () => {
+  it('measures the Butler swing from the change in Labour and Conservative shares', () => {
+    expect(swingConLab(seat().result)).toBe(10)
+    expect(swingConLab(seat({ since2019: { held: 'dup', change: { dup: -4 } } }).result)).toBeNull()
+    expect(signed(10)).toBe('+10')
+    expect(signed(-4.25, 1)).toBe('−4.3')
+    expect(signed(-0.01, 1)).toBe('0.0')
+  })
+
+  it('colours gains by the winner and holds in one neutral', () => {
+    const gains = spec('change', [], 'gains')
+    expect(fillOf(seat(), gains)).toBe(GE2024.colours.lab)
+    expect(keyOf(seat(), gains)).toBe('lab')
+    const held = seat({ since2019: { held: 'lab', change: {} } })
+    expect(fillOf(held, gains)).toBe('var(--map-hold)')
+    expect(keyOf(held, gains)).toBe('held')
+  })
+
+  it('lists gains by party with the held count last', () => {
+    const key = mapKeyFor(
+      [seat(), seat(), seat({ since2019: { held: 'lab', change: {} } })],
+      spec('change', [], 'gains'),
+      partyName,
+      '',
+    )
+    expect(key.items.map((i) => [i.label, i.count])).toEqual([
+      ['Labour gain', 2],
+      ['Held', 1],
+    ])
+  })
+
+  it('steps away from 0 in the party colour for rises and grey for falls', () => {
+    // Reform +14: the third step above 0.
+    const reform = spec('change', [...CHANGE_BREAKS], 'reform')
+    expect(fillOf(seat(), reform)).toBe(
+      `color-mix(in oklab, ${GE2024.colours.reform} 58%, var(--map-zero))`,
+    )
+    // Conservatives −12: the third step below 0.
+    const con = spec('change', [...CHANGE_BREAKS], 'con')
+    expect(fillOf(seat(), con)).toBe('color-mix(in oklab, var(--map-loss) 58%, var(--map-zero))')
+    // No figure for a party the seat's nation doesn't list.
+    expect(fillOf(seat(), spec('change', [...CHANGE_BREAKS], 'snp'))).toBe(NO_DATA)
+    // The swing's sides take the two parties' colours.
+    const swing = spec('change', [...SWING_BREAKS], 'swing')
+    expect(fillOf(seat(), swing)).toContain(GE2024.colours.lab)
+    expect(mapKeyFor([seat()], swing, partyName, '').scale).toMatchObject({
+      low: 'To Con',
+      high: 'To Lab',
+      ticks: ['−10', '−5', '0', '+5', '+10', '+15', '+20'],
+    })
   })
 })

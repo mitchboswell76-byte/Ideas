@@ -38,6 +38,10 @@
   --map-seq-4: #d7c9f3;
   --map-nodata: #262d34;
   --map-nodata-line: #48525d;
+  /* Since 2019: seats that stayed with the same party, the scale's 0, and a party's falls. */
+  --map-hold: #4a535c;
+  --map-zero: #2c343c;
+  --map-loss: #9aa3ab;
   --map-seat-line: rgb(14 19 24 / 0.8);
   --map-region-line: rgb(233 235 238 / 0.5);
   --map-nation-line: #e9ebee;
@@ -72,6 +76,9 @@
   --map-seq-4: #3b235d;
   --map-nodata: #e4e8ec;
   --map-nodata-line: #aab3bc;
+  --map-hold: #c6cdd3;
+  --map-zero: #eef1f4;
+  --map-loss: #5f6870;
   --map-seat-line: rgb(255 255 255 / 0.7);
   --map-region-line: rgb(21 24 28 / 0.45);
   --map-nation-line: #15181c;

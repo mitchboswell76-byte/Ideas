@@ -79,6 +79,16 @@ export async function fetchCached(
   return Buffer.from(bytes).toString('utf8')
 }
 
+/**
+ * The Commons Library briefing CBP-10009 as text (Open Parliament Licence v3.0), committed in
+ * `data-raw/manual/`: a text version of the PDF, supplied by the user on 2026-10-03. Pinned so an
+ * accidental edit fails the build instead of changing the results.
+ */
+export const BRIEFING = {
+  file: 'manual/cbp-10009-ge2024-briefing.md',
+  sha256: '64fa6d16bb8b985ead14b02a94b82120c4727e56372de93004a6de7100d00fb6',
+}
+
 /** Many small files, one per id, pinned by the SHA-256 of their contents joined in id order. */
 export interface RemoteSet {
   /** Cache file holding the joined contents. */

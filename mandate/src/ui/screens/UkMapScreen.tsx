@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties } from 'react'
 import type { CensusField, Ge2024Party, SeatType } from '../../data/types.ts'
 import {
+  ArrowsLeftRightIcon,
   ChartLineIcon,
   CrosshairIcon,
   FlagIcon,
@@ -13,6 +14,7 @@ import {
   Button,
   Card,
   Chip,
+  cx,
   formatCount,
   formatPercent,
   Segmented,
@@ -24,6 +26,7 @@ import {
 } from '../kit/index.ts'
 import '../map/map-screen.css'
 import { MapKey, type KeyHighlight } from '../map/MapKey.tsx'
+import { MapOnlyToggle } from '../map/MapOnlyToggle.tsx'
 import { PlaceList } from '../map/PlaceList.tsx'
 import {
   CENSUS_FIELDS,
@@ -38,12 +41,14 @@ import {
 } from '../map/uk/data.ts'
 import {
   breaksFor,
+  CHANGE_PARTIES,
   coverageOf,
   formatField,
   majorityShare,
   mapKeyFor,
+  parseChangeMeasure,
+  signed,
   turnoutShare,
-  UK_LATER_MODES,
   UK_MODE_LABELS,
   UK_MODES,
   type ModeSpec,
@@ -51,21 +56,26 @@ import {
 } from '../map/uk/modes.ts'
 import { UkMap } from '../map/uk/UkMap.tsx'
 import { useEscapeDeselect } from '../map/useEscapeDeselect.ts'
-import { ukLayoutStore, ukMapStore, useMapState, useUkLayout, type UkLayout } from '../store/map.ts'
+import {
+  ukLayoutStore,
+  ukMapStore,
+  useMapOnly,
+  useMapState,
+  useUkLayout,
+  type UkLayout,
+} from '../store/map.ts'
 import './screens.css'
 import './uk-map.css'
 
-type ModeKey = UkMode | (typeof UK_LATER_MODES)[number]
-
-const MODE_ICONS: Record<ModeKey, Icon> = {
+const MODE_ICONS: Record<UkMode, Icon> = {
   party: FlagIcon,
   majority: ChartLineIcon,
   turnout: UsersIcon,
   demographics: MapTrifoldIcon,
-  swing: ChartLineIcon,
+  change: ArrowsLeftRightIcon,
 }
 
-const TABS: TabItem<ModeKey>[] = [...UK_MODES, ...UK_LATER_MODES].map((key) => {
+const TABS: TabItem<UkMode>[] = UK_MODES.map((key) => {
   const ModeIcon = MODE_ICONS[key]
   return {
     key,
@@ -75,7 +85,6 @@ const TABS: TabItem<ModeKey>[] = [...UK_MODES, ...UK_LATER_MODES].map((key) => {
         {UK_MODE_LABELS[key]}
       </>
     ),
-    disabled: key === 'swing' ? 'Arrives with polling (T13)' : undefined,
   }
 })
 
@@ -128,29 +137,78 @@ function CityZoom() {
   )
 }
 
+/** The Since 2019 picker: who gained, the Con–Lab swing, or one party's change in share. */
+function MeasurePicker({ value }: { value: string }) {
+  return (
+    <label className="map-key__measure">
+      <span className="visually-hidden">Measure</span>
+      <select value={value} onChange={(e) => ukMapStore.getState().setOption(e.target.value)}>
+        <option value="gains">Seats that changed hands</option>
+        <option value="swing">Swing, Conservative to Labour</option>
+        <optgroup label="Change in vote share">
+          {CHANGE_PARTIES.map((p) => (
+            <option key={p} value={p}>
+              {partyName(p)}
+            </option>
+          ))}
+        </optgroup>
+      </select>
+    </label>
+  )
+}
+
+/** The Demographics picker: census measures grouped by where they have figures. */
+function FieldPicker({ value }: { value: CensusField }) {
+  return (
+    <label className="map-key__measure">
+      <span className="visually-hidden">Measure</span>
+      <select value={value} onChange={(e) => ukMapStore.getState().setOption(e.target.value)}>
+        {FIELD_GROUPS.map(([where, fields]) => (
+          <optgroup key={where} label={where}>
+            {fields.map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 /**
  * The Map screen: the 650 Westminster seats on their real boundaries (or as equal hexes) with
- * Paradox-style modes, and the constituency card or seat list beside it. Swing arrives with polling
- * (T13); 3D seat columns with election night (T18).
+ * Paradox-style modes, and the constituency card or seat list beside it. Since 2019 compares with
+ * the notional 2019 result (Commons Library); 3D seat columns arrive with election night (T18).
  */
 export function UkMapScreen() {
   const mode = useMapState(ukMapStore, (s) => s.mode)
-  const option = useMapState(ukMapStore, (s) => s.option)
+  const options = useMapState(ukMapStore, (s) => s.options)
   const selected = useMapState(ukMapStore, (s) => s.selected)
   const { layout } = useUkLayout()
-  const field: CensusField = isField(option) ? option : 'age65plus'
+  const { mapOnly } = useMapOnly()
+  const fieldOption = options.demographics ?? ''
+  const field: CensusField = isField(fieldOption) ? fieldOption : 'age65plus'
+  const measure = parseChangeMeasure(options.change ?? 'gains')
   useEscapeDeselect(ukMapStore)
 
   const spec = useMemo<ModeSpec>(
-    () => ({ mode, field, breaks: breaksFor(SEAT_LIST, mode, field), colours: PARTY_COLOURS }),
-    [mode, field],
+    () => ({
+      mode,
+      field,
+      measure,
+      breaks: breaksFor(SEAT_LIST, { mode, field, measure }),
+      colours: PARTY_COLOURS,
+    }),
+    [mode, field, measure],
   )
   const keyData = useMemo(
     () => mapKeyFor(SEAT_LIST, spec, partyName, CENSUS_FIELDS[field]),
     [spec, field],
   )
   // A picked-out key entry belongs to the mode it was picked in.
-  const context = `${mode}:${field}`
+  const context = `${mode}:${field}:${measure}`
   const [pick, setPick] = useState<KeyHighlight & { context: string }>({
     context,
     preview: null,
@@ -160,7 +218,14 @@ export function UkMapScreen() {
   const lit = highlight.preview ?? highlight.pinned
 
   return (
-    <div className="map-screen map-screen--tall">
+    <div
+      className={cx(
+        'map-screen',
+        'map-screen--tall',
+        mapOnly && 'map-screen--map-only',
+        mapOnly && !(selected && SEAT_BY_ID.has(selected)) && 'map-screen--bare',
+      )}
+    >
       <div className="map-screen__bar">
         <Tabs
           label="Map mode"
@@ -169,6 +234,7 @@ export function UkMapScreen() {
           onChange={(key) => ukMapStore.getState().setMode(key as UkMode)}
         />
         <div className="map-screen__tools">
+          <MapOnlyToggle />
           {layout === 'map' && <CityZoom />}
           <Segmented
             label="Map layout"
@@ -183,23 +249,9 @@ export function UkMapScreen() {
           data={keyData}
           heading={
             mode === 'demographics' ? (
-              <label className="map-key__measure">
-                <span className="visually-hidden">Measure</span>
-                <select
-                  value={field}
-                  onChange={(e) => ukMapStore.getState().setOption(e.target.value)}
-                >
-                  {FIELD_GROUPS.map(([where, fields]) => (
-                    <optgroup key={where} label={where}>
-                      {fields.map(([key, label]) => (
-                        <option key={key} value={key}>
-                          {label}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </label>
+              <FieldPicker value={field} />
+            ) : mode === 'change' ? (
+              <MeasurePicker value={measure} />
             ) : undefined
           }
           highlight={highlight}
@@ -245,7 +297,11 @@ interface VoteRow {
   party: Ge2024Party
   votes: number
   share: number
+  /** Change in share since the notional 2019 result, in points (null: not published). */
+  change: number | null
 }
+
+const CHANGE_SET = new Set<Ge2024Party>(CHANGE_PARTIES)
 
 function PartyName({ party }: { party: Ge2024Party }) {
   return (
@@ -273,7 +329,7 @@ const VOTE_COLUMNS: Column<VoteRow>[] = [
     key: 'share',
     label: 'Share',
     align: 'right',
-    width: '96px',
+    width: '58px',
     value: (r) => r.share,
     render: (r) => (
       <span className="share">
@@ -291,6 +347,23 @@ const VOTE_COLUMNS: Column<VoteRow>[] = [
       </span>
     ),
   },
+  {
+    key: 'change',
+    label: '± 2019',
+    align: 'right',
+    width: '52px',
+    value: (r) => r.change ?? -Infinity,
+    render: (r) =>
+      r.change === null ? (
+        <span className="muted">–</span>
+      ) : (
+        <span
+          className={cx('change', r.change > 0 && 'change--up', r.change < 0 && 'change--down')}
+        >
+          {signed(r.change, 1)}
+        </span>
+      ),
+  },
 ]
 
 function SeatCard({ id }: { id: string }) {
@@ -302,7 +375,12 @@ function SeatCard({ id }: { id: string }) {
   const rows: VoteRow[] = result.votes
     ? (Object.entries(result.votes) as [Ge2024Party, number][])
         .filter(([, v]) => v > 0)
-        .map(([party, votes]) => ({ party, votes, share: (100 * votes) / (result.valid ?? total) }))
+        .map(([party, votes]) => ({
+          party,
+          votes,
+          share: (100 * votes) / (result.valid ?? total),
+          change: CHANGE_SET.has(party) ? (result.since2019.change[party] ?? null) : null,
+        }))
     : []
   const hasCensus = CARD_FIELDS.some((f) => census[f] !== null)
 
@@ -327,6 +405,13 @@ function SeatCard({ id }: { id: string }) {
         <dd className="seat-card__mp">
           {result.mp ? `${result.mp.first} ${result.mp.last}` : 'Not recorded'}
           <Chip party={PARTY_COLOURS[result.winner]}>{partyName(result.winner)}</Chip>
+          {result.newMp && <span className="seat-card__new">New MP</span>}
+        </dd>
+        <dt>Result</dt>
+        <dd>
+          {result.since2019.held === result.winner
+            ? `${partyName(result.winner)} hold`
+            : `${partyName(result.winner)} gain from ${partyName(result.since2019.held)}`}
         </dd>
         <dt>Majority</dt>
         <dd>
@@ -370,7 +455,8 @@ function SeatCard({ id }: { id: string }) {
         </p>
       )}
       <p className="muted place-card__later">
-        MP and result as of 4 July 2024; later by-elections and defections are not shown.
+        MP and result as of 4 July 2024; later by-elections and defections are not shown. Holds,
+        gains and ± 2019 are against notional 2019 results on the new boundaries (Commons Library).
         {result.source === 'manual' && ' Copied from the UK Parliament results pages.'}
         {hasCensus && ' Census 2021 (Scotland 2022).'}
       </p>

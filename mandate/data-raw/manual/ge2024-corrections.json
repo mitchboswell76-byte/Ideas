@@ -1,0 +1,12 @@
+{
+  "note": "Corrections to the University of Bristol GB file where it disagrees with the Commons Library briefing CBP-10009 by more than electorates (which the build takes from the briefing). Each entry replaces one party's votes; valid votes change by the same amount.",
+  "asOf": "2026-10-03",
+  "seats": {
+    "E14001445": {
+      "name": "Richmond Park",
+      "votes": { "green": 3416 },
+      "source": "https://electionresults.parliament.uk/elections/3726",
+      "reason": "The Green total was under-reported by 688 at the declaration (2,728); the corrected 3,416 gives 52,205 valid votes and matches every share and the turnout in the briefing."
+    }
+  }
+}

@@ -9,7 +9,7 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 |---|---|---|
 | `uk-seats.json` | 650 Westminster seats (2024 boundaries): ONS code, name, nation, region, county/borough/burgh, hex cell | 2024-07-04 |
 | `uk-map.json` | The same seats' real boundaries projected to SVG paths (transverse Mercator on 2°W, 2000 units tall): per-seat path, focus box, label point and room; seat, region and nation border meshes and the coast; region label points; city zoom boxes | 2024-07-04 |
-| `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected; map colour per party | 2024-07-04 |
+| `ge2024.json` | 2024 general election result per seat: votes by party, electorate, valid/rejected, majority, MP as elected, new MP, who held it in 2019 (notional) and each party's change in share since 2019; map colour per party | 2024-07-04 |
 | `census2021.json` | 21 census measures per seat (GB only; Scotland's density from boundary areas) | E&W 2021-03-21, Scotland 2022-03-20 |
 | `world-110m.json` | 176 countries and territories as TopoJSON (Antarctica dropped) | Natural Earth via world-atlas 2.0.2 |
 | `world-map.json` | The same projected to SVG paths (Natural Earth I, 1000 units wide): focus box, label point, political colour per country; border and coast meshes | derived |
@@ -83,6 +83,24 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
   times for election night. Its column mapping (`fromHocCsv` in `scripts/data/ge2024.ts`) is written from the
   published column list and tested on a fixture, not on the real file; the script names any missing column.
 
+### Commons Library briefing CBP-10009 (all 650 seats)
+- **File:** `mandate/data-raw/manual/cbp-10009-ge2024-briefing.md`: a text version of *General election 2024:
+  results and analysis* (Cracknell and Baker, 24 September 2024, 128 pages), supplied by the user on 2026-10-03.
+  Open Parliament Licence v3.0. Pinned by SHA-256 in `scripts/data/sources.ts` (`BRIEFING`), so an edit fails the
+  build. `.prettierignore` covers `data-raw/`, so formatting never touches it.
+- **Used:** section 5's tables (`scripts/data/briefing.ts`): 5.1 (winner, runner-up, majority, MP, new MP?) and
+  5.2 (hold or gain against the notional 2019 result, shares, change in share, electorate, turnout).
+- **Checks:** every seat's result must agree with the briefing (winner, runner-up, majority, turnout and each
+  listed party's share to 0.05 points) or the build stops. This is the independent check for Northern Ireland's
+  hand-copied results: all 18 agree, and Mid Ulster's electorate really is 74,000. Tests also reproduce the
+  briefing's gains-and-losses table (p. 73: 303 seats changed hands) and its 350 MPs not in the 2019–24 Parliament.
+- **Taken from it:** electorates where the GB file differs (16 seats; the briefing's are "correct as of election
+  day"), `newMp`, `since2019.held` and `since2019.change` (percentage points; Reform's measured from the Brexit
+  Party; `other` = parties without a column in that nation's table). The notional 2019 votes themselves (Rallings
+  and Thrasher) are not in the data.
+- **Corrections** (`data-raw/manual/ge2024-corrections.json`): the GB file's Green vote in Richmond Park was the
+  under-reported declaration figure (2,728); the corrected 3,416 matches the briefing's shares and turnout.
+
 ### World borders
 - **Package:** `world-atlas` 2.0.2 (npm, ISC; © Michael Bostock): Natural Earth 1:110m admin-0 countries, public
   domain.
@@ -155,6 +173,7 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 ## Known limits
 - MPs are as elected on 4 July 2024. By-elections, defections and suspensions since then are not applied
   (T12 web-verifies current office-holders).
-- No 2019 notional results, so a "swing since 2019" map mode needs another source.
+- Notional 2019 votes are not in the data, only the briefing's holds/gains and change in share, so a seat's 2019
+  vote counts can't be shown.
 - Northern Ireland has no census measures (NISRA publishes Census 2021 for the 2024 constituencies, but its site and
   the UK Data Service copy are blocked from the build environment). The map hatches NI in Demographics mode.
