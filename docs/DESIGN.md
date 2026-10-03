@@ -311,14 +311,17 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 
 The user rejected two invented looks ("situation room"; "Ballot & Block" voxels) as generic or unwanted and asked for
 a design that **copies proven games at every level**; at T8c they asked for "simple but beautiful, not AI-looking",
-copied from popular, acclaimed games and websites. Each layer below names its source. We copy layouts,
+copied from popular, acclaimed games and websites; at T10c that the boxes and font still read as AI-made, so the
+page look became a **broadsheet** (NYT election pages: serif headlines, Franklin Gothic labels, hairline rules,
+dense tables): sections under ruled headings instead of bordered rounded cards. Each layer below names its source. We copy layouts,
 interaction patterns and conventions only: never artwork, logos, trademarks or paid fonts. No real organisation's
 branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport font is licence-restricted).
 
 ### What each layer copies
 | Layer | Copy from | What exactly |
 |---|---|---|
-| App shell + navigation | Linear (layout, density, type habits) with FM's contents | Compact left sidebar on the window background with unread badges: Home, Inbox, Calendar, Profile, Party, Money, Media, Polls, Map, World. The screen sits in one raised panel; slim header with a party / screen breadcrumb and a thin stripe in **your party's colour** (FM's club colours, kept to a line). Home = Linear-style overview: dated heading, Inbox and Upcoming lists, You / Game / Keys panels (FM26's tile hub was dropped: reviewers called it cluttered) |
+| App shell + navigation | Linear's layout and density, a broadsheet's type (T10c) | Compact left sidebar under a serif masthead wordmark, with unread badges: Home, Inbox, Calendar, Profile, Party, Money, Media, Polls, Map, World; the current screen is bold with a rule at its edge (no pill). The screen sits on the same page, split by a hairline (no floating rounded frame); slim header with a party / screen breadcrumb and a thin stripe in **your party's colour** (FM's club colours, kept to a line). Home = a front page: the date as a serif headline over a rule, Inbox and Upcoming lists, You / Game / Keys sections, each under a ruled heading (FM26's tile hub was dropped: reviewers called it cluttered) |
+| Sections (T10c) | Newspaper page grid (NYT, FT, Guardian) | A panel is a section of the page: a heavy rule, a short bold heading, then content on the page itself (no border, fill or rounded corners); radio lists are ruled rows; tags are square hairline labels; corners 2–4 px on controls only; icons only where they carry meaning (navigation, actions), never on every heading |
 | Command menu (T8c) | Linear / Raycast Ctrl+K | Ctrl+K or ⌘K (or the header button): type to filter screens, time controls and game actions; arrows, Enter, Esc |
 | Time controls | Paradox (CK3, Victoria 3) | Date, pause and five speed pips top-right; Space pauses; a banner says why the game paused |
 | Inbox + calendar | Football Manager | Inbox list (sender portrait, subject, date, unread dot) + reading pane with reply/action buttons. Calendar month grid: elections, conferences, council meetings, PMQs |
@@ -339,10 +342,12 @@ branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport fo
 Avoid FM26's criticised habit of stacking pop-ups: cards open in place (a side panel or the main area), one at a time.
 
 ### Visual system
-- **Fonts** (open licence, bundled offline): **Schibsted Grotesk** (made for the Schibsted news group's sites) for the
-  interface in sentence case, 13 px UI and 14 px paragraphs; **Newsreader** for narrative text (events, dialogue,
-  letters, news), event and mail headlines and the main-menu masthead. Tabular numerals wherever numbers line up.
-  Map region names keep spaced capitals (the cartographic convention). Barlow / Barlow Condensed retired at T8c.
+- **Fonts** (open licence, bundled offline): **Newsreader** for headlines (page heads, the masthead wordmark, menu
+  entries, panel titles in the creator), big figures, and narrative text (events, dialogue, letters, news); **Public
+  Sans** (the US Web Design System face, derived from Libre Franklin, so in the Franklin Gothic newsroom lineage) for
+  labels, tables and controls in sentence case, 13 px UI and 14 px paragraphs. Tabular numerals wherever numbers
+  line up (the free Libre Franklin build lacks them, which ruled it out). Map region names keep spaced capitals (the
+  cartographic convention). Barlow retired at T8c, Schibsted Grotesk at T10c.
 - **Icons:** Phosphor Icons (MIT), regular weight for UI and fill weight for active states. No emoji.
 - **Colour:** dark grey UI (default) and a light theme, as CSS tokens on `:root` with `[data-theme]` overrides.
   Surfaces step evenly in OKLCH lightness (Linear's method) with a faint cool tint; text is off-white, never pure
@@ -351,7 +356,8 @@ Avoid FM26's criticised habit of stacking pop-ups: cards open in place (a side p
   always ship with an icon or word; party colours only ever mean parties. No brown or olive anywhere in chrome or map
   palettes; value ramps are violet. Research behind these rules: PROGRESS decisions, 2026-10-02 (T8c).
 - **Still banned:** glassmorphism and blur, decorative gradients and glows, emoji icons, Inter (and other generated-UI
-  defaults: an indigo/purple accent on chrome, big rounded cards with soft shadows, centred hero text).
+  defaults: an indigo/purple accent on chrome, big rounded cards with soft shadows or borders on every section, an
+  icon on every heading, pill-shaped highlights, centred hero text). The default personal colour is slate, not violet.
 - **Motion:** quick, functional transitions (panel slides, tooltip fades ≤ 150 ms); respect `prefers-reduced-motion`.
 
 ### 3D (three.js + @react-three/fiber; lazy-loaded)

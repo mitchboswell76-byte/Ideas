@@ -35,8 +35,9 @@ Quality gate before every commit: `npm run typecheck && npm run lint && npm test
 - UK English in all player-facing text. Money in £.
 - Real politicians: no invented crimes/scandals; procedural scandals only hit the player or fictional NPCs.
 - Coup/insurgency stay abstract (numbers, risk, backlash) — no real-world tactics, no real extremist groups.
-- Look = copied reference stack (DESIGN §17 table): Linear shell/type habits + Ctrl+K, FM contents/inbox/tables, CK3
-  characters/tooltips/events, Suzerain dialogue, D4 policy, FP2 votes, Paradox map modes. Schibsted Grotesk + Newsreader;
-  Inter is banned. Copy patterns, never assets, logos, paid fonts or real-org branding. No brown/olive (colour research).
+- Look = copied reference stack (DESIGN §17 table): Linear shell layout + Ctrl+K, FM contents/inbox/tables, CK3
+  characters/tooltips/events, Suzerain dialogue, D4 policy, FP2 votes, Paradox map modes; broadsheet pages (T10c):
+  sections under ruled headings, never boxed rounded cards; Newsreader headlines + Public Sans labels; Inter is
+  banned. Copy patterns, never assets, logos, paid fonts or real-org branding. No brown/olive (colour research).
 - Laptop target (Dell Latitude, Intel integrated GPU): 3D renders on demand, cached portraits, Low preset + 2D mode.
 - Network is restricted in cloud sessions: npm + raw.githubusercontent.com work; gov.uk/parliament/ONS/Wikipedia don't.

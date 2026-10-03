@@ -1,36 +1,36 @@
-/* Panels, tiles and cards (DESIGN §17): hairline borders, no drop shadows. */
+/*
+ * Panels, tiles and cards (DESIGN §17, T10c broadsheet): not boxes. A panel is a section of the page
+ * under a ruled heading (a heavy rule, then a short bold title), like a newspaper's; its body sits on
+ * the page with no fill, border or rounded corners. Panel icons are not drawn: an icon on every
+ * heading was a template tell (the prop stays for places that may want one back).
+ */
 .panel {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
-  background: var(--surface-2);
 }
 
 .panel__head {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
-  padding: 0 8px 0 14px;
-  border-bottom: 1px solid var(--line);
+  min-height: 34px;
+  padding: 6px 0 4px;
+  border-top: 2px solid var(--rule);
 }
 
 .panel__icon {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
+  display: none;
 }
 
 .panel__title {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  font-size: var(--fs-m);
-  font-weight: 600;
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.02em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -45,7 +45,7 @@
 .panel__body {
   flex: 1;
   min-height: 0;
-  padding: 14px;
+  padding: 8px 0 0;
   overflow: auto;
 }
 
@@ -53,31 +53,30 @@
   padding: 0;
 }
 
-/* Tiles. */
+/* Tiles: a ruled column of a front page, its figure in the headline face. */
 .tile {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 124px;
-  padding: 14px 16px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
-  background: var(--surface-2);
+  gap: 8px;
+  min-height: 112px;
+  padding: 8px 0 12px;
+  border: 0;
+  border-top: 2px solid var(--rule);
+  border-radius: 0;
+  background: none;
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition:
-    border-color var(--dur-fast),
-    background-color var(--dur-fast);
+  transition: background-color var(--dur-fast);
 }
 
 .tile:hover {
-  border-color: var(--line-strong);
+  background: var(--hover);
 }
 
 .tile[aria-expanded='true'] {
-  border-color: var(--text-muted);
-  background: var(--surface-3);
+  border-top-color: var(--text);
+  background: var(--hover);
 }
 
 .tile__head {
@@ -87,16 +86,15 @@
 }
 
 .tile__icon {
-  width: 15px;
-  height: 15px;
-  color: var(--text-muted);
+  display: none;
 }
 
 .tile__title {
   flex: 1;
-  color: var(--text-muted);
+  color: var(--text);
   font-size: var(--fs-s);
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .tile__body {
@@ -106,12 +104,12 @@
   font-size: var(--fs-s);
 }
 
-/* Big number or headline inside a tile. */
+/* Big number or headline inside a tile: set in the headline face, like a front-page figure. */
 .tile__stat {
   color: var(--text);
+  font-family: var(--font-serif);
   font-size: var(--fs-xxl);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 400;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }

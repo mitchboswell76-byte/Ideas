@@ -60,7 +60,7 @@
   width: 100%;
   padding: 8px 10px;
   border: 0;
-  border-radius: var(--radius);
+  border-radius: 0;
   background: none;
   color: var(--text-muted);
   text-align: left;
@@ -73,9 +73,12 @@
 }
 
 .creator__step[aria-current='step'] {
-  background: var(--surface-2);
   color: var(--text);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 2px 0 0 var(--text);
+}
+
+.creator__step[aria-current='step'] .creator__step-label {
+  font-weight: 700;
 }
 
 .creator__step-icon {
@@ -113,15 +116,13 @@
   color: var(--warn);
 }
 
-/* Stage: the turntable, map or compass, raised one step. */
+/* Stage: the turntable, map or compass on a square-cornered plate (a photograph, not a card). */
 .creator__stage {
   position: relative;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
   background: var(--surface-1);
   overflow: hidden;
 }
@@ -268,22 +269,21 @@
   width: 220px;
 }
 
-/* Panel: the category's controls. */
+/* Panel: the category's controls, on the page, its title as a headline. */
 .creator__panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
-  background: var(--surface-1);
   overflow: hidden;
 }
 
 .creator__panel-title {
   margin: 0;
-  padding: 14px 18px 10px;
-  font-size: var(--fs-l);
-  font-weight: 600;
+  padding: 8px 18px 12px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.15;
 }
 
 .creator__panel-body {
@@ -321,23 +321,26 @@
 }
 
 .creator-section + .creator-section {
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  padding-top: 6px;
 }
 
+/* Section headings under a heavy rule, as on the game's pages. */
 .creator-section__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 26px;
+  min-height: 30px;
+  padding-top: 4px;
+  border-top: 2px solid var(--rule);
 }
 
 .creator-section__title {
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text);
   font-size: var(--fs-s);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .section-actions {

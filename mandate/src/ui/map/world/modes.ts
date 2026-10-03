@@ -99,8 +99,8 @@ export function legendNote(mode: WorldMode, bloc: Bloc | null): string | null {
   )
 }
 
-/** Approximate width of a label at `LABEL_PX` in Schibsted Grotesk (weight 500), per character. */
-const CHAR_PX = 6.7
+/** Approximate width of a label at `LABEL_PX` in Public Sans (weight 500), per character. */
+const CHAR_PX = 6.8
 export const LABEL_PX = 12
 
 /**

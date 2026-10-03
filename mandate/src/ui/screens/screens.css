@@ -37,29 +37,35 @@ kbd {
   background: transparent;
 }
 
-/* Home (Linear overview): page heading, lists in the main column, status panels beside. */
+/*
+ * Home (a front page, T10c): the date as the headline over a heavy rule, lists in the main column,
+ * status sections beside, each under its own ruled heading.
+ */
 .home {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   grid-template-areas:
     'head head'
     'main side';
-  gap: 16px 20px;
+  gap: 22px 40px;
   align-items: start;
-  max-width: 1280px;
+  max-width: 1200px;
 }
 
 .page-head {
   grid-area: head;
   display: grid;
-  gap: 4px;
-  padding-bottom: 4px;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-strong);
 }
 
 .page-head__title {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif);
+  font-size: var(--fs-head);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
 }
 
 .page-head__sub {
@@ -70,7 +76,7 @@ kbd {
 .home__main,
 .home__side {
   display: grid;
-  gap: 16px;
+  gap: 28px;
   min-width: 0;
 }
 
@@ -101,7 +107,7 @@ kbd {
   gap: 12px;
   width: 100%;
   min-height: 40px;
-  padding: 0 14px;
+  padding: 0 4px;
   border: 0;
   border-top: 1px solid var(--line);
   background: none;
@@ -149,7 +155,7 @@ kbd {
 }
 
 .list-empty {
-  padding: 16px 14px;
+  padding: 16px 4px;
   color: var(--text-muted);
 }
 
@@ -283,12 +289,12 @@ kbd {
 }
 
 .mail-row:hover {
-  background: var(--surface-2);
+  background: var(--hover);
 }
 
 .mail-row[aria-current='true'] {
-  background: var(--surface-3);
-  box-shadow: inset 3px 0 0 var(--text);
+  background: var(--hover);
+  box-shadow: inset 2px 0 0 var(--text);
 }
 
 .mail-row--unread {
@@ -410,13 +416,15 @@ kbd {
 }
 
 .month__day[aria-pressed='true'] {
-  background: var(--surface-3);
-  box-shadow: inset 0 0 0 1px var(--line-strong);
+  background: var(--hover);
+  box-shadow: inset 0 2px 0 var(--text);
 }
 
 .month__date {
-  font-size: var(--fs-m);
-  font-weight: 600;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -433,21 +441,18 @@ kbd {
 }
 
 .month__day--today .month__date {
-  display: inline-grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--text);
-  color: var(--bg);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 .month__entry {
   overflow: hidden;
   padding: 1px 5px;
-  border-left: 3px solid var(--line-strong);
-  border-radius: 2px;
-  background: var(--surface-2);
+  border-left: 2px solid var(--line-strong);
+  border-radius: 0;
+  background: none;
   font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;

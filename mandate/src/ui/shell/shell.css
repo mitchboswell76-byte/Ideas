@@ -1,6 +1,6 @@
 /*
- * The game shell (DESIGN §17): the sidebar on the window background, and the screen in one raised
- * panel (Linear) holding the header, the stage and the status bar.
+ * The game shell (DESIGN §17): the sidebar and the screen on one page, split by a hairline (T10c:
+ * no floating rounded frame), with the header, the stage and the status bar.
  */
 .shell {
   display: grid;
@@ -17,10 +17,8 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
-  margin: 8px 8px 8px 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
-  background: var(--surface-1);
+  border-left: 1px solid var(--line);
+  background: var(--bg);
   overflow: hidden;
 }
 
@@ -92,7 +90,7 @@
   grid-row: 2;
   min-height: 0;
   overflow: auto;
-  padding: 24px;
+  padding: 28px 32px;
 }
 
 .shell__screen.shell__screen--flush {

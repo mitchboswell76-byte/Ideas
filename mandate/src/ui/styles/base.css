@@ -1,11 +1,13 @@
 /*
  * Foundations (DESIGN §17): fonts, colour tokens, base elements.
  *
- * T8c look: Linear's layout habits (sentence case, 4 px grid, hairlines, evenly stepped greys) set in
- * a newspaper grotesque. Colour follows the colour research (PROGRESS, 2026-10-02): dark grey, not
- * black, with off-white text (halation); calm low-saturation chrome, leaving saturated colour to
- * data (saturation drives arousal); no brown or olive (the least-liked hues); status colours from the
- * Okabe–Ito colour-blind-safe set, always paired with an icon or word.
+ * T10c look, "broadsheet" (user, 2026-10-03: the boxes and font read as AI-made): newspaper habits
+ * instead of app-template ones. Sections sit under ruled headings rather than in bordered, rounded
+ * cards; Newsreader carries headlines and big numbers; a Franklin-lineage grotesque carries labels,
+ * tables and controls (the NYT pairs Cheltenham headlines with Franklin labels); corners are nearly
+ * square; few icons. Colour follows the colour research (PROGRESS, 2026-10-02): dark grey, not black,
+ * with off-white text (halation); calm chrome, saturated colour left to data; no brown or olive;
+ * status colours from the Okabe–Ito colour-blind-safe set, always paired with an icon or word.
  */
 
 @import '@fontsource/newsreader/latin-400.css';
@@ -13,16 +15,16 @@
 @import '@fontsource/newsreader/latin-700.css';
 
 /*
- * Schibsted Grotesk (OFL): the grotesque made for the Schibsted news group's sites, so the
- * interface reads like a newsroom tool rather than a generic app (Inter, the default of countless
- * generated UIs, stays banned). Variable weight 400–900; tabular figures via `tnum`.
+ * Public Sans (OFL): the US Web Design System's interface face, derived from Libre Franklin, so it
+ * keeps Franklin Gothic's newsroom voice (and, unlike the free Libre Franklin build, has tabular
+ * figures). Inter, the default of countless generated UIs, stays banned. Variable weight 100–900.
  */
 @font-face {
-  font-family: 'Schibsted Grotesk Variable';
+  font-family: 'Public Sans Variable';
   font-style: normal;
   font-display: swap;
-  font-weight: 400 900;
-  src: url('../../../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2')
+  font-weight: 100 900;
+  src: url('../../../node_modules/@fontsource-variable/public-sans/files/public-sans-latin-wght-normal.woff2')
     format('woff2-variations');
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
@@ -31,11 +33,11 @@
 
 /* Latin Extended (Welsh ŵ, Romanian ș ă): only fetched when such a character is on screen. */
 @font-face {
-  font-family: 'Schibsted Grotesk Variable';
+  font-family: 'Public Sans Variable';
   font-style: normal;
   font-display: swap;
-  font-weight: 400 900;
-  src: url('../../../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-ext-wght-normal.woff2')
+  font-weight: 100 900;
+  src: url('../../../node_modules/@fontsource-variable/public-sans/files/public-sans-latin-ext-wght-normal.woff2')
     format('woff2-variations');
   unicode-range:
     U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
@@ -45,7 +47,8 @@
 
 /*
  * Dark (default). Surfaces step evenly in OKLCH lightness (bg 0.205 → raised 0.29) with a faint cool
- * tint; components use these tokens only. Party colours come from data and only ever mean parties;
+ * tint, but the broadsheet look uses them sparingly: pages sit on `--bg`, raised surfaces are kept
+ * for things that float (menus, tooltips, dialogs) and inputs. Components use these tokens only. Party colours come from data and only ever mean parties;
  * selection and focus use the text colour; good / warn / bad are their own. Themes apply to any
  * subtree via `data-theme`, so the style guide can show both side by side.
  */
@@ -70,8 +73,11 @@
   --attr-3: #e6cf45;
   --attr-4: #78c451;
   --attr-5: #33c2a6;
-  /* The player's personal colour: the default until a career sets it (`useYouColour`). */
-  --you: #b79cf2;
+  /* The player's personal colour: the default until a career sets it (`useYouColour`). Slate: no hue
+     of its own until the player picks one (violet was a template tell). */
+  --you: #9aa7b4;
+  /* Section rules: the heavy rule above a section heading, as in a newspaper. */
+  --rule: #c9ccd1;
   /* The header's party colour until the player joins one (set inline by the shell). */
   --party: #6b737d;
   --party-ink: #ffffff;
@@ -82,13 +88,15 @@
 }
 
 [data-theme='light'] {
-  --bg: #f2f5fa;
-  --surface-1: #f7faff;
+  /* Newsprint: near-white page, near-black ink. */
+  --bg: #fafafa;
+  --surface-1: #f4f5f6;
   --surface-2: #ffffff;
-  --surface-3: #eceff3;
-  --line: #dde0e4;
+  --surface-3: #eceef0;
+  --line: #dfe1e4;
   --line-strong: #b8bbbf;
-  --text: #1c1e21;
+  --rule: #1c1e21;
+  --text: #16181b;
   --text-muted: #535559;
   --text-faint: #7e8084;
   --good: #007c59;
@@ -99,7 +107,7 @@
   --attr-3: #9c8400;
   --attr-4: #3f8f1f;
   --attr-5: #0f8a76;
-  --you: #7a55d6;
+  --you: #5d6b79;
   --hover: rgb(20 24 30 / 0.05);
   --scrim: rgb(30 34 40 / 0.4);
   --shadow: 0 8px 24px rgb(20 24 30 / 0.12), 0 0 0 1px rgb(20 24 30 / 0.06);
@@ -107,7 +115,7 @@
 }
 
 :root {
-  --font-ui: 'Schibsted Grotesk Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Public Sans Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
   /* Captions, badges. */
   --fs-xs: 11px;
@@ -125,8 +133,11 @@
   --fs-xxl: 28px;
   /* Narrative text (events, dialogue, mail). */
   --fs-serif: 17px;
-  --radius: 6px;
-  --radius-l: 8px;
+  /* Page headlines (Newsreader). */
+  --fs-head: 34px;
+  /* Nearly square: rounded corners on everything are a template tell. */
+  --radius: 3px;
+  --radius-l: 4px;
   --dur-fast: 120ms;
   --sidebar-w: 220px;
   --rail-w: 56px;
@@ -224,11 +235,33 @@ a {
   line-height: 1.45;
 }
 
-/* A group label (Linear): small, sentence case, muted. */
+/* A group label: small, sentence case, muted. */
 .label {
   color: var(--text-muted);
   font-size: var(--fs-s);
   font-weight: 500;
+}
+
+/*
+ * A section heading (the broadsheet's kicker): a heavy rule above, a short bold label below it.
+ * Panels use it for their titles; screens can use it directly.
+ */
+.kicker {
+  padding-top: 7px;
+  border-top: 2px solid var(--rule);
+  color: var(--text);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* A page headline. */
+.headline {
+  font-family: var(--font-serif);
+  font-size: var(--fs-head);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
 }
 
 @media (prefers-reduced-motion: reduce) {

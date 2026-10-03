@@ -3,11 +3,11 @@
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M1 — Nobody to Prime Minister (M0 follow-ups T8b, T8c done). M0 was merged into
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
-**Next session:** start at **T10c** (then T10d … T10i, then T11). T10b–T10i come from the user's 2026-10-03
+**Next session:** start at **T10d** (then T10e … T10i, then T11). T10b–T10i come from the user's 2026-10-03
   feedback on the character system, UI and UK map; the research behind them is in the decisions log (2026-10-03 T10b).
-**Last playable link (T10b2):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Last playable link (T10c):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
-**UI kit (T10):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
+**UI kit (T10c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
 ## Workflow for the user
 Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Then `/clear`.
@@ -119,16 +119,15 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
   or one party's change; the seat card shows hold/gain, New MP and a ± 2019 column. "Map only" on both maps hides
   the key and the list. Each map mode keeps its own option. 279 unit tests, 22/22 e2e (UK map 58.9 fps, world
   59.4 under the 4x throttle; turntable rebuild 33.0).
-- [ ] T10c Look & feel v2: "must not look AI-made" (user: "the font and boxes give me that vibe"). Research first
-      (keep it short): what reads as template/AI UI (inference, not academic: shadcn/Tailwind defaults: Inter/Geist,
-      8–12px rounded cards with 1px borders on everything, grey-on-grey, violet accents, equal-weight card grids,
-      an icon on every heading) against award-winning references: NYT/FT/Guardian election pages (Malofiej/SND),
-      Suzerain, Disco Elysium, CK3, Football Manager. Then: boxes → rules (panels lose borders and fills; hairline
-      rules + whitespace on a newspaper grid; radius 2–4px on controls only; no card-in-card); stronger type
-      contrast (Newsreader display heads 28–40px and big tabular numbers; try Libre Franklin, OFL, NYT's Franklin
-      lineage, against Schibsted Grotesk for UI text, pick by screenshots); fewer icons; default personal colour
-      not violet. Apply to shell, Home, Inbox, Calendar, Saves, Settings, maps chrome, kit gallery. Creator and
-      Profile get it in T10d–T10i. Update DESIGN §17 (one named reference per surface).
+- [x] T10c Look & feel v2: "must not look AI-made" (user: "the font and boxes give me that vibe")
+
+  Done: a broadsheet look. Panels, tiles, Settings choices, the creator panel, the style guide and the shell are
+  no longer bordered rounded boxes: sections sit on the page under a heavy rule and a short bold heading;
+  Newsreader headlines (page heads, masthead wordmark, menu entries, creator titles, calendar dates, big
+  figures); Public Sans (Franklin lineage) replaces Schibsted Grotesk for labels and controls; corners 2–4 px;
+  tags square; the sidebar's current screen is bold with an edge rule (no pill); panel and tile icons hidden;
+  default personal colour slate (was violet); light theme is newsprint (near-white page, near-black rules).
+  279 unit tests; e2e 21/22 (the creator turntable rebuild check, untouched T10 code, fails about 1 run in 3).
 - [ ] T10d Identity & background: ethnicity = the ONS 2021 England and Wales list, official wording, 19 boxes in
       5 groups (incl. "Gypsy or Irish Traveller", "Roma", the four Mixed boxes, "Arab", "Any other …" boxes);
       ethnicity is self-identification, not appearance: it seeds names, family and the Look's *defaults* (skin tone
@@ -633,6 +632,16 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   Map store: `options` per mode (switching modes keeps each choice); `mapOnlyStore` (in memory, shared by both
   maps): `--map-only` hides the key, `--bare` also the side panel when nothing is picked.
 
+- 2026-10-03 T10c research and choices: the "AI look" is design commentary, not academic: Inter, indigo/purple
+  accents, rounded cards with identical borders or shadows, an icon on everything (e.g. 925 Studios, "AI slop
+  fonts and gradients"; prg.sh, "Why your AI keeps building the same purple gradient website"). Counter-model: the
+  NYT's election pages (Cheltenham headlines, Franklin Gothic labels, hairline rules, dense tables; fontsinuse.com).
+  Libre Franklin was the first pick but its free build has no tabular figures (a row of 1s is narrower than a row
+  of 0s), so Public Sans (USWDS, derived from Libre Franklin, true `tnum`, 27 KB latin vs Schibsted's 47 KB) took
+  its place. Tokens: `--rule` (heavy section rule), `--fs-head` 34 px, `--radius` 3 / `--radius-l` 4, `.kicker`
+  and `.headline` utilities; `DEFAULT_COLOUR` = slate (`personalColour` falls back to it). Chips stay `Chip` in code.
+  World label width `CHAR_PX` 6.7 → 6.8 (Public Sans measured 1.5% wider at 12 px).
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -656,9 +665,11 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   flat triangles, and the 2D illustration is front-on while the 3D bust is turned a little. The T10 turntable shows
   the full body large, which exposes more: ball hands, a hard jumper hem, plain legs. Worth a pass on the body
   meshes before M1 ships. The 2D creator view is the bust only (no full-body illustration, no turning).
-- Creator slider drags rebuild the whole figure (~5 ms; ~13 ms with upload and GC). Paced, they hold 31–38 fps
-  under the 4x throttle, just above the 30 floor (one full e2e run on 2026-10-03 measured 23.8). T10g replaces
-  rebuilds with GPU morph targets.
+- Creator slider drags rebuild the whole figure (~5 ms; ~13 ms with upload and GC). Under the 4x throttle with
+  software WebGL they sit on the 30 fps floor: on 2026-10-03 the e2e check `creator turntable … slider rebuilds`
+  failed about 1 run in 3 (worst 23.8 fps; 28.8 fps / p95 83 ms; passes at 31–34 fps / p95 67 ms). Not caused by
+  T10b/T10c (CSS and data only). Root fix = T10g (GPU morph targets: drags change weights, no rebuild); until then
+  that one check is not a reliable signal.
 - Traits are free at creation (CK3 charges for good ones): players will skip Lazy and Scandal-prone. Balance at T22
   (trait costs against the attribute budget).
 - The Profile shows the birth nation only: not the birth country (born abroad) or the home seat, because seat and

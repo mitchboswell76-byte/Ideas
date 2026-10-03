@@ -21,8 +21,12 @@ export const PERSONAL_COLOURS: readonly PersonalColour[] = [
   { id: 'slate', name: 'Slate', dark: '#a9b4c4', light: '#56616f' },
 ]
 
-export const DEFAULT_COLOUR = 'violet'
+/** Until the player picks: slate has no hue of its own (T10c; violet read as a template default). */
+export const DEFAULT_COLOUR = 'slate'
 
 export function personalColour(id: string | undefined): PersonalColour {
-  return PERSONAL_COLOURS.find((c) => c.id === id) ?? PERSONAL_COLOURS[0]
+  return (
+    PERSONAL_COLOURS.find((c) => c.id === id) ??
+    PERSONAL_COLOURS.find((c) => c.id === DEFAULT_COLOUR)!
+  )
 }

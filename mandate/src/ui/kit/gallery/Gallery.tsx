@@ -50,7 +50,7 @@ import {
   type DialogueLine,
   type PartyColours,
 } from '../index.ts'
-import { PERSONAL_COLOURS } from '../../../sim/character/colours.ts'
+import { DEFAULT_COLOUR, PERSONAL_COLOURS } from '../../../sim/character/colours.ts'
 import { Avatars } from './Avatars.tsx'
 import './gallery.css'
 
@@ -129,10 +129,12 @@ function Type() {
   return (
     <Section
       title="Type"
-      note="Schibsted Grotesk (a news group's typeface) for the interface, in sentence case; Newsreader for narrative, headlines and the masthead. Tabular numbers wherever figures line up."
+      note="Broadsheet pairing (T10c): Newsreader for headlines, big figures, narrative and the masthead; Public Sans (Franklin Gothic lineage) for labels, tables and controls, in sentence case. Sections sit under ruled headings, not in boxes. Tabular numbers wherever figures line up."
     >
       <div className="type-specimens">
-        <p className="type-display">Schibsted Grotesk · Home · Inbox · Calendar</p>
+        <p className="kicker">Section heading · a heavy rule, then a short bold label</p>
+        <p className="headline">Thursday 1 October 2026</p>
+        <p className="type-display">Public Sans · Home · Inbox · Calendar</p>
         <p>The interface: buttons, labels and lists at 13 px, paragraphs at 14 px.</p>
         <p className="type-headline">Chancellor faces revolt over fuel duty</p>
         <p className="serif">
@@ -223,7 +225,7 @@ function ChipsTabs() {
 
 function Creator() {
   const [height, setHeight] = useState(0.2)
-  const [colour, setColour] = useState('violet')
+  const [colour, setColour] = useState(DEFAULT_COLOUR)
   const [charisma, setCharisma] = useState(12)
   return (
     <Section
@@ -791,10 +793,10 @@ export function Gallery({ initialTheme }: { initialTheme: Theme }) {
         <div>
           <h1 className="gallery__title">Mandate UI kit</h1>
           <p className="gallery__lede">
-            The reference stack: Linear's layout, type habits and command menu; Football Manager's
-            inbox and tables; Crusader Kings III's portraits, tooltips and event windows; Suzerain's
-            conversations; Frostpunk 2's vote bar; Paradox time controls. Patterns only; no artwork,
-            logos or paid fonts.
+            The reference stack: a broadsheet's pages (ruled sections, serif headlines, Franklin
+            labels); Linear's layout and command menu; Football Manager's inbox and tables; Crusader
+            Kings III's portraits, tooltips and event windows; Suzerain's conversations; Frostpunk
+            2's vote bar; Paradox time controls. Patterns only; no artwork, logos or paid fonts.
           </p>
         </div>
         <Tabs
@@ -825,8 +827,8 @@ export function Gallery({ initialTheme }: { initialTheme: Theme }) {
         <TickerDemo />
       </main>
       <footer className="gallery__foot">
-        Fictional parties, places and people throughout. Icons: Phosphor (MIT). Fonts: Schibsted
-        Grotesk and Newsreader (OFL).
+        Fictional parties, places and people throughout. Icons: Phosphor (MIT). Fonts: Public Sans
+        and Newsreader (OFL).
       </footer>
     </div>
   )
