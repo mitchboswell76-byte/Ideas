@@ -4,6 +4,7 @@
  */
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import type { Command } from '../../sim/command.ts'
+import type { CharacterSpec } from '../../sim/character/create.ts'
 import type { PlayerSummary } from '../../sim/engine.ts'
 import type { Notification, PauseReason } from '../../sim/scheduler.ts'
 import { GAME_VERSION } from '../../sim/version.ts'
@@ -73,7 +74,8 @@ export interface GameState extends RunnerStatus {
 
   /** Wait for the runner, apply settings and list saves. The title screen starts or loads a game. */
   boot(): Promise<void>
-  newGame(seed: string): Promise<void>
+  /** Start a career: the creator's character, or a random one. */
+  newGame(seed: string, player?: CharacterSpec): Promise<void>
   setSpeed(speed: Speed): void
   togglePause(): void
   step(days: number): void
@@ -195,8 +197,8 @@ export function createGameStore({
         bridge.send({ type: 'autoPause', settings: get().autoPause })
         await get().refreshSlots()
       },
-      newGame: (seed) =>
-        replaceGame(() => bridge.request({ type: 'newGame', options: { seed } }), true),
+      newGame: (seed, player) =>
+        replaceGame(() => bridge.request({ type: 'newGame', options: { seed, player } }), true),
       setSpeed: (speed) => bridge.send({ type: 'speed', speed }),
       togglePause: () => bridge.send({ type: 'togglePause' }),
       step: (days) => bridge.send({ type: 'step', days }),

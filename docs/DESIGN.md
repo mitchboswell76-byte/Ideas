@@ -86,8 +86,13 @@ Figures marked **(verify)** must be checked by web search before being hard-code
     from about 40 and posture stoops past 65; children are smaller with larger eyes. Portraits show age in five-year
     steps for adults (yearly for children), so they are redrawn every few years, not every birthday. Outfits change
     with role (school uniform → hoodie → jumper and rosette → MP's suit); suits keep to sober colours.
-  - **Creator (T10):** copies the CK3 ruler designer and The Sims' Create-a-Sim: categories on the left, turntable
-    avatar in the centre (drag to rotate, zoom to face), sliders and swatches on the right, randomise and presets.
+  - **Creator (T10):** copies the CK3 ruler designer and The Sims' Create-a-Sim: categories on the left (Identity,
+    Origins, Family, Look, Abilities, Beliefs, Start), turntable avatar in the centre (drag or arrow keys to turn,
+    wheel or button to zoom to the face; the map on Origins, the compass on Beliefs), sliders and swatches on the
+    right, randomise per category and overall, six preset faces. Attributes are bought from a 60-point budget (each
+    4–16 before trait bonuses); 3–5 traits, no opposites. Beliefs come from a 14-statement quiz (`quiz.json`). The
+    family is generated around the chosen player (same roots and class, the household's politics, a likeness).
+    The finished `CharacterSpec` is checked again by the sim (`specProblems`) before the career starts.
   - **Portraits:** CK3-style framed portraits. One shared offscreen WebGL canvas draws the bust once and caches it
     as an image (`Portrait`, `ui/avatar/`): renders queue one per frame, sized by the graphics preset (smaller on
     Low), and are reused until the look changes. No live 3D canvas per panel. The frame shows party colour and
@@ -100,7 +105,10 @@ Figures marked **(verify)** must be checked by web search before being hard-code
 
 ## §5 Life mode (playable backstory)
 
-- You choose a start age (0–17 for life mode, or 18–70 for quick start). Birth date = game start date − start age.
+- You choose your age on the game start date (18–70, T10). Birth date = game start date − that age. Life mode plays
+  the years before the start (childhood cards from age 0); quick start samples them. Both modes begin real-time
+  politics on the game start date with an adult, so real politicians stay current (decided at T10: the earlier
+  "0–17 for life mode" would have started politics with a child).
 - Life mode plays each backstory year as 1–3 BitLife-style **cards** (text + 2–4 choices) until the game start date.
   After that, real-time politics begins.
 - Card pools by age band:

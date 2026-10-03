@@ -344,3 +344,9 @@ body {
   border-radius: var(--radius);
   background: var(--surface-3);
 }
+
+.specimen__stack {
+  display: grid;
+  gap: 14px;
+  max-width: 360px;
+}

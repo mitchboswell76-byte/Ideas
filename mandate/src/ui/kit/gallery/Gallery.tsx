@@ -21,6 +21,7 @@ import {
 } from '../icons.ts'
 import {
   AttributeGrid,
+  AttributeValue,
   Badge,
   Button,
   Card,
@@ -34,8 +35,11 @@ import {
   PauseBanner,
   PortraitFrame,
   Sidebar,
-  Table,
   Segmented,
+  Slider,
+  Stepper,
+  Swatches,
+  Table,
   Tabs,
   Term,
   Ticker,
@@ -46,6 +50,7 @@ import {
   type DialogueLine,
   type PartyColours,
 } from '../index.ts'
+import { PERSONAL_COLOURS } from '../../../sim/character/colours.ts'
 import { Avatars } from './Avatars.tsx'
 import './gallery.css'
 
@@ -211,6 +216,48 @@ function ChipsTabs() {
             { key: 'hex', label: 'Hexes' },
           ]}
         />
+      </div>
+    </Section>
+  )
+}
+
+function Creator() {
+  const [height, setHeight] = useState(0.2)
+  const [colour, setColour] = useState('violet')
+  const [charisma, setCharisma] = useState(12)
+  return (
+    <Section
+      title="Sliders, swatches, steppers"
+      note="Character creator controls (T10): the Sims' sliders and colour swatches, the CK3 ruler designer's point-buy."
+    >
+      <div className="specimen__stack">
+        <Slider
+          label="Height"
+          min={-1}
+          max={1}
+          step={0.05}
+          value={height}
+          format={(v) => Math.round(v * 10)}
+          onChange={setHeight}
+        />
+        <Swatches
+          label="Personal colour"
+          size="l"
+          swatches={PERSONAL_COLOURS.map((c) => ({ key: c.id, colour: c.dark, name: c.name }))}
+          value={colour}
+          onChange={setColour}
+        />
+        <div className="row">
+          <span>Charisma</span>
+          <Stepper
+            label="Charisma"
+            value={charisma}
+            canDecrease={charisma > 4}
+            canIncrease={charisma < 16}
+            onChange={setCharisma}
+          />
+          <AttributeValue value={charisma} />
+        </div>
       </div>
     </Section>
   )
@@ -765,6 +812,7 @@ export function Gallery({ initialTheme }: { initialTheme: Theme }) {
         <Type />
         <Buttons />
         <ChipsTabs />
+        <Creator />
         <Tooltips />
         <ShellDemo />
         <TilesDemo />

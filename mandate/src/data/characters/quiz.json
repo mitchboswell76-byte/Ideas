@@ -1,0 +1,90 @@
+{
+  "note": "The creator's beliefs quiz (DESIGN §4, T10). Each statement is answered from strongly disagree (-2) to strongly agree (+2). Weights say where agreeing moves you: econ -1 = left, +1 = right; social -1 = liberal, +1 = authoritarian; issues use the poles in ISSUE_LABELS (negative = the 'low' pole). Statements alternate direction so that agreeing with everything lands near the centre. Game design, not a validated survey instrument.",
+  "answers": ["Strongly disagree", "Disagree", "Neither", "Agree", "Strongly agree"],
+  "statements": [
+    {
+      "id": "ownership",
+      "text": "The government should own the railways and the water companies.",
+      "econ": -1,
+      "issues": { "publicServices": -0.5 }
+    },
+    {
+      "id": "taxTooHigh",
+      "text": "Taxes are too high: people should keep more of what they earn.",
+      "econ": 1,
+      "issues": { "tax": 1 }
+    },
+    {
+      "id": "nhsFunding",
+      "text": "The NHS needs more money, even if that means higher taxes.",
+      "econ": -0.7,
+      "issues": { "publicServices": -1, "tax": -0.7 }
+    },
+    {
+      "id": "immigration",
+      "text": "Immigration to Britain should be cut substantially.",
+      "social": 1,
+      "issues": { "immigration": 1 }
+    },
+    {
+      "id": "rejoin",
+      "text": "Britain should rejoin the European Union.",
+      "social": -0.5,
+      "issues": { "eu": -1 }
+    },
+    {
+      "id": "netZero",
+      "text": "Britain should reach net zero sooner, even if it costs households more for a while.",
+      "econ": -0.3,
+      "issues": { "climate": -1 }
+    },
+    {
+      "id": "sentences",
+      "text": "Criminals should serve longer prison sentences.",
+      "social": 1,
+      "issues": { "crime": 1 }
+    },
+    {
+      "id": "councilHomes",
+      "text": "Councils, not private developers, should build most new homes.",
+      "econ": -1,
+      "issues": { "housing": -1 }
+    },
+    {
+      "id": "defence",
+      "text": "Defence spending should rise, even if other budgets are cut.",
+      "econ": 0.2,
+      "social": 0.5,
+      "issues": { "defence": 1 }
+    },
+    {
+      "id": "devolution",
+      "text": "Scotland, Wales and Northern Ireland should run more of their own affairs.",
+      "social": -0.3,
+      "issues": { "union": -1 }
+    },
+    {
+      "id": "traditions",
+      "text": "Traditional British values are under threat and should be defended.",
+      "social": 1,
+      "issues": { "culture": 1 }
+    },
+    {
+      "id": "unions",
+      "text": "Trade unions should have more power to protect workers.",
+      "econ": -1
+    },
+    {
+      "id": "privateNhs",
+      "text": "Private companies should be allowed to run more NHS services.",
+      "econ": 1,
+      "issues": { "publicServices": 1 }
+    },
+    {
+      "id": "liveAndLetLive",
+      "text": "People should be free to live as they choose, so long as they harm no one else.",
+      "social": -1,
+      "issues": { "culture": -0.5 }
+    }
+  ]
+}

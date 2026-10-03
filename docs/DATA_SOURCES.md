@@ -134,6 +134,13 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
 - **Avatars:** built in code from parameters (`src/sim/character/appearance.ts`); no model files, photos or
   photo-derived likenesses. Real politicians (T12) get hand-set parameters.
 
+### Character creator (T10)
+- **Files:** `mandate/src/data/characters/quiz.json` (14 agree/disagree statements and the compass/issue weights
+  each answer moves) and the heritage `label`s in `people.json` (the creator's "Family roots"). Written for the game.
+- **The quiz is game design, not a validated survey instrument.** Statements alternate direction so that agreeing
+  with everything lands near the centre; weights are judgement calls, not fitted to the British Election Study or
+  any other survey. Don't present a character's score as a real-world political classification.
+
 ## Known limits
 - MPs are as elected on 4 July 2024. By-elections, defections and suspensions since then are not applied
   (T12 web-verifies current office-holders).

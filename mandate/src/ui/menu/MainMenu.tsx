@@ -1,9 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { GAME_VERSION } from '../../sim/version.ts'
 import { formatShortDate } from '../format.ts'
 import { ArrowRightIcon, WarningIcon, XIcon } from '../kit/icons.ts'
 import { Button, IconButton, cx } from '../kit/index.ts'
-import { randomSeed } from '../random.ts'
 import type { SlotMeta } from '../saves/slots.ts'
 import { Saves } from '../screens/Saves.tsx'
 import { Settings } from '../screens/Settings.tsx'
@@ -16,6 +15,9 @@ function latestSlot(slots: readonly SlotMeta[]): SlotMeta | null {
 }
 
 type Pane = 'load' | 'settings'
+
+/** The character creator (T10), loaded when first opened. */
+const Creator = lazy(() => import('../creator/Creator.tsx'))
 
 interface MenuItemProps {
   children: ReactNode
@@ -57,6 +59,7 @@ export function MainMenu() {
   const lastError = useGame((s) => s.lastError)
   const [busy, setBusy] = useState(false)
   const [pane, setPane] = useState<Pane | null>(null)
+  const [creating, setCreating] = useState(false)
   const latest = latestSlot(slots)
   const game = gameStore.getState()
 
@@ -73,6 +76,14 @@ export function MainMenu() {
     return () => window.removeEventListener('keydown', onKey)
   }, [pane])
 
+  if (creating) {
+    return (
+      <Suspense fallback={<div className="menu" aria-busy="true" />}>
+        <Creator onBack={() => setCreating(false)} />
+      </Suspense>
+    )
+  }
+
   return (
     <div className={cx('menu', pane && 'menu--pane')} data-testid="title-screen">
       <Backdrop />
@@ -87,7 +98,7 @@ export function MainMenu() {
             testId="title-new"
             disabled={!ready || busy}
             detail="Start as nobody, somewhere in Britain"
-            onClick={() => run(() => game.newGame(randomSeed()))}
+            onClick={() => setCreating(true)}
           >
             New career
           </MenuItem>

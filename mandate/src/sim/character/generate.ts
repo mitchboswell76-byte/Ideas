@@ -1,5 +1,5 @@
 /**
- * Random characters for NPCs and, until character creation (T10), the player. Deterministic: all
+ * Random characters for NPCs (the player comes from a `CharacterSpec`, create.ts). Deterministic: all
  * randomness comes from the `rng` passed in. Names and looks come from data/characters/people.json.
  */
 import people from '../../data/characters/people.json'
@@ -11,6 +11,7 @@ import { energyMax, healthCap } from './condition.ts'
 import {
   ATTRIBUTES,
   clamp,
+  ISSUE_LOADINGS,
   ISSUES,
   SKILL_ATTRIBUTE,
   SKILLS,
@@ -29,6 +30,8 @@ import { pickTraits, traitDefs } from './traits.ts'
 
 export interface Heritage extends LookWeights {
   id: string
+  /** Player-facing name (the creator's "Family roots"). */
+  label: string
   weight: number
   female: readonly string[]
   male: readonly string[]
@@ -37,13 +40,16 @@ export interface Heritage extends LookWeights {
 }
 
 export const HERITAGES: readonly Heritage[] = people.heritages as Heritage[]
-const NEUTRAL_NAMES: readonly string[] = people.neutralNames
-const OCCUPATIONS: Readonly<Record<string, readonly string[]>> = people.occupations
+export const NEUTRAL_NAMES: readonly string[] = people.neutralNames
+/** Jobs by stage of life (`young`, `retired`) and by class. */
+export const OCCUPATIONS: Readonly<Record<string, readonly string[]>> = people.occupations
+export const CLASS_WEIGHTS = people.classes as Record<ClassOrigin, number>
+export const NATION_WEIGHTS = people.nations as Record<Nation, number>
 
 const DAYS_PER_YEAR = 365.2425
 
 /** Pick a key of a weight table. */
-function pickKey<K extends string>(rng: Rng, weights: Partial<Record<K, number>>): K {
+export function pickKey<K extends string>(rng: Rng, weights: Partial<Record<K, number>>): K {
   return rng.weighted(Object.entries(weights) as [K, number][], ([, w]) => w)[0]
 }
 
@@ -57,36 +63,18 @@ const EDUCATION_BY_CLASS: Readonly<Record<ClassOrigin, Partial<Record<Education,
   upper: { gcse: 2, alevel: 10, degree: 55, postgrad: 33 },
 }
 
-function education(rng: Rng, age: number, cls: ClassOrigin): Education {
+export function randomEducation(rng: Rng, age: number, cls: ClassOrigin): Education {
   if (age < 16) return 'none'
   if (age < 18) return 'gcse'
   if (age < 21) return 'alevel'
   return pickKey(rng, EDUCATION_BY_CLASS[cls])
 }
 
-function occupation(rng: Rng, age: number, cls: ClassOrigin): string {
+export function randomOccupation(rng: Rng, age: number, cls: ClassOrigin): string {
   if (age < 16) return 'School pupil'
   if (age >= 67) return rng.pick(OCCUPATIONS.retired)
   if (age < 25) return rng.pick(OCCUPATIONS.young)
-  return rng.pick(
-    OCCUPATIONS[
-      rng.chance(0.8) ? cls : pickKey(rng, people.classes as Record<ClassOrigin, number>)
-    ],
-  )
-}
-
-/** How strongly each issue follows the economic and social axes. */
-const ISSUE_LOADINGS: Readonly<Record<IssueKey, { econ: number; social: number }>> = {
-  immigration: { econ: 0.1, social: 0.8 },
-  eu: { econ: 0.2, social: 0.6 },
-  climate: { econ: 0.5, social: 0.3 },
-  publicServices: { econ: 0.8, social: 0 },
-  tax: { econ: 0.9, social: 0 },
-  defence: { econ: 0.3, social: 0.5 },
-  union: { econ: 0.2, social: 0.4 },
-  crime: { econ: 0.1, social: 0.8 },
-  housing: { econ: 0.7, social: 0.1 },
-  culture: { econ: 0, social: 0.9 },
+  return rng.pick(OCCUPATIONS[rng.chance(0.8) ? cls : pickKey(rng, CLASS_WEIGHTS)])
 }
 
 const CLASS_LEAN: Readonly<Record<ClassOrigin, number>> = { working: -15, middle: 0, upper: 20 }
@@ -102,18 +90,55 @@ export function randomIdeology(
   const inherit = parents.length > 0 && rng.chance(0.5)
   const mean = (pick: (i: Ideology) => number) =>
     parents.reduce((s, p) => s + pick(p.ideology), 0) / Math.max(1, parents.length)
-  const econ = axis(
-    inherit ? mean((i) => i.econ) + rng.normal(0, 20) : CLASS_LEAN[cls] + rng.normal(0, 35),
-  )
-  const social = axis(
-    inherit ? mean((i) => i.social) + rng.normal(0, 20) : (age - 45) * 0.8 + rng.normal(0, 35),
-  )
+  const econ = inherit
+    ? mean((i) => i.econ) + rng.normal(0, 20)
+    : CLASS_LEAN[cls] + rng.normal(0, 35)
+  const social = inherit
+    ? mean((i) => i.social) + rng.normal(0, 20)
+    : (age - 45) * 0.8 + rng.normal(0, 35)
+  return ideologyAt(rng, econ, social)
+}
+
+/** Beliefs at a point on the compass, each issue scattered around what the two axes suggest. */
+export function ideologyAt(rng: Rng, econ: number, social: number): Ideology {
+  const e = axis(econ)
+  const s = axis(social)
   const issues = {} as Record<IssueKey, number>
   for (const issue of ISSUES) {
     const l = ISSUE_LOADINGS[issue]
-    issues[issue] = axis(l.econ * econ + l.social * social + rng.normal(0, 28))
+    issues[issue] = axis(l.econ * e + l.social * s + rng.normal(0, 28))
   }
-  return { econ, social, issues }
+  return { econ: e, social: s, issues }
+}
+
+/** Skills from talent (the carrying attribute) and experience (age). */
+export function rollSkills(
+  rng: Rng,
+  attributes: Readonly<Record<AttributeKey, number>>,
+  age: number,
+): Record<SkillKey, number> {
+  const experience = clamp((age - 14) / 30, 0, 1)
+  const skills = {} as Record<SkillKey, number>
+  for (const s of SKILLS) {
+    const talent = (attributes[SKILL_ATTRIBUTE[s]] - 10) * 1.5
+    const served = s === 'military' ? (rng.chance(0.05) ? 30 : -15) : 0
+    skills[s] = clamp(Math.round(rng.normal(6 + 26 * experience, 8) + talent + served), 0, 70)
+  }
+  return skills
+}
+
+/** Attributes plus the creation bonuses of the traits held (0–20). */
+export function withTraitBonuses(
+  base: Readonly<Record<AttributeKey, number>>,
+  traits: readonly string[],
+): Record<AttributeKey, number> {
+  const defs = traitDefs(traits)
+  const out = {} as Record<AttributeKey, number>
+  for (const a of ATTRIBUTES) {
+    const bonus = defs.reduce((s, t) => s + (t.effects.attributes?.[a] ?? 0), 0)
+    out[a] = clamp(Math.round(base[a] + bonus), 0, 20)
+  }
+  return out
 }
 
 export interface GenerateOptions {
@@ -153,30 +178,15 @@ export function generateCharacter(world: World, rng: Rng, opts: GenerateOptions 
         : rng.chance(0.5)
           ? NEUTRAL_NAMES
           : rng.pick([heritage.female, heritage.male])
-  const cls =
-    opts.classOrigin ??
-    p1?.background.classOrigin ??
-    pickKey(rng, people.classes as Record<ClassOrigin, number>)
-  const nation =
-    opts.nation ??
-    p1?.background.birthplace.nation ??
-    pickKey(rng, people.nations as Record<Nation, number>)
+  const cls = opts.classOrigin ?? p1?.background.classOrigin ?? pickKey(rng, CLASS_WEIGHTS)
+  const nation = opts.nation ?? p1?.background.birthplace.nation ?? pickKey(rng, NATION_WEIGHTS)
   const religion = p1 && rng.chance(0.75) ? p1.background.religion : pickKey(rng, heritage.religion)
 
   const traits = pickTraits(rng, opts.traitCount ?? rng.int(2, 4))
-  const defs = traitDefs(traits)
-  const attributes = {} as Record<AttributeKey, number>
-  for (const a of ATTRIBUTES) {
-    const bonus = defs.reduce((s, t) => s + (t.effects.attributes?.[a] ?? 0), 0)
-    attributes[a] = clamp(Math.round(clamp(rng.normal(10, 3), 1, 18) + bonus), 0, 20)
-  }
-  const experience = clamp((age - 14) / 30, 0, 1)
-  const skills = {} as Record<SkillKey, number>
-  for (const s of SKILLS) {
-    const talent = (attributes[SKILL_ATTRIBUTE[s]] - 10) * 1.5
-    const served = s === 'military' ? (rng.chance(0.05) ? 30 : -15) : 0
-    skills[s] = clamp(Math.round(rng.normal(6 + 26 * experience, 8) + talent + served), 0, 70)
-  }
+  const base = {} as Record<AttributeKey, number>
+  for (const a of ATTRIBUTES) base[a] = clamp(rng.normal(10, 3), 1, 18)
+  const attributes = withTraitBonuses(base, traits)
+  const skills = rollSkills(rng, attributes, age)
 
   const character: Character = {
     id: newId(world, 'chr'),
@@ -184,7 +194,7 @@ export function generateCharacter(world: World, rng: Rng, opts: GenerateOptions 
     familyName: opts.familyName ?? p1?.familyName ?? rng.pick(heritage.family),
     gender,
     birthDay,
-    occupation: opts.occupation ?? occupation(rng, age, cls),
+    occupation: opts.occupation ?? randomOccupation(rng, age, cls),
     attributes,
     skills,
     traits,
@@ -206,7 +216,7 @@ export function generateCharacter(world: World, rng: Rng, opts: GenerateOptions 
       citizenship: ['cty_GBR'],
       classOrigin: cls,
       religion,
-      education: education(rng, age, cls),
+      education: randomEducation(rng, age, cls),
       heritage: heritage.id,
     },
     appearance: randomAppearance(rng, {

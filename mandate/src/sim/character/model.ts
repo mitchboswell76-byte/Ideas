@@ -105,6 +105,20 @@ export const ISSUE_LABELS: Readonly<Record<IssueKey, { name: string; low: string
     culture: { name: 'Culture and identity', low: 'Progressive', high: 'Traditional' },
   }
 
+/** How strongly each issue follows the economic and social axes. */
+export const ISSUE_LOADINGS: Readonly<Record<IssueKey, { econ: number; social: number }>> = {
+  immigration: { econ: 0.1, social: 0.8 },
+  eu: { econ: 0.2, social: 0.6 },
+  climate: { econ: 0.5, social: 0.3 },
+  publicServices: { econ: 0.8, social: 0 },
+  tax: { econ: 0.9, social: 0 },
+  defence: { econ: 0.3, social: 0.5 },
+  union: { econ: 0.2, social: 0.4 },
+  crime: { econ: 0.1, social: 0.8 },
+  housing: { econ: 0.7, social: 0.1 },
+  culture: { econ: 0, social: 0.9 },
+}
+
 export interface Ideology {
   /** −100 left … +100 right. */
   econ: number
@@ -157,7 +171,8 @@ export interface Relationship {
 export const GENDERS = ['female', 'male', 'nonbinary'] as const
 export type Gender = (typeof GENDERS)[number]
 
-export type ClassOrigin = 'working' | 'middle' | 'upper'
+export const CLASS_ORIGINS = ['working', 'middle', 'upper'] as const
+export type ClassOrigin = (typeof CLASS_ORIGINS)[number]
 
 export const EDUCATION = ['none', 'gcse', 'alevel', 'degree', 'postgrad'] as const
 export type Education = (typeof EDUCATION)[number]
@@ -176,6 +191,8 @@ export type Religion = (typeof RELIGIONS)[number]
 
 export interface Background {
   birthplace: { country: CountryId; nation?: Nation; seat?: ConstituencyId }
+  /** Where they live now: the player's political home (chosen at creation). */
+  home?: { nation: Nation; seat?: ConstituencyId }
   citizenship: CountryId[]
   classOrigin: ClassOrigin
   religion: Religion
@@ -205,7 +222,7 @@ export interface Character {
   relationships: Partial<Record<CharacterId, Relationship>>
   background: Background
   appearance: Appearance
-  /** Personal colour (`--you` for the player), chosen at creation (T10). */
+  /** Personal colour id (`PERSONAL_COLOURS`; `--you` for the player), chosen at creation. */
   colour?: string
 }
 

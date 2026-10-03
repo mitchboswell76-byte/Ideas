@@ -3,7 +3,7 @@
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M1 — Nobody to Prime Minister (M0 follow-ups T8b, T8c done). M0 was merged into
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
-**Next session:** start at **T10**
+**Next session:** start at **T11**
 **Last playable link (T9):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
 **UI kit (T9):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
@@ -90,9 +90,15 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
   generator (14 hairstyles, 6 facial hair, 4 glasses, 10 outfits, 5 accessories, 5 expressions, 4 poses, ageing);
   cached portraits + 2D illustration; Profile screen (sidebar, Ctrl+K) and the Home "You" panel; kit gallery
   Avatars section. 241 unit tests, 20 e2e (Profile at speed 5: 60 fps under a 4x throttle).
-- [ ] T10 Character creation (CK3 ruler designer + Sims Create-a-Sim layout): birthplace (world / UK map), family
+- [x] T10 Character creation (CK3 ruler designer + Sims Create-a-Sim layout): birthplace (world / UK map), family
       background, avatar creator (turntable, all parts, randomise, presets), personal colour, traits, ideology quiz,
       start mode
+
+  Done: New career opens a 7-category creator (Identity, Origins, Family, Look, Abilities, Beliefs, Start) with a
+  live turntable, UK/world pick maps, 6 preset faces, randomise per category and overall, 60-point attribute buy,
+  3–5 traits, 14-statement beliefs quiz, 8 personal colours (applied as `--you`); the sim validates the
+  `CharacterSpec` and builds the family around it. Life mode is shown but disabled until T11. 258 unit tests,
+  22 e2e (creator flow + turntable perf).
 - [ ] T11 Event engine (data-driven) + life mode as a BitLife age log (Age + button) with CK3 event windows,
       ~60 childhood/youth cards
 - [ ] T12 Seed data: parties, leaders & key figures (web-verify, `asOf`), outlets, polling baseline, donor archetypes
@@ -414,8 +420,8 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   Grotesk (OFL, made for the Schibsted news group; variable 400–900; has `tnum`; 47 KB latin + 21 KB latin-ext, only
   latin and latin-ext are bundled). IBM Plex Sans was rejected (no tabular figures in the fontsource build).
 - 2026-10-02 T8c measured: all 17 e2e tests pass; 57–60 fps under a 4× CPU throttle on every 2D screen; 212 unit
-  tests. The player's default personal colour (`--you`, violet) now shares a hue family with the UK value ramp:
-  revisit when T10 lets the player pick it.
+  tests. The player's default personal colour (`--you`, violet) now shares a hue family with the UK value ramp
+  (T10: the player can now pick one of eight).
 
 - 2026-10-03 T9 sim map: `src/sim/character/` = `model.ts` (Character, attribute/skill/issue keys and labels,
   relationships, background), `appearance.ts` (avatar parameters, palettes, part catalogue with generation weights,
@@ -456,6 +462,39 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - 2026-10-03 Browser-verified (scratchpad Playwright): gallery avatars in 3D and 2D, Home, Profile, a relation's
   profile and back, 2D view, 390 px (no sideways scroll); no console errors.
 
+- 2026-10-03 T10 map: `sim/character/create.ts` (`CharacterSpec`, `specProblems` → `{ section, message }[]`,
+  `randomSpec`, `createPlayer`, `START_AGE` 18–70, `ATTRIBUTE_BUY` 4–16 / 60 points, `TRAIT_COUNT` 3–5, households,
+  `EDUCATION_MIN_AGE`), `quiz.ts` + `data/characters/quiz.json` (`scoreQuiz`, `answersFor`), `colours.ts`
+  (`PERSONAL_COLOURS`: id + dark/light shade). `cast.ts`: `createStartingCast(world, rng, spec)` always builds from a
+  spec; `startWorld({ seed, player? })` throws on an invalid spec (random spec when omitted: tests, soak). Protocol
+  `newGame.options` carries `player`; store `newGame(seed, spec?)`. `ui/creator/` = `Creator.tsx` (lazy from the
+  main menu), `store.ts` (draft, quiz answers, view state, `presetLooks`), `panels.tsx`, `LookPanel.tsx`,
+  `AbilitiesPanel.tsx`, `BeliefsPanel.tsx`, `OriginsMap.tsx` (lazy: map geometry), `SearchPick.tsx`, `places.ts`,
+  `describe.ts`, `Field.tsx`. Kit gained `Slider`, `Swatches` (`.colour-pick`, not `.swatch`: the gallery uses that),
+  `Stepper`; `.search-field` moved to kit controls.css. Profile's compass, issue scales and trait effects moved to
+  `ui/character/Beliefs.tsx` (+ beliefs.css) for reuse.
+- 2026-10-03 Start age: the age on the game start date, 18–70 for both modes (DESIGN §5 rewritten). The old "0–17
+  for life mode" contradicted the 2026-09-28 decision that politics starts on the start date with real politicians
+  current. Life mode is stored (`world.meta.startMode`) but disabled in the UI until T11 builds the age log.
+- 2026-10-03 New data on the character (no save bump; both optional): `background.home { nation, seat? }` (the
+  player's political home seat, for T15's local party) and `meta.startMode`. `colour` now holds a palette id.
+  Born abroad = citizenship [GBR, birth country] (standing needs British citizenship). Country ids are
+  `cty_<ISO3>`; seats `con_<ONS code>` (format-checked only: the sim has no seat table until T12–T14).
+- 2026-10-03 The family takes after the chosen player: parents share roots, class and nation; skin within one step,
+  one parent has the player's hair colour and one their eye colour; parents' beliefs centre on the household's
+  lean (left −45 / centre 0 / right +45 econ, sd 18; "not political" = random); 80% share the religion. Parents over
+  78 may have died (chance rises with age; never before 60). 0–2 siblings as chosen.
+- 2026-10-03 Turntable = plain three.js on its own canvas (`ui/avatar/turntable.ts` + `Turntable.tsx`), not r3f,
+  so it shares the portrait chunk (turntable code 1 KB gzip). Renders on demand; full-body build; drag / arrow keys
+  turn, wheel / +/− / button zoom to the face (eased, instant with reduced motion). Low preset: no MSAA (40 → 59
+  fps turning under the 4x throttle). Rebuilds that cost > 8 ms (meshes + upload) hold the next one back by
+  max(2 × cost, 120 ms), so slider drags stay smooth on slow machines. The rosette shows the personal colour.
+  No decorative stage gradient (DESIGN §17 ban).
+- 2026-10-03 Measured (4x throttle, software WebGL): turntable turning 59–60 fps; slider rebuilds 31–38 fps,
+  p95 50–67 ms (budget: Low floor 30 fps, p95 ≤ 4 frames). Without rebuilds the same drag is 60 fps, so React is
+  not the cost. Unthrottled: full-body build ~5.3 ms, 21.7k triangles. Creator chunk 19.5 KB gzip, lazy; initial
+  JS ~133 KB gzip.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -473,8 +512,17 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
 - Characters never die yet: health bottoms out at 1 (death and heirs are DESIGN §4, not yet scheduled). Fame,
   credibility and heat sit at their defaults until media and money (T16–T17).
 - Avatar rough edges: long hair lies flat over the shoulders, the hoodie's hood is a simple ring, collar points are
-  flat triangles, and the 2D illustration is front-on while the 3D bust is turned a little. Good enough for
-  portraits; revisit with the T10 creator, which shows the avatar large.
+  flat triangles, and the 2D illustration is front-on while the 3D bust is turned a little. The T10 turntable shows
+  the full body large, which exposes more: ball hands, a hard jumper hem, plain legs. Worth a pass on the body
+  meshes before M1 ships. The 2D creator view is the bust only (no full-body illustration, no turning).
+- Creator slider drags rebuild the whole figure (~5 ms; ~13 ms with upload and GC). Paced, they hold 31–38 fps
+  under the 4x throttle; if the Dell hitches, build a lower-detail figure while dragging, or move builds to a
+  worker (OffscreenCanvas).
+- Traits are free at creation (CK3 charges for good ones): players will skip Lazy and Scandal-prone. Balance at T22
+  (trait costs against the attribute budget).
+- The Profile shows the birth nation only: not the birth country (born abroad) or the home seat, because seat and
+  country names live in lazy UI data. Show them once the sim has a seat table (T12–T14).
+- Life mode is visible but disabled in the creator ("coming soon") until T11.
 - Portrait renders happen on the main thread (~7.5 ms each to build on the cloud machine, plus the WebGL draw);
   worth timing on the Dell. An OffscreenCanvas in a worker could move it off the main thread if it hitches.
 - `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);

@@ -263,3 +263,57 @@ export function randomAppearance(
     },
   }
 }
+
+const SLIDERS: readonly (readonly [keyof Appearance, string])[] = [
+  ['head', 'width'],
+  ['head', 'jaw'],
+  ['head', 'cheeks'],
+  ['head', 'chin'],
+  ['head', 'brow'],
+  ['eyes', 'size'],
+  ['eyes', 'spacing'],
+  ['brows', 'thickness'],
+  ['nose', 'size'],
+  ['nose', 'width'],
+  ['mouth', 'width'],
+  ['mouth', 'lips'],
+  ['ears', 'size'],
+  ['body', 'height'],
+  ['body', 'build'],
+]
+
+const isIndex = (n: unknown, length: number) =>
+  Number.isInteger(n) && (n as number) >= 0 && (n as number) < length
+const inPart = (parts: readonly PartDef[], id: unknown) => parts.some((p) => p.id === id)
+
+/**
+ * What is wrong with an appearance built outside the generator (the creator): unknown parts,
+ * palette indexes out of range, sliders outside −1 … +1 (jaw may reach ±1.2, as generated).
+ */
+export function appearanceProblems(a: Appearance): string[] {
+  const out: string[] = []
+  for (const [group, key] of SLIDERS) {
+    const v = (a[group] as unknown as Record<string, unknown> | undefined)?.[key]
+    const limit = key === 'jaw' ? 1.2 : 1
+    if (typeof v !== 'number' || !(Math.abs(v) <= limit))
+      out.push(`Look: ${group} ${key} is out of range`)
+  }
+  if (!isIndex(a.skin, SKIN_TONES.length)) out.push('Look: unknown skin tone')
+  if (!isIndex(a.eyes?.colour, EYE_COLOURS.length)) out.push('Look: unknown eye colour')
+  if (!isIndex(a.hair?.colour, HAIR_COLOURS.length)) out.push('Look: unknown hair colour')
+  if (!inPart(HAIR_STYLES, a.hair?.style)) out.push('Look: unknown hairstyle')
+  if (!inPart(BROW_STYLES, a.brows?.style)) out.push('Look: unknown brows')
+  if (!inPart(FACIAL_HAIR, a.facialHair)) out.push('Look: unknown facial hair')
+  if (!inPart(GLASSES, a.glasses)) out.push('Look: unknown glasses')
+  if (!inPart(OUTFITS, a.outfit)) out.push('Look: unknown outfit')
+  if (!isIndex(a.clothes?.main, CLOTHES_COLOURS.length)) out.push('Look: unknown clothes colour')
+  if (!isIndex(a.clothes?.accent, CLOTHES_COLOURS.length)) out.push('Look: unknown clothes colour')
+  if (!Array.isArray(a.accessories) || a.accessories.some((x) => !ACCESSORIES.includes(x)))
+    out.push('Look: unknown accessory')
+  const { greyAt, recede } = a.ageing ?? {}
+  if (!(typeof greyAt === 'number' && greyAt >= 20 && greyAt <= 90))
+    out.push('Look: greying age is out of range')
+  if (!(typeof recede === 'number' && recede >= 0 && recede <= 1))
+    out.push('Look: hairline is out of range')
+  return out
+}

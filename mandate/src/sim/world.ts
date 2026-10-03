@@ -39,7 +39,8 @@ export interface IdTypes {
 /** Keys are prefixed IDs (never integer-like), so insertion order — and iteration — is deterministic. */
 export type Table<K extends string, V> = Record<K, V>
 
-export type Nation = 'england' | 'scotland' | 'wales' | 'northern-ireland'
+export const NATIONS = ['england', 'scotland', 'wales', 'northern-ireland'] as const
+export type Nation = (typeof NATIONS)[number]
 
 export type { Character }
 
@@ -115,7 +116,12 @@ export interface ClockState {
 }
 
 export interface World {
-  meta: { seed: string; createdWith: string }
+  meta: {
+    seed: string
+    createdWith: string
+    /** How the career began (T10): quick start, or life mode's playable backstory (T11). */
+    startMode?: 'quick' | 'life'
+  }
   clock: ClockState
   rngState: RngState
   player: CharacterId | null

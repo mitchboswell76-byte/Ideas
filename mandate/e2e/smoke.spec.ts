@@ -34,6 +34,55 @@ test('main menu → new career → every screen', async ({ page }) => {
   }
 })
 
+test('character creator: choices carry into the game', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByTestId('title-new').click()
+  await expect(page.getByTestId('creator')).toBeVisible()
+  expect(await scrollsSideways(page)).toBe(false)
+  await page.setViewportSize({ width: 1280, height: 800 })
+
+  await page.getByTestId('creator-given-name').fill('Ada')
+  await page.getByRole('textbox', { name: 'Surname' }).fill('Lovelace')
+  await page.getByRole('radio', { name: 'Teal' }).click()
+  await expect(page.locator('.stage__name')).toHaveText('Ada Lovelace')
+
+  await page.getByTestId('creator-tab-origins').click()
+  await page.getByRole('combobox', { name: 'Find a constituency to live in' }).fill('Ynys')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('.place-line__name').first()).toHaveText('Ynys Môn')
+  await expect(page.locator('.origins__home')).toHaveCount(1)
+
+  // Too few traits: the category is flagged and Start career points at the problem.
+  await page.getByTestId('creator-tab-abilities').click()
+  const held = page.locator('.trait-pick[aria-pressed="true"]')
+  while ((await held.count()) > 0) await held.first().click()
+  await expect(
+    page.getByTestId('creator-tab-abilities').getByLabel('Needs attention'),
+  ).toBeVisible()
+  await page.getByTestId('creator-start').click()
+  await expect(page.getByRole('alert')).toContainText('Choose 3–5 traits')
+  await page.getByTestId('creator-tab-abilities').click()
+  for (const trait of ['Ambitious', 'Calm', 'Bookish'])
+    await page.getByRole('button', { name: trait, exact: true }).click()
+  await expect(held).toHaveCount(3)
+
+  await page.getByTestId('creator-tab-beliefs').click()
+  await page
+    .getByRole('radiogroup', { name: /^Taxes are too high/ })
+    .getByRole('radio', { name: 'Strongly agree' })
+    .click()
+
+  await page.getByTestId('creator-start').click()
+  await expect(page.getByTestId('game-date')).toBeVisible()
+  await go(page, 'Profile')
+  await expect(page.locator('.profile__name')).toHaveText('Ada Lovelace')
+  await expect(page.locator('.profile__traits')).toContainText('Bookish')
+  const you = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--you').trim(),
+  )
+  expect(you).toBe('#4fc6bc')
+})
+
 test('profile: the player and their people, 3D portraits and 2D illustrations', async ({
   page,
 }) => {
@@ -171,7 +220,7 @@ test('UK and world maps: modes, search, card, Esc', async ({ page }) => {
   await expect(page.locator('.ukmap__fills--hex path')).toHaveCount(650)
   await expect(page.getByRole('combobox', { name: 'Zoom to' })).toHaveCount(0)
   await page.reload()
-  await page.getByTestId('title-new').click()
+  await newCareer(page)
   await go(page, 'Map')
   await expect(page.locator('.ukmap__fills--hex path')).toHaveCount(650)
   await layout.getByRole('button', { name: 'Map' }).click()

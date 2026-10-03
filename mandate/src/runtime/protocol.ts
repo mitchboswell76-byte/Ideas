@@ -6,7 +6,7 @@
 import type { Command } from '../sim/command.ts'
 import type { TickSummary } from '../sim/engine.ts'
 import type { PauseReason } from '../sim/scheduler.ts'
-import type { CreateWorldOptions } from '../sim/world.ts'
+import type { NewGameOptions } from '../sim/character/cast.ts'
 import type { QueryArgs, QueryName, QueryResult } from './queries.ts'
 
 /** 0 = paused. */
@@ -41,7 +41,7 @@ export const MAX_STEP_DAYS = 36_525
 
 /** Request payloads; each gets exactly one `result` with the same id. */
 export type Request =
-  | { type: 'newGame'; options: CreateWorldOptions }
+  | { type: 'newGame'; options: NewGameOptions }
   | { type: 'save'; savedAt: string }
   | { type: 'load'; bytes: Uint8Array<ArrayBuffer> }
   | { [K in QueryName]: { type: 'query'; what: K; args: QueryArgs<K> } }[QueryName]

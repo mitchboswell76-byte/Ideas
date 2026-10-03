@@ -61,12 +61,6 @@
   margin: 14px 0 8px;
 }
 
-.trait-tip {
-  display: grid;
-  gap: 8px;
-  max-width: 260px;
-}
-
 /* Bars. */
 .bar {
   position: relative;
@@ -152,91 +146,6 @@
 }
 
 /* Beliefs. */
-.beliefs {
-  display: grid;
-  gap: 14px;
-}
-
-.compass {
-  width: 168px;
-  justify-self: center;
-}
-
-.compass__box {
-  fill: var(--surface-2);
-  stroke: var(--line-strong);
-  stroke-width: 1;
-}
-
-.compass__axis {
-  stroke: var(--line);
-  stroke-width: 1;
-}
-
-.compass__label {
-  fill: var(--text-faint);
-  font-size: 7px;
-  text-anchor: middle;
-}
-
-.compass__dot {
-  fill: var(--you);
-  stroke: var(--bg);
-  stroke-width: 1.5;
-}
-
-.issues {
-  display: grid;
-  gap: 4px;
-}
-
-.issues__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(70px, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  min-height: 24px;
-  font-size: var(--fs-s);
-}
-
-.issues__name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.issues__scale {
-  position: relative;
-  display: block;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--surface-3);
-}
-
-.issues__scale::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  bottom: -2px;
-  left: 50%;
-  width: 1px;
-  background: var(--line-strong);
-}
-
-.issues__fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-radius: 2px;
-  background: var(--you);
-}
-
-.issues__lean {
-  overflow: hidden;
-  color: var(--text-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* People. */
 .relation {

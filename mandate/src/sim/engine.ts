@@ -17,6 +17,8 @@ export interface PlayerSummary {
   stress: number
   energy: number
   energyMax: number
+  /** Personal colour id (`PERSONAL_COLOURS`), for `--you`. */
+  colour: string | null
 }
 
 /** What the UI receives after each tick. */
@@ -39,6 +41,7 @@ export function summarisePlayer(world: World): PlayerSummary | null {
     stress,
     energy,
     energyMax: energyMax(c),
+    colour: c.colour ?? null,
   }
 }
 

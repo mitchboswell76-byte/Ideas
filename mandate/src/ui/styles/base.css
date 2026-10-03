@@ -70,7 +70,7 @@
   --attr-3: #e6cf45;
   --attr-4: #78c451;
   --attr-5: #33c2a6;
-  /* The player's personal colour (chosen at T10). */
+  /* The player's personal colour: the default until a career sets it (`useYouColour`). */
   --you: #b79cf2;
   /* The header's party colour until the player joins one (set inline by the shell). */
   --party: #6b737d;

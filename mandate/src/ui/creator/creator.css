@@ -1,0 +1,776 @@
+/*
+ * Character creator (T10, DESIGN §17: CK3 ruler designer + the Sims' Create-a-Sim). Linear's habits
+ * carry over: categories on the window background, the stage and the panel raised one step,
+ * hairlines, sentence case, 13 px controls.
+ */
+.creator {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  background: var(--bg);
+}
+
+.creator__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px;
+}
+
+.creator__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-xl);
+  font-weight: 400;
+}
+
+.creator__head-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.creator__body {
+  display: grid;
+  grid-template-columns: 208px minmax(0, 1fr) minmax(340px, 400px);
+  gap: 8px;
+  min-height: 0;
+  padding: 0 8px 8px 0;
+}
+
+/* Categories: numbered steps, CK3's tab column in Linear's sidebar style. */
+.creator__nav {
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 8px;
+}
+
+.creator__steps {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.creator__step {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.creator__step:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.creator__step[aria-current='step'] {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.creator__step-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.creator__step-text {
+  display: grid;
+  min-width: 0;
+}
+
+.creator__step-label {
+  display: flex;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.creator__step-n {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.creator__step-hint {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.creator__step-flag {
+  width: 14px;
+  height: 14px;
+  color: var(--warn);
+}
+
+/* Stage: the turntable, map or compass, raised one step. */
+.creator__stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--surface-1);
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  min-height: 0;
+}
+
+.stage__tools {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.stage__tools > * {
+  pointer-events: auto;
+}
+
+.turntable {
+  position: relative;
+  display: grid;
+  min-height: 0;
+}
+
+.turntable__canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.turntable__canvas:active {
+  cursor: grabbing;
+}
+
+.turntable__canvas:focus-visible {
+  outline-offset: -4px;
+}
+
+.turntable--flat {
+  place-items: center;
+  padding: 56px 24px 8px;
+}
+
+.turntable__flat {
+  width: min(100%, 360px);
+  max-height: 100%;
+}
+
+.stage__caption {
+  padding: 12px 20px 18px;
+  text-align: center;
+}
+
+.stage__name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.stage__sub {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.stage--map {
+  grid-row: 1 / -1;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.stage__note {
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+}
+
+.stage__loading {
+  place-self: center;
+  color: var(--text-muted);
+}
+
+.origins__map {
+  min-height: 0;
+  background: var(--map-sea);
+}
+
+.origins__fills path {
+  fill: var(--map-other);
+  cursor: pointer;
+}
+
+.origins__home {
+  fill: var(--you);
+  pointer-events: none;
+}
+
+.origins__born {
+  fill: none;
+  stroke: var(--you);
+  stroke-width: 3px;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+/* Beliefs stage: the live result of the quiz. */
+.beliefs-stage {
+  display: grid;
+  grid-row: 1 / -1;
+  align-content: start;
+  gap: 4px;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 36px 24px;
+  overflow: auto;
+}
+
+.beliefs-stage__kicker {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+}
+
+.beliefs-stage__title {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.beliefs-stage .compass {
+  width: 220px;
+}
+
+/* Panel: the category's controls. */
+.creator__panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--surface-1);
+  overflow: hidden;
+}
+
+.creator__panel-title {
+  margin: 0;
+  padding: 14px 18px 10px;
+  font-size: var(--fs-l);
+  font-weight: 600;
+}
+
+.creator__panel-body {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  min-height: 0;
+  padding: 0 18px 18px;
+  overflow: auto;
+}
+
+.creator__panel-foot {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.creator__problems {
+  justify-self: stretch;
+}
+
+.creator__error {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  color: var(--bad);
+}
+
+/* Sections and fields. */
+.creator-section {
+  display: grid;
+  gap: 10px;
+}
+
+.creator-section + .creator-section {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.creator-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.creator-section__title {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  font-weight: 600;
+}
+
+.section-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: var(--fs-s);
+  font-weight: 600;
+}
+
+.field__hint {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-s);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.input:focus-visible {
+  border-color: var(--text);
+  outline: 0;
+}
+
+select.input {
+  padding-right: 6px;
+}
+
+.creator .segmented {
+  flex-wrap: wrap;
+  justify-self: start;
+}
+
+.slider--wide {
+  grid-template-columns: minmax(0, 1fr) 34px;
+}
+
+.slider--wide .slider__label {
+  display: none;
+}
+
+/* Origins. */
+.place-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.place-line__icon {
+  flex: none;
+  color: var(--you);
+}
+
+.place-line__name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-line__meta {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  white-space: nowrap;
+}
+
+.place-line__clear {
+  display: inline-flex;
+  margin-left: auto;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.place-line__meta + .place-line__clear {
+  margin-left: 0;
+}
+
+.search-pick {
+  position: relative;
+}
+
+.search-pick__list {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  box-shadow: var(--shadow);
+}
+
+.search-pick__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+}
+
+.search-pick__item[aria-selected='true'],
+.search-pick__item:hover {
+  background: var(--surface-3);
+}
+
+.search-pick__meta {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Look. */
+.presets {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.preset {
+  aspect-ratio: 5 / 6;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.preset:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+}
+
+.preset__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.look-tabs {
+  justify-self: start;
+}
+
+.look-body {
+  display: grid;
+  gap: 14px;
+}
+
+/* Abilities: the attribute point-buy and the trait picker. */
+.points {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.points .num {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.points--over .num {
+  color: var(--bad);
+}
+
+.buy {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.buy__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px 28px;
+  align-items: center;
+  gap: 10px;
+}
+
+.buy__bonus {
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  text-align: right;
+}
+
+.buy__row .attr__value {
+  text-align: right;
+}
+
+.trait-group {
+  display: grid;
+  gap: 6px;
+}
+
+.trait-group__title {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.trait-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trait-pick {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+  font-size: var(--fs-s);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.trait-pick:hover {
+  border-color: var(--line-strong);
+}
+
+.trait-pick[aria-pressed='true'] {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+
+.trait-pick[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.trait-tip__note {
+  margin: 0;
+  color: var(--warn);
+}
+
+/* Beliefs quiz: statement in the serif, a five-step scale under it. */
+.quiz {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.quiz__item {
+  display: grid;
+  gap: 8px;
+}
+
+.quiz__text {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.quiz__scale {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.quiz__option {
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quiz__option:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.quiz__option[aria-checked='true'] {
+  border-color: var(--you);
+  background: var(--you);
+  color: var(--bg);
+}
+
+.quiz__legend {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+/* Start. */
+.start-modes .choice__detail {
+  grid-column: 2;
+}
+
+.creator-problems {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.creator-problems__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-s);
+}
+
+.creator-problems__icon {
+  color: var(--warn);
+}
+
+/* Narrower screens: categories become a scrolling strip; stage above the panel. */
+@media (max-width: 1100px) {
+  .creator__body {
+    grid-template-columns: 64px minmax(0, 1fr) minmax(320px, 380px);
+  }
+
+  .creator__step {
+    grid-template-columns: 18px;
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  .creator__step-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .creator__step-flag {
+    position: absolute;
+    margin: -16px 0 0 16px;
+  }
+
+  .creator__step {
+    position: relative;
+  }
+}
+
+@media (max-width: 760px) {
+  .creator {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .creator__head {
+    flex-wrap: wrap;
+  }
+
+  .creator__head-actions {
+    width: 100%;
+  }
+
+  .creator__head-actions .btn {
+    flex: 1;
+  }
+
+  .hide-narrow {
+    display: none;
+  }
+
+  .creator__body {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 8px 8px;
+  }
+
+  .creator__nav {
+    padding: 0;
+    overflow-x: auto;
+  }
+
+  .creator__steps {
+    display: flex;
+  }
+
+  .creator__step {
+    width: 48px;
+  }
+
+  .creator__stage {
+    height: 52vh;
+  }
+
+  .creator__panel {
+    overflow: visible;
+  }
+
+  .creator__panel-body {
+    overflow: visible;
+  }
+
+  .presets {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

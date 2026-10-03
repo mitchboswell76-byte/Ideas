@@ -22,9 +22,10 @@ export { expect }
 export type Screen =
   'Home' | 'Inbox' | 'Calendar' | 'Profile' | 'Map' | 'World' | 'Saves' | 'Settings'
 
-/** Start a new career from the main menu and wait for the shell. */
+/** Start a new career from the main menu with the creator's random character; wait for the shell. */
 export async function newCareer(page: Page): Promise<void> {
   await page.getByTestId('title-new').click()
+  await page.getByTestId('creator-start').click()
   await expect(page.getByTestId('game-date')).toBeVisible()
 }
 

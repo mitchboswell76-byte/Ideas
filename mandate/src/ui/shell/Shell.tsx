@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useState, type ComponentType } from 'react'
+import { useYouColour } from '../character/you.ts'
 import { useCommandShortcut } from '../hooks/useCommandShortcut.ts'
 import { useSpeedKeys } from '../hooks/useSpeedKeys.ts'
 import { cx } from '../kit/index.ts'
@@ -8,6 +9,7 @@ import { Inbox } from '../screens/Inbox.tsx'
 import { Profile } from '../screens/Profile.tsx'
 import { Saves } from '../screens/Saves.tsx'
 import { Settings } from '../screens/Settings.tsx'
+import { useGame } from '../store/index.ts'
 import { useNav, type ScreenName } from '../store/nav.ts'
 import { CommandMenu } from './CommandMenu.tsx'
 import { GameSidebar } from './GameSidebar.tsx'
@@ -42,6 +44,7 @@ const FLUSH = new Set<ScreenName>(['map', 'world'])
  */
 export function Shell() {
   useSpeedKeys()
+  useYouColour(useGame((s) => s.player?.colour))
   const [commands, setCommands] = useState(false)
   const openCommands = useCallback(() => setCommands(true), [])
   useCommandShortcut(openCommands)

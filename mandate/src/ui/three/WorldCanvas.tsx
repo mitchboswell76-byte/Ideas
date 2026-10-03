@@ -1,6 +1,7 @@
 /**
  * The 3D layer (DESIGN §17), loaded lazily so three.js never delays the first paint. A generic host:
- * scenes (maps from T6/T7, portraits and the creator from T9/T10) are its children. Renders on
+ * scenes (map tilt, election-night columns) are its children; portraits (T9) and the creator's
+ * turntable (T10) use plain three.js instead (`ui/avatar/render.ts`, `turntable.ts`). Renders on
  * demand at the preset's internal resolution; redraw with `invalidate()` or `useStepper`.
  */
 import { Canvas, useFrame, useThree } from '@react-three/fiber'

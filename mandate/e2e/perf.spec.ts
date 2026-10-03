@@ -5,8 +5,9 @@
  *
  * Screens are 2D DOM and must hold the Medium target. Portraits (T9) are 3D renders cached as
  * images, so a screen full of them is still 2D once they have arrived; their one-off render cost
- * is measured separately. When a live 3D view lands (T10 creator turntable, T18 seat columns),
- * add it here once per preset with `LOW` (≥ 30 fps) and `MEDIUM` (60 fps) budgets.
+ * is measured separately. Live 3D views: the creator's turntable (T10) is measured on the preset
+ * the GPU detection picks here (Low: software WebGL); T18's seat columns go here too. Software
+ * WebGL rasterises on the throttled CPU, so 3D numbers are pessimistic for a real GPU.
  */
 import { gzipSync } from 'node:zlib'
 import type { Page } from '@playwright/test'
@@ -27,6 +28,12 @@ interface Budget {
 
 /** 60 fps target: the odd dropped frame allowed, never below the Low floor for long. */
 const MEDIUM: Budget = { fps: 55, p95Ms: 1000 / 30 }
+/**
+ * A 3D view that rebuilds its model as you drag (the creator's sliders; rebuilds are paced, see
+ * `turntable.ts`): DESIGN §17's Low floor of 30 fps, and a slow frame no longer than four 60 Hz
+ * frames (frame times come in whole frames, so 66.7 ms must pass).
+ */
+const REBUILD: Budget = { fps: 30, p95Ms: 70 }
 
 interface FrameStats {
   fps: number
@@ -241,4 +248,47 @@ test('portrait renders: first face quickly, a full Profile page in time', async 
   // Generous (CPU-rendered WebGL under a 4x throttle) but catches a render that blocks for seconds.
   expect(first).toBeLessThan(8000)
   expect(all).toBeLessThan(20_000)
+})
+
+/** Drag the creator's turntable round and back, again and again. */
+async function turnAvatar(page: Page): Promise<void> {
+  const box = await page.locator('.turntable__canvas').boundingBox()
+  if (!box) throw new Error('turntable not visible')
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  const started = Date.now()
+  while (Date.now() - started < SAMPLE_MS) {
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    for (let i = 0; i < 30; i++) await page.mouse.move(x + Math.sin(i / 5) * 200, y)
+    await page.mouse.up()
+  }
+}
+
+/** Drag the Height slider back and forth: every step rebuilds the avatar. */
+async function dragSlider(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Body', exact: true }).click()
+  const box = await page.getByRole('slider', { name: 'Height' }).boundingBox()
+  if (!box) throw new Error('slider not visible')
+  const y = box.y + box.height / 2
+  const started = Date.now()
+  while (Date.now() - started < SAMPLE_MS) {
+    await page.mouse.move(box.x + 4, y)
+    await page.mouse.down()
+    for (let i = 0; i <= 20; i++) await page.mouse.move(box.x + (box.width * i) / 20, y)
+    await page.mouse.up()
+  }
+}
+
+test('creator turntable: turning and slider rebuilds (3D)', async ({ page }) => {
+  await page.goto('/')
+  await page.getByTestId('title-new').click()
+  test.skip(!(await hasWebgl(page)), 'No WebGL 2 in this browser')
+  await expect(page.locator('.turntable__canvas')).toBeVisible()
+  await page.waitForTimeout(1500)
+  await throttle(page)
+  expectWithin(await framesDuring(page, () => turnAvatar(page)), MEDIUM, 'turntable turn')
+  await page.getByTestId('creator-tab-look').click()
+  await page.waitForTimeout(1500)
+  expectWithin(await framesDuring(page, () => dragSlider(page)), REBUILD, 'turntable rebuild')
 })

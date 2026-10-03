@@ -44,7 +44,8 @@ function getRenderer(): WebGLRenderer {
   return renderer
 }
 
-function lights(scene: Scene): void {
+/** The portrait lighting: soft sky fill, warm key, cool fill and a rim. */
+export function lights(scene: Scene): void {
   scene.add(new HemisphereLight('#f3f5ff', '#5d6470', 1.4))
   scene.add(new AmbientLight('#ffffff', 0.25))
   const key = new DirectionalLight('#fff4ea', 2.3)

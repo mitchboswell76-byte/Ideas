@@ -3,6 +3,7 @@
   "heritages": [
     {
       "id": "british",
+      "label": "English and British",
       "weight": 70,
       "female": [
         "Olivia",
@@ -153,6 +154,7 @@
     },
     {
       "id": "celtic",
+      "label": "Irish, Scottish and Welsh",
       "weight": 10,
       "female": [
         "Siobhan",
@@ -243,6 +245,7 @@
     },
     {
       "id": "southAsian",
+      "label": "South Asian",
       "weight": 9,
       "female": [
         "Priya",
@@ -335,6 +338,7 @@
     },
     {
       "id": "africanCaribbean",
+      "label": "African and Caribbean",
       "weight": 5,
       "female": [
         "Abena",
@@ -422,6 +426,7 @@
     },
     {
       "id": "easternEuropean",
+      "label": "Eastern European",
       "weight": 4,
       "female": [
         "Agnieszka",
@@ -496,6 +501,7 @@
     },
     {
       "id": "eastAsian",
+      "label": "East Asian",
       "weight": 2,
       "female": [
         "Mei",
