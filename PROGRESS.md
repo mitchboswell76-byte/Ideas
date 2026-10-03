@@ -4,9 +4,9 @@
 **Current milestone:** M1 — Nobody to Prime Minister (M0 follow-ups T8b, T8c done). M0 was merged into
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
 **Next session:** start at **T11**
-**Last playable link (T9):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
+**Last playable link (T10):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
-**UI kit (T9):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
+**UI kit (T10):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
 
 ## Workflow for the user
 Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Then `/clear`.
