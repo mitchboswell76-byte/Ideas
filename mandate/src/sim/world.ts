@@ -1,8 +1,10 @@
 /**
  * The World: one plain, JSON-serialisable object of normalised tables (DESIGN §3).
- * Entity shapes here are minimal placeholders; the systems that own them extend them
- * (characters T9, parties/outlets T12, polls T13, elections T14, activities T15, news T17).
+ * Entity shapes here are minimal placeholders until the systems that own them extend them
+ * (parties/outlets T12, polls T13, elections T14, activities T15, news T17). Characters (T9) live
+ * in `character/model.ts`.
  */
+import type { Character } from './character/model.ts'
 import { START_DATE, dayFromIso } from './clock.ts'
 import { seedState, type RngState } from './rng.ts'
 import { GAME_VERSION } from './version.ts'
@@ -39,11 +41,7 @@ export type Table<K extends string, V> = Record<K, V>
 
 export type Nation = 'england' | 'scotland' | 'wales' | 'northern-ireland'
 
-export interface Character {
-  id: CharacterId
-  name: string
-  birthDay: number
-}
+export type { Character }
 
 export interface Party {
   id: PartyId

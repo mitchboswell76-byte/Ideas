@@ -42,7 +42,7 @@ function GraphicsSettings() {
           name="view"
           value="3d"
           label="3D"
-          detail={webgl ? 'Maps and characters in 3D' : 'Needs WebGL 2, which this browser lacks'}
+          detail={webgl ? 'Characters rendered in 3D' : 'Needs WebGL 2, which this browser lacks'}
           checked={view === '3d'}
           disabled={!webgl}
           onChange={() => setView('3d')}
@@ -51,7 +51,7 @@ function GraphicsSettings() {
           name="view"
           value="2d"
           label="2D"
-          detail="Flat maps and portraits; lightest on battery"
+          detail="Illustrated characters; lightest on battery"
           checked={view === '2d'}
           onChange={() => setView('2d')}
         />

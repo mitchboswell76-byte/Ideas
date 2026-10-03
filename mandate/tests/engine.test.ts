@@ -35,6 +35,7 @@ describe('engine', () => {
       day: engine.world.clock.day,
       date: '2026-10-02',
       notifications: [],
+      player: null,
     })
     expect(engine.runDays(30).date).toBe('2026-11-01')
   })

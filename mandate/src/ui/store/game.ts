@@ -4,9 +4,11 @@
  */
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import type { Command } from '../../sim/command.ts'
+import type { PlayerSummary } from '../../sim/engine.ts'
 import type { Notification, PauseReason } from '../../sim/scheduler.ts'
 import { GAME_VERSION } from '../../sim/version.ts'
 import type { BridgeMode, SimBridge } from '../../runtime/bridge.ts'
+import type { QueryArgs, QueryName, QueryResult } from '../../runtime/queries.ts'
 import type {
   AutoPauseSettings,
   GameDate,
@@ -59,6 +61,8 @@ export interface GameState extends RunnerStatus {
   date: string | null
   autoPause: AutoPauseSettings
   autosave: AutosaveCadence
+  /** The player's headline numbers (`null` before a character exists). */
+  player: PlayerSummary | null
   /** Inbox and ticker items, newest first. */
   log: LoggedNotification[]
   /** The simulation crashed; shown until a new game or load. */
@@ -74,6 +78,8 @@ export interface GameState extends RunnerStatus {
   togglePause(): void
   step(days: number): void
   send(cmd: Command): void
+  /** Ask the runner a detail query (DESIGN §3). */
+  query<K extends QueryName>(what: K, args: QueryArgs<K>): Promise<QueryResult<K>>
   /** Mark an inbox item read (or unread again). */
   markRead(id: number, read?: boolean): void
   markAllRead(): void
@@ -99,6 +105,15 @@ export interface GameStoreDeps {
   settings: SettingsStorage
   /** Real-time ISO timestamp for `savedAt`. */
   now?: () => string
+}
+
+/** Keep the old object when nothing changed, so selectors don't re-render every tick. */
+function samePlayer(old: PlayerSummary | null, next: PlayerSummary | null): PlayerSummary | null {
+  if (!old || !next) return next
+  for (const key of Object.keys(next) as (keyof PlayerSummary)[]) {
+    if (old[key] !== next[key]) return next
+  }
+  return old
 }
 
 function errorMessage(error: unknown): string {
@@ -168,6 +183,7 @@ export function createGameStore({
       pausedBy: null,
       autoPause: settings.loadAutoPause(),
       autosave: settings.loadAutosave(),
+      player: null,
       log: [],
       fatal: null,
       lastError: null,
@@ -185,6 +201,8 @@ export function createGameStore({
       togglePause: () => bridge.send({ type: 'togglePause' }),
       step: (days) => bridge.send({ type: 'step', days }),
       send: (cmd) => bridge.send({ type: 'cmd', cmd }),
+      query: (what, args) =>
+        bridge.request({ type: 'query', what, args } as never) as Promise<QueryResult<typeof what>>,
       markRead(id, read = true) {
         set((s) => ({
           log: s.log.map((n) => (n.id === id && n.read !== read ? { ...n, read } : n)),
@@ -253,14 +271,20 @@ export function createGameStore({
       case 'tick': {
         const { day, date, notifications } = msg.summary
         autosaveOnTick(date)
+        const player = samePlayer(store.getState().player, msg.summary.player)
         if (!notifications.length) {
-          store.setState({ day, date })
+          store.setState({ day, date, player })
           break
         }
         const fresh = notifications
           .map((n) => ({ ...n, id: nextLogId++, date, read: false }))
           .reverse()
-        store.setState((s) => ({ day, date, log: [...fresh, ...s.log].slice(0, LOG_LIMIT) }))
+        store.setState((s) => ({
+          day,
+          date,
+          player,
+          log: [...fresh, ...s.log].slice(0, LOG_LIMIT),
+        }))
         break
       }
       case 'status': {

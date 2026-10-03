@@ -145,15 +145,18 @@ describe('game store', () => {
       settings: memorySettings().settings,
     })
     const note = (text: string) => ({ kind: 'news' as const, text })
-    emit({ type: 'tick', summary: { day: 1, date: 'd1', notifications: [note('a'), note('b')] } })
-    emit({ type: 'tick', summary: { day: 2, date: 'd2', notifications: [] } })
+    emit({
+      type: 'tick',
+      summary: { day: 1, date: 'd1', notifications: [note('a'), note('b')], player: null },
+    })
+    emit({ type: 'tick', summary: { day: 2, date: 'd2', notifications: [], player: null } })
     expect(store.getState()).toMatchObject({ day: 2, date: 'd2' })
     expect(store.getState().log).toEqual([
       { id: 2, kind: 'news', text: 'b', date: 'd1', read: false },
       { id: 1, kind: 'news', text: 'a', date: 'd1', read: false },
     ])
     const many = Array.from({ length: LOG_LIMIT + 5 }, (_, i) => note(`n${i}`))
-    emit({ type: 'tick', summary: { day: 3, date: 'd3', notifications: many } })
+    emit({ type: 'tick', summary: { day: 3, date: 'd3', notifications: many, player: null } })
     expect(store.getState().log).toHaveLength(LOG_LIMIT)
     expect(store.getState().log[0]?.text).toBe(`n${LOG_LIMIT + 4}`)
 
@@ -171,7 +174,10 @@ describe('game store', () => {
       settings: memorySettings().settings,
     })
     const note = (text: string) => ({ kind: 'info' as const, text })
-    emit({ type: 'tick', summary: { day: 1, date: 'd1', notifications: [note('a'), note('b')] } })
+    emit({
+      type: 'tick',
+      summary: { day: 1, date: 'd1', notifications: [note('a'), note('b')], player: null },
+    })
     const [b, a] = store.getState().log
     store.getState().markRead(a!.id)
     expect(store.getState().log.map((n) => n.read)).toEqual([false, true])

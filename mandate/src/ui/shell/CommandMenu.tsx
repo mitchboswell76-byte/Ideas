@@ -27,7 +27,9 @@ function useCommands(): Command[] {
     const manual = slots.filter((s) => s.id !== AUTOSAVE_SLOT && s.id !== QUICKSAVE_SLOT).length
     const other = theme === 'dark' ? 'light' : 'dark'
     return [
-      ...(['home', 'inbox', 'calendar', 'map', 'world', 'saves', 'settings'] as const).map(go),
+      ...(
+        ['home', 'inbox', 'calendar', 'profile', 'map', 'world', 'saves', 'settings'] as const
+      ).map(go),
       {
         id: 'pause',
         label: speed === 0 ? 'Resume' : 'Pause',

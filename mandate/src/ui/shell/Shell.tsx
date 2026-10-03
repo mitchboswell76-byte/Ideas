@@ -5,6 +5,7 @@ import { cx } from '../kit/index.ts'
 import { Calendar } from '../screens/Calendar.tsx'
 import { Home } from '../screens/Home.tsx'
 import { Inbox } from '../screens/Inbox.tsx'
+import { Profile } from '../screens/Profile.tsx'
 import { Saves } from '../screens/Saves.tsx'
 import { Settings } from '../screens/Settings.tsx'
 import { useNav, type ScreenName } from '../store/nav.ts'
@@ -25,6 +26,7 @@ const SCREENS: Record<ScreenName, ComponentType> = {
   home: Home,
   inbox: Inbox,
   calendar: Calendar,
+  profile: Profile,
   map: UkMap,
   world: World,
   saves: Saves,

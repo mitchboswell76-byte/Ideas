@@ -11,7 +11,7 @@ import { Engine } from '../src/sim/engine.ts'
 import { hashJson } from '../src/sim/hash.ts'
 import { decodeSave, encodeSave } from '../src/sim/save.ts'
 import { GAME_VERSION } from '../src/sim/version.ts'
-import { createWorld } from '../src/sim/world.ts'
+import { startWorld } from '../src/sim/character/cast.ts'
 
 /** p99 tick budget in ms (speed 5 is "as fast as possible"; tighten once real systems land). */
 const P99_BUDGET_MS = 4
@@ -34,7 +34,7 @@ const years = Number(arg('years', '50'))
 const seed = arg('seed', 'soak')
 const failures: string[] = []
 
-const straight = new Engine(createWorld({ seed }))
+const straight = new Engine(startWorld({ seed }))
 const start = civil(straight.world.clock.day)
 const endDay = dayFromCivil(start.y + years, start.m, start.d)
 const totalDays = endDay - straight.world.clock.day
@@ -58,7 +58,7 @@ const bad = findBadNumbers(straight.world)
 if (bad.length) failures.push(`non-finite numbers at ${bad.slice(0, 5).join(', ')}`)
 
 // 2. Same seed, saved and reloaded halfway.
-const split = new Engine(createWorld({ seed }))
+const split = new Engine(startWorld({ seed }))
 split.runDays(halfDays)
 const bytes = await encodeSave(split.world, '2000-01-01T00:00:00.000Z')
 split.load((await decodeSave(bytes)).world)

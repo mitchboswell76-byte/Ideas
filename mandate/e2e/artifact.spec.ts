@@ -2,6 +2,7 @@
  * The single-file build as published to claude.ai: the sim on the main thread, and Export through
  * the viewer's `downloads` capability as `.json` (the viewer refuses `.mandate`).
  */
+import { SAVE_VERSION } from '../src/sim/version.ts'
 import { ARTIFACT_URL, routeArtifact, viewerSaves } from './artifact.ts'
 import { expect, go, newCareer, test } from './fixtures.ts'
 
@@ -17,7 +18,7 @@ test('in the viewer: exports .json through downloads and imports it back', async
   await expect.poll(async () => (await viewerSaves(page)).length).toBe(1)
   const [saved] = await viewerSaves(page)
   expect(saved.filename).toBe('mandate-2026-10-08.json')
-  expect(JSON.parse(saved.data)).toMatchObject({ version: 1, world: { clock: {} } })
+  expect(JSON.parse(saved.data)).toMatchObject({ version: SAVE_VERSION, world: { clock: {} } })
 
   await page.getByRole('button', { name: '+1 week' }).click()
   await page.getByTestId('import-input').setInputFiles({

@@ -3,9 +3,10 @@
  * Dell Latitude target on a fast machine. Frames are counted with requestAnimationFrame, so this
  * measures main-thread headroom (React, sim, input), not GPU raster.
  *
- * Every screen is 2D until one has a 3D view (`HAS_3D_VIEW`): 2D screens must hold the Medium
- * target. When a 3D view lands (T9 portraits, T18 seat columns), add it here once per preset with
- * `LOW` (≥ 30 fps) and `MEDIUM` (60 fps) budgets.
+ * Screens are 2D DOM and must hold the Medium target. Portraits (T9) are 3D renders cached as
+ * images, so a screen full of them is still 2D once they have arrived; their one-off render cost
+ * is measured separately. When a live 3D view lands (T10 creator turntable, T18 seat columns),
+ * add it here once per preset with `LOW` (≥ 30 fps) and `MEDIUM` (60 fps) budgets.
  */
 import { gzipSync } from 'node:zlib'
 import type { Page } from '@playwright/test'
@@ -113,6 +114,25 @@ async function expectTimePassed(page: Page): Promise<void> {
   expect(await gameDate(page)).not.toBe('2026-10-01')
 }
 
+/** True when the browser can draw 3D portraits. */
+function hasWebgl(page: Page): Promise<boolean> {
+  return page.evaluate(() => !!document.createElement('canvas').getContext('webgl2'))
+}
+
+/**
+ * Wait until every face on screen is its cached 3D render (not the 2D stand-in), so frame
+ * sampling measures the steady state; the one-off render cost has its own test below.
+ */
+async function portraitsSettled(page: Page): Promise<void> {
+  if (!(await hasWebgl(page))) return
+  const faces = page.locator('main .portrait, main .relation__face')
+  await expect(faces.first()).toBeVisible()
+  await expect(page.locator('main .portrait img, main .relation__face img')).toHaveCount(
+    await faces.count(),
+    { timeout: 30_000 },
+  )
+}
+
 test.describe.configure({ mode: 'serial' })
 
 test('initial JS under 1.5 MB gzip', async ({ page }) => {
@@ -142,6 +162,7 @@ test('main menu backdrop drift (2D)', async ({ page }) => {
 test('Home at speed 5, sim in a worker (2D)', async ({ page }) => {
   await page.goto('/')
   await newCareer(page)
+  await portraitsSettled(page)
   await throttle(page)
   await runAt(page, '5')
   expectWithin(await framesDuring(page, async () => {}), MEDIUM, 'home speed 5')
@@ -181,8 +202,43 @@ test('Artifact build: Home at speed 5 with the sim on the main thread (2D)', asy
   await routeArtifact(page)
   await page.goto(ARTIFACT_URL)
   await newCareer(page)
+  await portraitsSettled(page)
   await throttle(page)
   await runAt(page, '5')
   expectWithin(await framesDuring(page, async () => {}), MEDIUM, 'artifact home speed 5')
   await expectTimePassed(page)
+})
+
+test('Profile at speed 5 with cached 3D portraits', async ({ page }) => {
+  await page.goto('/')
+  await newCareer(page)
+  await go(page, 'Profile')
+  test.skip(!(await hasWebgl(page)), 'No WebGL 2 in this browser')
+  await portraitsSettled(page)
+  await page.waitForTimeout(500)
+  await throttle(page)
+  await runAt(page, '5')
+  expectWithin(await framesDuring(page, async () => {}), MEDIUM, 'profile speed 5')
+  await expectTimePassed(page)
+})
+
+test('portrait renders: first face quickly, a full Profile page in time', async ({ page }) => {
+  await page.goto('/')
+  await newCareer(page)
+  test.skip(!(await hasWebgl(page)), 'No WebGL 2 in this browser')
+  await throttle(page)
+  const started = Date.now()
+  await go(page, 'Profile')
+  const profile = page.getByTestId('profile')
+  await expect(profile.locator('.portrait img')).toHaveCount(1, { timeout: 30_000 })
+  const first = Date.now() - started
+  const people = await profile.locator('.relation').count()
+  await expect(profile.locator('.relation img')).toHaveCount(people, { timeout: 30_000 })
+  const all = Date.now() - started
+  const description = `portraits (4x throttle, software WebGL): first ${first} ms, all ${people + 1} in ${all} ms`
+  test.info().annotations.push({ type: 'perf', description })
+  console.log(description)
+  // Generous (CPU-rendered WebGL under a 4x throttle) but catches a render that blocks for seconds.
+  expect(first).toBeLessThan(8000)
+  expect(all).toBeLessThan(20_000)
 })

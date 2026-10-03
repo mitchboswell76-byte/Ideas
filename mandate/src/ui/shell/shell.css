@@ -171,7 +171,9 @@
   }
 
   .topbar__party,
-  .topbar__sep {
+  .topbar__sep,
+  .view-toggle {
+    /* The 3D / 2D choice stays in Settings. */
     display: none;
   }
 

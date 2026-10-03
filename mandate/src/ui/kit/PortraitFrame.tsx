@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { readableInk } from './colour.ts'
 import { cx } from './cx.ts'
 import './character.css'
@@ -17,8 +17,10 @@ interface PortraitFrameProps {
   size?: 's' | 'm' | 'l'
   /** The player: framed in their personal colour. */
   you?: boolean
-  /** A cached portrait render (T9); a silhouette until then. */
+  /** An image URL (a cached render). */
   src?: string
+  /** Custom art (e.g. the 2D illustrated avatar); wins over `src`. */
+  children?: ReactNode
   className?: string
 }
 
@@ -30,6 +32,7 @@ export function PortraitFrame({
   size = 'm',
   you,
   src,
+  children,
   className,
 }: PortraitFrameProps) {
   const style = party
@@ -43,7 +46,9 @@ export function PortraitFrame({
       role="img"
       aria-label={[name, office, party?.name].filter(Boolean).join(', ')}
     >
-      {src ? (
+      {children ? (
+        children
+      ) : src ? (
         <img className="portrait__image" src={src} alt="" />
       ) : (
         <svg className="portrait__image" viewBox="0 0 100 120" aria-hidden>

@@ -3,7 +3,7 @@
 **Branch:** `claude/magical-cori-1sjt0r` (push here; start new sessions on this branch)
 **Current milestone:** M1 — Nobody to Prime Minister (M0 follow-ups T8b, T8c done). M0 was merged into
   `main` via PR https://github.com/mitchboswell76-byte/Ideas/pull/1; the branch was fast-forwarded to `main` after it.
-**Next session:** start at **T9**
+**Next session:** start at **T10**
 **Last playable link (T8c):** https://claude.ai/artifact/Nc1przbgbhKETpcBmrAMNz (private; rebuild with
   `npm run build:preview`, publish with `url` set to this link; it declares the `downloads` capability)
 **UI kit (T8c):** https://claude.ai/artifact/33BFAWxwjLHcHyS8ViY99h (private; `npm run build:kit` → `dist-kit/mandate-kit.html`)
@@ -82,9 +82,14 @@ Say "continue" (or "do T7"). Claude does one task, pushes, updates this file. Th
   Typeface is Schibsted Grotesk, not Inter (see decisions); colour rules from the research below.
 
 ## M1 — Nobody to Prime Minister (party route)
-- [ ] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
+- [x] T9  Character model: attributes, skills, traits, ideology, health/stress/energy, relationships; stylised 3D avatar
       generator (Sims / Two Point style: parametric head + body, hair/clothes parts, expression morphs, ageing, role
       outfits) + cached CK3-framed `Portrait` renders + illustrated 2D fallback
+
+  Done: character model + system + starting cast (player, parents, maybe a sibling, friend, rival) in the sim; avatar
+  generator (14 hairstyles, 6 facial hair, 4 glasses, 10 outfits, 5 accessories, 5 expressions, 4 poses, ageing);
+  cached portraits + 2D illustration; Profile screen (sidebar, Ctrl+K) and the Home "You" panel; kit gallery
+  Avatars section. 241 unit tests, 20 e2e (Profile at speed 5: 60 fps under a 4x throttle).
 - [ ] T10 Character creation (CK3 ruler designer + Sims Create-a-Sim layout): birthplace (world / UK map), family
       background, avatar creator (turntable, all parts, randomise, presets), personal colour, traits, ideology quiz,
       start mode
@@ -412,6 +417,45 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   tests. The player's default personal colour (`--you`, violet) now shares a hue family with the UK value ramp:
   revisit when T10 lets the player pick it.
 
+- 2026-10-03 T9 sim map: `src/sim/character/` = `model.ts` (Character, attribute/skill/issue keys and labels,
+  relationships, background), `appearance.ts` (avatar parameters, palettes, part catalogue with generation weights,
+  `randomAppearance`), `traits.ts` (data/characters/traits.json, `canAddTrait`, `pickTraits`), `checks.ts`
+  (`checkOdds` with a CK3 modifier breakdown, `rollCheck`, `practise`), `condition.ts` (`energyMax`, `addStress`,
+  `monthlyCondition`), `generate.ts` (data/characters/people.json, `generateCharacter`, `randomIdeology`, `relate`),
+  `cast.ts` (`createStartingCast`, `startWorld`). `systems/character.ts`: daily energy refill and the player's
+  birthday card (from the parent who likes them most), monthly stress recovery and health drift, burnout warning.
+- 2026-10-03 New careers come from `startWorld` (runner `newGame`); `createWorld` stays bare for tests. Until T10 the
+  player is random: 21–26, early-career job, 3–4 traits. Save v2: the v1 → v2 migration empties `characters` and
+  sets `player` null (v1 games never had characters). `TickSummary.player` carries the player's headline numbers;
+  the store keeps the old object when nothing changed. Queries `character {id}` and `player` return a
+  `CharacterView` (age, energy max, check odds per skill, relations with both opinions).
+- 2026-10-03 Heritage pools (people.json) shape names, family resemblance and religion odds only; weights are
+  game-design approximations, documented as such in DATA_SOURCES (not statistics). Non-binary NPCs are rare (0.6%);
+  the player chooses at T10.
+- 2026-10-03 T9 avatar map: `ui/avatar/` = `rig.ts` (pure: appearance + age + expression + role → `Rig`; ageing,
+  outfits, `lookAge`, cache `key`), `shape.ts` (pure head surface, face anchors, hair profiles and drape, brow/mouth/
+  beard curves shared by both renderers), `body.ts` (pure proportions), `build.ts` (three.js meshes), `render.ts`
+  (one offscreen WebGL canvas → WebP blob URL), `portraits.ts` (LRU cache of 240, one render per frame, lazy-imports
+  three), `usePortrait.ts`, `useRig.ts`, `Portrait.tsx` (`Portrait`, `AvatarImage`), `AvatarSvg.tsx` (2D). `PortraitFrame`
+  takes children as art. three.js lands in a lazy `render` chunk (~141 KB gzip); initial JS ~130 KB gzip.
+- 2026-10-03 Look: stylised Two Point proportions (head 1.12x, compact body), CK3 three-quarter turn, bust crop from
+  just above the head to mid-chest; MeshStandardMaterial with hemisphere + key/fill/rim lights, transparent
+  background. Expressions are rig parameters, not GPU morph targets (renders are one-off). Long hair is pushed
+  clear of the torso so it drapes over the shoulders. Suits keep to a sober palette; ties never white.
+- 2026-10-03 Portrait cost: ~7.5 ms CPU to build a bust (18.6k triangles) on the cloud machine, after cutting mesh
+  resolution; materials stay cached across builds because disposing them made three.js recompile shaders on every
+  render. Adults' portraits use five-year age steps (`lookAge`), so a running clock doesn't redraw faces on every
+  birthday. Measured (4x throttle, software WebGL): first face ~1 s, a Profile page of 6 faces ~2 s.
+- 2026-10-03 `HAS_3D_VIEW` is now true: the 3D/2D toggle and graphics settings are back (3D = rendered characters,
+  2D = illustrations); the toggle hides below 600 px (Settings keeps it). `WorldLayer` is still not mounted.
+- 2026-10-03 Profile screen (FM profile + CK3 character window): framed portrait, traits (tooltip: description and
+  effects), attributes, skills (tooltip: check odds and every modifier), condition and standing, political compass
+  and issue scales, people (each opens their own profile), background. `useCharacterView` watches the date outside
+  React, refreshes at most every 500 ms and structurally shares unchanged parts (`ui/character/share.ts`) so
+  memoised panels skip re-rendering; the first version re-rendered the whole screen every tick (44 fps at speed 5).
+- 2026-10-03 Browser-verified (scratchpad Playwright): gallery avatars in 3D and 2D, Home, Profile, a relation's
+  profile and back, 2D view, 390 px (no sideways scroll); no console errors.
+
 ## Known issues / open questions
 - Space toggles pause even when a button has focus (T3 design), so keyboard users press buttons with Enter. Revisit
   at T22 accessibility pass.
@@ -426,6 +470,13 @@ M4 world diplomacy/economies · M5 coup, insurgency, war · M6 US + other countr
   will be measured from 2024 in the running game.
 - Census gaps: Scotland lacks ~10 measures in the source; Northern Ireland has none.
 - Current office-holders and polls must be web-verified at T12 (knowledge may be stale).
+- Characters never die yet: health bottoms out at 1 (death and heirs are DESIGN §4, not yet scheduled). Fame,
+  credibility and heat sit at their defaults until media and money (T16–T17).
+- Avatar rough edges: long hair lies flat over the shoulders, the hoodie's hood is a simple ring, collar points are
+  flat triangles, and the 2D illustration is front-on while the 3D bust is turned a little. Good enough for
+  portraits; revisit with the T10 creator, which shows the avatar large.
+- Portrait renders happen on the main thread (~7.5 ms each to build on the cloud machine, plus the WebGL draw);
+  worth timing on the Dell. An OffscreenCanvas in a worker could move it off the main thread if it hitches.
 - `THREE.Clock` deprecation warning comes from @react-three/fiber 9.8.1 internals with three r186 (not our code);
   revisit when r3f updates.
 - Artifact export via `downloads` is tested against a fake viewer only; the real claude.ai prompt hasn't been

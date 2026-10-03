@@ -79,14 +79,20 @@ Figures marked **(verify)** must be checked by web search before being hard-code
   - Parts: head (shape morphs: width, jaw, cheeks, chin, brow), eyes, brows, nose, mouth, ears, hair (mesh
     variants + colour), facial hair, glasses, body (height, build), clothing (top, jacket/suit, tie, trousers/skirt,
     shoes), accessories (rosette, lanyard, placard, hard hat, poppy).
-  - Expressions (neutral, smile, grim, worried, angry) as morph targets. Idle poses: stand, arms folded, podium, wave.
-  - Ageing: hair greys or recedes, lines appear, posture changes past set ages. Outfits change with role
-    (student → councillor → MP suit).
+  - Expressions (neutral, smile, grim, worried, angry) are rig parameters (mouth curve and opening, brow tilt and
+    height, eyelids), applied when the mesh is built rather than as GPU morph targets: portraits are rendered once,
+    so nothing is animated per frame. Idle poses: stand, arms folded, podium, wave (full-body renders).
+  - Ageing: hair greys from a per-character age, the hairline recedes (short cuts become a horseshoe), lines appear
+    from about 40 and posture stoops past 65; children are smaller with larger eyes. Portraits show age in five-year
+    steps for adults (yearly for children), so they are redrawn every few years, not every birthday. Outfits change
+    with role (school uniform → hoodie → jumper and rosette → MP's suit); suits keep to sober colours.
   - **Creator (T10):** copies the CK3 ruler designer and The Sims' Create-a-Sim: categories on the left, turntable
     avatar in the centre (drag to rotate, zoom to face), sliders and swatches on the right, randomise and presets.
-  - **Portraits:** CK3-style framed portraits. The bust is rendered once to a small offscreen target and cached as
-    an image (`Portrait` component); re-rendered only when appearance changes; no live 3D canvas per panel. The frame
-    shows party colour and office. Without WebGL: a flat illustrated silhouette in the same colours.
+  - **Portraits:** CK3-style framed portraits. One shared offscreen WebGL canvas draws the bust once and caches it
+    as an image (`Portrait`, `ui/avatar/`): renders queue one per frame, sized by the graphics preset (smaller on
+    Low), and are reused until the look changes. No live 3D canvas per panel. The frame shows party colour and
+    office. 2D view, no WebGL or a failed render: a flat illustration drawn from the same rig (the same face
+    geometry projected front-on), which also stands in while a render is on its way.
   - NPCs use the same generator. Real politicians get avatars generated from editable parameters (hair, glasses,
     build), with no photos and no photo-derived likenesses.
 - **Personal colour:** chosen at creation; used for the player's rosette, portrait frame and UI highlights (`--you`).
@@ -308,7 +314,7 @@ branding either (no GOV.UK or BBC look: impersonation, and GOV.UK's Transport fo
 | Command menu (T8c) | Linear / Raycast Ctrl+K | Ctrl+K or ⌘K (or the header button): type to filter screens, time controls and game actions; arrows, Enter, Esc |
 | Time controls | Paradox (CK3, Victoria 3) | Date, pause and five speed pips top-right; Space pauses; a banner says why the game paused |
 | Inbox + calendar | Football Manager | Inbox list (sender portrait, subject, date, unread dot) + reading pane with reply/action buttons. Calendar month grid: elections, conferences, council meetings, PMQs |
-| Character sheet | FM player profile + CK3 character window | Attribute grid with FM's colour-coded 1–20 values; traits as icon chips; relations with opinion numbers; big framed portrait |
+| Character sheet (T9: Profile screen) | FM player profile + CK3 character window | Big framed portrait, name in the serif, trait chips (tooltip: description and effects); attribute grid with FM's colour-coded 1–20 values; skills with bars (tooltip: the check's odds, every modifier listed); condition and standing bars; political compass and issue scales; people with portrait, relation and CK3 opinion number (tooltip: both directions), each opening their own profile |
 | Portraits | CK3 framing, stylised art (§4) | Cached 3D bust in a frame showing party colour and office |
 | Tooltips | CK3 nested tooltips | Highlighted terms inside a tooltip open their own tooltip; hold to lock; effect breakdowns list every modifier |
 | Events / decisions | CK3 event window | Title, scene image (3D render), body text, 2–4 options; each option's effects in its tooltip |

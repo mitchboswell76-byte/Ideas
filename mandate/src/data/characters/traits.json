@@ -1,0 +1,167 @@
+{
+  "note": "Character traits (DESIGN §4). Effects: attributes = creation bonus; checks = bonus to skill checks (percentage points); energy = daily energy; stress = multiplier on stress gained; recovery = extra stress shed each month; eventTags weight events from T11. creation: false = gained only through life.",
+  "traits": [
+    {
+      "id": "ambitious",
+      "name": "Ambitious",
+      "group": "personality",
+      "description": "Wants the top job and does not hide it.",
+      "opposite": "content",
+      "effects": { "checks": { "leadership": 5, "networking": 3 }, "stress": 1.15 },
+      "eventTags": ["ambition"],
+      "weight": 1.4
+    },
+    {
+      "id": "content",
+      "name": "Content",
+      "group": "personality",
+      "description": "Happy with a quiet life; pressure slides off.",
+      "opposite": "ambitious",
+      "effects": { "checks": { "leadership": -5 }, "stress": 0.85, "recovery": 2 },
+      "weight": 0.8
+    },
+    {
+      "id": "principled",
+      "name": "Principled",
+      "group": "personality",
+      "description": "Holds to their beliefs even when it costs them.",
+      "opposite": "opportunist",
+      "effects": { "checks": { "intrigue": -5, "oratory": 3 } },
+      "eventTags": ["conscience"],
+      "weight": 1
+    },
+    {
+      "id": "opportunist",
+      "name": "Opportunist",
+      "group": "personality",
+      "description": "Goes where the wind blows, and usually gets there first.",
+      "opposite": "principled",
+      "effects": { "checks": { "intrigue": 5, "networking": 3 } },
+      "eventTags": ["opportunity"],
+      "weight": 1
+    },
+    {
+      "id": "workaholic",
+      "name": "Workaholic",
+      "group": "lifestyle",
+      "description": "First in, last out. Gets a lot done and pays for it.",
+      "opposite": "lazy",
+      "effects": { "energy": 2, "stress": 1.2, "recovery": -2 },
+      "weight": 1
+    },
+    {
+      "id": "lazy",
+      "name": "Lazy",
+      "group": "lifestyle",
+      "description": "Will do it tomorrow. Probably.",
+      "opposite": "workaholic",
+      "effects": { "energy": -2, "stress": 0.8 },
+      "weight": 0.7
+    },
+    {
+      "id": "charming",
+      "name": "Charming",
+      "group": "personality",
+      "description": "People warm to them within a minute.",
+      "opposite": "awkward",
+      "effects": {
+        "attributes": { "charisma": 2 },
+        "checks": { "oratory": 5, "fundraising": 5, "media": 5, "networking": 5 }
+      },
+      "weight": 1
+    },
+    {
+      "id": "awkward",
+      "name": "Awkward",
+      "group": "personality",
+      "description": "Better on paper than in the room.",
+      "opposite": "charming",
+      "effects": {
+        "attributes": { "charisma": -2 },
+        "checks": { "oratory": -5, "media": -5, "networking": -5, "policy": 3 }
+      },
+      "weight": 0.8
+    },
+    {
+      "id": "hotHeaded",
+      "name": "Hot-headed",
+      "group": "personality",
+      "description": "Quick to anger, quick to say so on camera.",
+      "opposite": "calm",
+      "effects": { "checks": { "media": -5, "oratory": 3 }, "stress": 1.1 },
+      "eventTags": ["temper"],
+      "weight": 0.9
+    },
+    {
+      "id": "calm",
+      "name": "Calm",
+      "group": "personality",
+      "description": "Unflappable under pressure.",
+      "opposite": "hotHeaded",
+      "effects": { "checks": { "media": 3, "leadership": 3 }, "stress": 0.85, "recovery": 2 },
+      "weight": 1
+    },
+    {
+      "id": "resilient",
+      "name": "Resilient",
+      "group": "personality",
+      "description": "Bounces back from setbacks.",
+      "opposite": "anxious",
+      "effects": { "stress": 0.8, "recovery": 3 },
+      "weight": 0.8
+    },
+    {
+      "id": "anxious",
+      "name": "Anxious",
+      "group": "personality",
+      "description": "Sees every way it could go wrong, which helps sometimes.",
+      "opposite": "resilient",
+      "effects": { "stress": 1.25, "checks": { "policy": 3, "oratory": -3 } },
+      "weight": 0.8
+    },
+    {
+      "id": "bookish",
+      "name": "Bookish",
+      "group": "lifestyle",
+      "description": "Has read the white paper. And the footnotes.",
+      "effects": { "attributes": { "intellect": 2 }, "checks": { "policy": 8 } },
+      "weight": 1
+    },
+    {
+      "id": "teetotal",
+      "name": "Teetotal",
+      "group": "lifestyle",
+      "description": "Never drinks; misses some late-night deals, keeps a clear head.",
+      "effects": { "checks": { "networking": -3 } },
+      "eventTags": ["sober"],
+      "weight": 0.6
+    },
+    {
+      "id": "gambler",
+      "name": "Gambler",
+      "group": "lifestyle",
+      "description": "Likes a flutter, in politics as at the bookmaker's.",
+      "effects": { "checks": { "intrigue": 3, "business": 3 } },
+      "eventTags": ["risk"],
+      "weight": 0.6
+    },
+    {
+      "id": "scandalProne",
+      "name": "Scandal-prone",
+      "group": "reputation",
+      "description": "Trouble finds them, and the papers find out.",
+      "effects": { "checks": { "media": -3 } },
+      "eventTags": ["scandal"],
+      "weight": 0.5
+    },
+    {
+      "id": "localHero",
+      "name": "Local hero",
+      "group": "reputation",
+      "description": "A household name in their patch.",
+      "effects": { "checks": { "organising": 5, "fundraising": 3 } },
+      "creation": false,
+      "weight": 0
+    }
+  ]
+}

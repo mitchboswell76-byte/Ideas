@@ -21,7 +21,16 @@ export type RawSave = { version: number } & Record<string, unknown>
 export type Migration = (save: RawSave) => Record<string, unknown>
 
 /** `migrations[v]` upgrades a version-v save to v+1. Add one whenever SAVE_VERSION is bumped. */
-export const migrations: Readonly<Record<number, Migration>> = {}
+export const migrations: Readonly<Record<number, Migration>> = {
+  /**
+   * v1 → v2 (T9): characters gained the full model. v1 games never created any, so the table is
+   * reset and the save simply has no player.
+   */
+  1: (save) => ({
+    ...save,
+    world: { ...(save.world as Record<string, unknown>), characters: {}, player: null },
+  }),
+}
 
 export class SaveError extends Error {
   override name = 'SaveError'

@@ -120,6 +120,20 @@ The licences' attribution lines are shown in the game's Settings screen (`src/da
   `#rrggbb` per party key) and written into `ge2024.json`. Used only to mean that party (Party map mode, results
   table, main-menu backdrop). T12's party data replaces them.
 
+## Hand-authored game data (not downloaded)
+
+### Characters (T9)
+- **Files:** `mandate/src/data/characters/traits.json` (17 traits and their effects) and `people.json` (name
+  pools, heritage look weights, nation/class weights, occupations). Written for the game; no third-party data.
+- **Names:** common given names and surnames for fictional NPCs, grouped into six loose heritage pools so families
+  get consistent names. No real people.
+- **Weights are game-design approximations, not statistics.** Heritage, class, religion-by-heritage, nation and
+  appearance weights only aim for a plausible spread of fictional people across the UK; they are not taken from
+  the census and must not be cited as figures. Heritage shapes names, family resemblance and religion odds, nothing
+  else (no effect on skills, beliefs or events).
+- **Avatars:** built in code from parameters (`src/sim/character/appearance.ts`); no model files, photos or
+  photo-derived likenesses. Real politicians (T12) get hand-set parameters.
+
 ## Known limits
 - MPs are as elected on 4 July 2024. By-elections, defections and suspensions since then are not applied
   (T12 web-verifies current office-holders).

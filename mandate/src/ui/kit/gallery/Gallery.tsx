@@ -46,6 +46,7 @@ import {
   type DialogueLine,
   type PartyColours,
 } from '../index.ts'
+import { Avatars } from './Avatars.tsx'
 import './gallery.css'
 
 /** Fictional parties for the specimens; real parties arrive as data (T12). */
@@ -769,6 +770,7 @@ export function Gallery({ initialTheme }: { initialTheme: Theme }) {
         <TilesDemo />
         <TableDemo />
         <Character />
+        <Avatars Section={Section} />
         <EventDemo />
         <DialogueDemo />
         <Votes />

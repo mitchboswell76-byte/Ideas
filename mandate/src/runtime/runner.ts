@@ -4,11 +4,12 @@
  * runs in the Web Worker, on the main thread (fallback) and in tests with a manual clock.
  */
 import { toIso } from '../sim/clock.ts'
-import { Engine, type TickSummary } from '../sim/engine.ts'
+import { Engine, summarisePlayer, type TickSummary } from '../sim/engine.ts'
 import { decodeSave, encodeSave } from '../sim/save.ts'
 import type { Notification, PauseReason, System } from '../sim/scheduler.ts'
 import { defaultSystems } from '../sim/systems/index.ts'
-import { createWorld, type World } from '../sim/world.ts'
+import { startWorld } from '../sim/character/cast.ts'
+import type { World } from '../sim/world.ts'
 import {
   DEFAULT_AUTO_PAUSE,
   MAX_STEP_DAYS,
@@ -212,7 +213,7 @@ export class SimRunner {
   private async fulfil(req: Request): Promise<[unknown, Transferable[]]> {
     switch (req.type) {
       case 'newGame':
-        return [this.start(createWorld(req.options)), []]
+        return [this.start(startWorld(req.options)), []]
       case 'load':
         return [this.start((await decodeSave(req.bytes)).world), []]
       case 'save': {
@@ -241,7 +242,8 @@ export class SimRunner {
     this.postStatus()
     const day = world.clock.day
     const date = toIso(day)
-    this.host.post({ type: 'tick', summary: { day, date, notifications: [] } }, [])
+    const player = summarisePlayer(world)
+    this.host.post({ type: 'tick', summary: { day, date, notifications: [], player } }, [])
     return { day, date }
   }
 }

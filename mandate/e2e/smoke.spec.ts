@@ -1,4 +1,5 @@
 /** Smoke test of the production build (worker mode): what a player does in the first minutes. */
+import { SAVE_VERSION } from '../src/sim/version.ts'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 import { expect, gameDate, go, newCareer, scrollsSideways, test, type Screen } from './fixtures.ts'
@@ -13,14 +14,15 @@ test('main menu → new career → every screen', async ({ page }) => {
   await expect(page.getByTestId('title-continue')).toBeDisabled()
   await newCareer(page)
   await expect(page.getByTestId('sim-mode')).toHaveText('Worker')
-  // Everything is 2D until a screen has a 3D view (HAS_3D_VIEW).
+  // Portraits render offscreen; no screen mounts the live 3D layer yet.
   await expect(page.getByTestId('world-canvas')).toHaveCount(0)
 
   const landmarks: Record<Screen, () => Promise<void>> = {
-    Home: () => expect(page.getByRole('main').getByText('Nobody yet')).toBeVisible(),
+    Home: () => expect(page.getByRole('heading', { name: 'You', exact: true })).toBeVisible(),
     Inbox: () =>
       expect(page.getByRole('heading', { name: 'Welcome to your career' })).toBeVisible(),
     Calendar: () => expect(page.getByRole('button', { name: 'Previous month' })).toBeVisible(),
+    Profile: () => expect(page.getByTestId('profile')).toBeVisible(),
     Map: () => expect(page.getByRole('application', { name: /650 constituencies/ })).toBeVisible(),
     World: () => expect(page.getByText('176 countries and territories')).toBeVisible(),
     Saves: () => expect(page.getByTestId('slot-list')).toBeVisible(),
@@ -30,6 +32,38 @@ test('main menu → new career → every screen', async ({ page }) => {
     await go(page, screen as Screen)
     await landmark()
   }
+})
+
+test('profile: the player and their people, 3D portraits and 2D illustrations', async ({
+  page,
+}) => {
+  await newCareer(page)
+  const name = (await page.locator('.you__name').textContent()) ?? ''
+  expect(name).not.toBe('Nobody yet')
+  await go(page, 'Profile')
+  const profile = page.getByTestId('profile')
+  await expect(profile.getByRole('heading', { name })).toBeVisible()
+  await expect(profile.getByText('Attributes')).toBeVisible()
+  const people = profile.locator('.relation')
+  expect(await people.count()).toBeGreaterThanOrEqual(4)
+  const webgl = await page.evaluate(() => !!document.createElement('canvas').getContext('webgl2'))
+  if (webgl) {
+    // Cached renders arrive as images, one per face on screen.
+    await expect(profile.locator('.portrait img')).toHaveCount(1, { timeout: 20_000 })
+    await expect(profile.locator('.relation img')).toHaveCount(await people.count(), {
+      timeout: 20_000,
+    })
+  }
+  // Someone else's profile, then back to your own.
+  const first = (await people.first().locator('.list__title').textContent()) ?? ''
+  await people.first().click()
+  await expect(profile.getByRole('heading', { name: first })).toBeVisible()
+  await page.getByRole('button', { name: 'Your profile' }).click()
+  await expect(profile.getByRole('heading', { name })).toBeVisible()
+  // 2D view: illustrations, no 3D renders.
+  await page.getByTestId('view-2d').click()
+  await expect(profile.locator('.portrait svg')).toHaveCount(1)
+  await expect(profile.locator('img')).toHaveCount(0)
 })
 
 test('command menu: Ctrl+K, filter, Enter runs, Esc closes, typing leaves the clock alone', async ({
@@ -105,7 +139,7 @@ test('export .mandate, import it and its JSON, reject a bad file', async ({ page
 
   // The Artifact build exports this JSON; a normal tab must read it too.
   const json = gunzipSync(readFileSync(mandatePath)).toString('utf8')
-  expect(JSON.parse(json)).toMatchObject({ version: 1, world: { clock: {} } })
+  expect(JSON.parse(json)).toMatchObject({ version: SAVE_VERSION, world: { clock: {} } })
   const jsonPath = info.outputPath('save.json')
   writeFileSync(jsonPath, json)
   await go(page, 'Saves')

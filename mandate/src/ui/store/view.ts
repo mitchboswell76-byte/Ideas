@@ -11,10 +11,11 @@ import { readLocal, writeLocal } from './settings.ts'
 export type QualitySetting = 'auto' | QualityPreset
 
 /**
- * No screen has a 3D view yet (maps arrive at T6/T7, portraits at T9): until one does, the 3D/2D
- * toggle and the graphics settings stay hidden and the 3D layer is not mounted.
+ * Something is drawn in 3D (T9: character portraits, rendered offscreen and cached as images), so
+ * the 3D/2D toggle and the graphics settings are shown. 2D view draws the illustrated avatars.
+ * The persistent 3D layer (`WorldLayer`) is still not mounted: no screen has a live 3D scene yet.
  */
-export const HAS_3D_VIEW = false
+export const HAS_3D_VIEW = true
 
 export const QUALITY_SETTINGS: readonly QualitySetting[] = ['auto', ...QUALITY_PRESETS]
 

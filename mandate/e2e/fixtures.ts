@@ -19,7 +19,8 @@ export const test = base.extend<{ consoleErrors: string[] }>({
 
 export { expect }
 
-export type Screen = 'Home' | 'Inbox' | 'Calendar' | 'Map' | 'World' | 'Saves' | 'Settings'
+export type Screen =
+  'Home' | 'Inbox' | 'Calendar' | 'Profile' | 'Map' | 'World' | 'Saves' | 'Settings'
 
 /** Start a new career from the main menu and wait for the shell. */
 export async function newCareer(page: Page): Promise<void> {

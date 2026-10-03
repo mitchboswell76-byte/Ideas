@@ -1,4 +1,7 @@
+import { Portrait } from '../avatar/Portrait.tsx'
 import { daysBetween, upcomingFixtures } from '../calendar.ts'
+import { useCharacterView } from '../character/useCharacter.ts'
+import { fullName } from '../../sim/character/model.ts'
 import { formatLongDate, formatSavedAt, formatShortDate } from '../format.ts'
 import {
   ArrowRightIcon,
@@ -95,17 +98,50 @@ function UpcomingList() {
 }
 
 function YouPanel() {
+  const player = useGame((s) => s.player)
+  const view = useCharacterView(null)
+  const c = view?.character
+  const open = () => navStore.getState().openProfile(null)
   return (
-    <Panel title="You" icon={UserIcon}>
+    <Panel title="You" icon={UserIcon} actions={c && <SeeAll label="Profile" onClick={open} />}>
       <div className="you">
-        <PortraitFrame name="You" size="m" you />
+        {c ? (
+          <Portrait
+            person={{
+              name: fullName(c),
+              appearance: c.appearance,
+              age: view.age,
+              gender: c.gender,
+            }}
+            size="m"
+            you
+          />
+        ) : (
+          <PortraitFrame name="You" size="m" you />
+        )}
         <div className="you__text">
-          <p className="you__name">Nobody yet</p>
+          <p className="you__name">{player?.name ?? 'Nobody yet'}</p>
+          {c && (
+            <p className="muted">
+              {player?.age} · {c.occupation}
+            </p>
+          )}
           <div className="chip-row">
             <Chip>No party</Chip>
             <Chip>No office</Chip>
           </div>
-          <p className="muted">Your character, attributes and traits will appear here.</p>
+          {player && (
+            <dl className="facts">
+              <dt>Health</dt>
+              <dd className="num">{player.health}</dd>
+              <dt>Stress</dt>
+              <dd className="num">{player.stress}</dd>
+              <dt>Energy</dt>
+              <dd className="num">
+                {player.energy}/{player.energyMax}
+              </dd>
+            </dl>
+          )}
         </div>
       </div>
     </Panel>

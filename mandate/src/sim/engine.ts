@@ -1,16 +1,45 @@
 import { EventBus, type SimEventMap } from './bus.ts'
-import { toIso } from './clock.ts'
+import { energyMax } from './character/condition.ts'
+import { fullName } from './character/model.ts'
+import { ageOn, toIso } from './clock.ts'
 import type { Command, CommandHandler } from './command.ts'
 import { Rng } from './rng.ts'
 import { isDue, type Notification, type System, type SystemContext } from './scheduler.ts'
 import { defaultSystems } from './systems/index.ts'
 import type { World } from './world.ts'
 
-/** What the UI receives after each tick (extended with player stats from T9 on). */
+/** The player's headline numbers, sent with every tick (details come from queries). */
+export interface PlayerSummary {
+  id: string
+  name: string
+  age: number
+  health: number
+  stress: number
+  energy: number
+  energyMax: number
+}
+
+/** What the UI receives after each tick. */
 export interface TickSummary {
   day: number
   date: string
   notifications: Notification[]
+  player: PlayerSummary | null
+}
+
+export function summarisePlayer(world: World): PlayerSummary | null {
+  const c = world.player ? world.characters[world.player] : undefined
+  if (!c) return null
+  const { health, stress, energy } = c.condition
+  return {
+    id: c.id,
+    name: fullName(c),
+    age: ageOn(c.birthDay, world.clock.day),
+    health,
+    stress,
+    energy,
+    energyMax: energyMax(c),
+  }
 }
 
 type AnyListener = (payload: unknown, world: World, ctx: SystemContext) => void
@@ -85,7 +114,7 @@ export class Engine {
 
     const notifications = this.notifications
     this.notifications = []
-    return { day, date: toIso(day), notifications }
+    return { day, date: toIso(day), notifications, player: summarisePlayer(world) }
   }
 
   /** Run several ticks; returns one summary covering them all. */
@@ -93,7 +122,7 @@ export class Engine {
     const notifications: Notification[] = []
     for (let i = 0; i < days; i++) notifications.push(...this.tick().notifications)
     const day = this.world.clock.day
-    return { day, date: toIso(day), notifications }
+    return { day, date: toIso(day), notifications, player: summarisePlayer(this.world) }
   }
 
   /** Swap in another World (e.g. a loaded save). Pending commands are dropped. */

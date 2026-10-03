@@ -303,3 +303,44 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Avatars. */
+.avatar-demo {
+  display: grid;
+  gap: 10px;
+}
+
+.avatar-demo__title {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: var(--fs-s);
+  font-weight: 600;
+}
+
+.avatar-demo__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.avatar-demo__item {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.avatar-demo__label {
+  max-width: 110px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+.avatar-demo__full {
+  width: 132px;
+  aspect-ratio: 3 / 5;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-3);
+}
